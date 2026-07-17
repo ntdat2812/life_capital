@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: life_capital_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: life_capital
+      POSTGRES_USER: lifecap
+      POSTGRES_PASSWORD: lifecap_secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

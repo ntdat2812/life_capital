@@ -19,6 +19,15 @@ description: Go development, Echo framework, SQL database handling, context life
 
 ## 2. Echo Framework Standards
 
+- **Route Registration**: All routes must be registered via a dedicated `registerRoutes()` function in `main.go`. Handlers are initialized in `main()` and passed into this function:
+  ```go
+  func registerRoutes(e *echo.Echo, healthH *handler.HealthHandler, profileH *handler.ProfileHandler) {
+      api := e.Group("/api/v1")
+      api.GET("/health", healthH.HealthCheck)
+      api.GET("/profile", profileH.GetProfile)
+  }
+  ```
+- **Handler Files**: Each domain has its own handler file under `internal/handler/` using the naming convention `{domain}_handler.go` (e.g., `health_handler.go`, `profile_handler.go`, `asset_handler.go`). Each handler struct is created with a factory function `NewXxxHandler(svc XxxService)`.
 - **Route Grouping**: Define groups logically:
   ```go
   r := e.Group("/api/v1")
@@ -32,6 +41,7 @@ description: Go development, Echo framework, SQL database handling, context life
   profile, err := h.service.GetProfile(ctx, userID)
   ```
 - **Error Binding**: Bind requests using `c.Bind(payload)`. Do not ignore binding errors. Return `HTTP 400` with clean JSON.
+
 
 ---
 
@@ -72,10 +82,38 @@ func MapHTTPError(err error) error {
 
 ---
 
-## 5. Build & Run
+## 5. Swagger API Documentation Standards
+
+Mọi Handler endpoint trong Go Echo phải sử dụng cú pháp chú thích (annotations) chuẩn của **swag** để tự động tạo Swagger docs:
+
+```go
+// GetProfile handles retrieving the active investor profile.
+// @Summary      Lấy thông tin hồ sơ nhà đầu tư
+// @Description  Trả về hồ sơ nhà đầu tư đang active cùng các thông số tài chính cơ bản.
+// @Tags         profile
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  model.InvestorProfile
+// @Failure      401  {object}  map[string]string "Unauthorized"
+// @Failure      404  {object}  map[string]string "Not Found"
+// @Router       /api/v1/profile [get]
+func (h *Handler) GetProfile(c echo.Context) error { ... }
+```
+
+### Các bước biên dịch tài liệu Swagger:
+1. Mỗi khi thay đổi hoặc thêm endpoint mới, chạy lệnh sau ở thư mục `backend/` để sinh lại folder `docs/`:
+   ```bash
+   swag init -g cmd/server/main.go
+   ```
+2. Thư mục `docs` được tự động sinh ra và phải được import dạng blank import (`_ "github.com/datnguyen/life_capital/backend/docs"`) trong `main.go` để đăng ký tài liệu.
+
+---
+
+## 6. Build & Run
 
 - Main entrypoint is `backend/cmd/server/main.go`.
 - Configuration values should be loaded from environment variables or a `.env` file using a library like `github.com/joho/godotenv`.
+
 
 ---
 

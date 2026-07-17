@@ -74,6 +74,7 @@ description: Canonical coding, naming, technology, API, database, and testing st
   - `404 Not Found` for resource missing.
   - `409 Conflict` for state violations (e.g., target allocations exceeding 100%).
   - `422 Unprocessable Entity` for business rules checks.
+- **Swagger Documentation**: Mọi API endpoint mới được tạo phải có chú thích Swagger chi tiết (Summary, Description, Tags, Param, Success, Failure, Router). Tài liệu API phải được render tự động qua Swagger UI tại đường dẫn `/swagger/*`.
 
 ---
 

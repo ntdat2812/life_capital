@@ -64,5 +64,6 @@ Every architectural or database schema change must be documented synchronously:
 - **DB Schema/Index Changes**: Update [erd.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/erd.md) (`docs/erd.md`) to reflect tables and fields before applying migrations.
 - **Workflow/Cascade Logic Changes**: Update [lld.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/lld.md) (`docs/lld.md`) to keep logic blocks and Go pseudocode models accurate.
 - **Core Requirements & Calculations**: Update [business.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/business.md) (`docs/business.md`) if financial rules or product scopes evolve.
-- **API Spec Changes**: Update the API Design section in [features.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/features.md) (`docs/features.md`).
+- **API Spec Changes**: Update the API Design section in [features.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/features.md) (`docs/features.md`) và đồng bộ trực tiếp chú thích Swagger trong mã nguồn Go.
+
 

@@ -42,15 +42,16 @@ life_capital/
 ├── backend/                           # Go Backend (Echo)
 │   ├── cmd/
 │   │   └── server/
-│   │       └── main.go                # Application Entry Point
+│   │       └── main.go                # Application Entry Point & Route Registration
 │   ├── internal/
-│   │   ├── handler/                   # Echo HTTP Controllers
+│   │   ├── handler/                   # Echo HTTP Controllers (one file per domain: {domain}_handler.go)
 │   │   ├── service/                   # Business Logic & Cascade Engine
 │   │   ├── repository/                # Database Queries (SQL / pgx)
 │   │   ├── model/                     # Domain & DB Entities
 │   │   ├── ai/                        # Prompts, AI Client Wrapper
 │   │   ├── config/                    # Config structures & env loading
 │   │   └── middleware/                # Auth, CORS, Logger
+│   ├── docs/                          # Auto-generated Swagger API docs (swag init)
 │   ├── migrations/                    # SQL migration scripts
 │   ├── go.mod
 │   └── go.sum
@@ -87,6 +88,7 @@ life_capital/
 4. **Vue 3 Best Practices**: Use Composition API (`<script setup>`), Pinia for global state, and keep components modular.
 5. **No fully qualified imports in Go**: Always use standard imports.
 6. **Robust Error Handling**: Go returns clean, typed domain errors mapped to HTTP status codes inside middleware handlers.
+7. **Swagger API Documentation**: Every API endpoint MUST have Swagger annotations (`@Summary`, `@Description`, `@Tags`, `@Router`, etc.). Run `swag init -g cmd/server/main.go` in `backend/` after any API changes. Swagger UI is served at `/swagger/*`.
 
 ---
 
@@ -100,4 +102,5 @@ life_capital/
 - Refer to `.agents/rules/standards.md` before making any coding modifications.
 - Consult the specific roles under `.agents/skills/` depending on the current task (e.g. database change -> Solution Architect; Go code change -> Backend Developer).
 - **Project Documentation Updates**: Every design or database changes must be reflected in the relevant files inside the `docs/` directory. Solution Architect updates architecture/DB schemas, QA updates tests, etc.
+- **Swagger Sync**: After adding or modifying any backend API endpoint, regenerate Swagger docs by running `swag init -g cmd/server/main.go` inside `backend/` and commit the updated `backend/docs/` folder.
 - Always verify changes with unit tests and document updates in the `/walkthrough.md` file.

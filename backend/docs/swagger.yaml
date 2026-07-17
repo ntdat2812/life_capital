@@ -1,0 +1,24 @@
+basePath: /
+host: localhost:8080
+info:
+  contact: {}
+  description: API server for Personal Wealth Operating System.
+  title: Life Capital (WealthOS) API
+  version: "1.0"
+paths:
+  /api/v1/health:
+    get:
+      description: Check backend health status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health Check
+      tags:
+      - system
+swagger: "2.0"
