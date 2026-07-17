@@ -1,0 +1,60 @@
+# OS metadata
+.DS_Store
+Thumbs.db
+*.db
+
+# IDE / Editor configurations
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*.swo
+
+# Dependency directories
+node_modules/
+jspm_packages/
+web_modules/
+vendor/
+
+# Local env files (containing sensitive API keys like GEMINI_API_KEY)
+.env
+.env.local
+.env.*.local
+*.env
+config.yaml
+config.json
+
+# Log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test coverage
+coverage/
+*.lcov
+*.out
+c.out
+
+# Build & compilation outputs
+dist/
+dist-ssr/
+tmp/
+out/
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.prof
+backend/cmd/server/server
+backend/bin/
+
+# Temporary HTML prototypes (optional review files)
+draft_prototype.html
