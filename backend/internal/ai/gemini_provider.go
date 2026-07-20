@@ -18,6 +18,7 @@ var extractProfilePrompt string
 
 type GeminiProvider struct {
 	apiKey string
+	model  string
 }
 
 func NewGeminiProvider() (*GeminiProvider, error) {
@@ -25,7 +26,16 @@ func NewGeminiProvider() (*GeminiProvider, error) {
 	if apiKey == "" {
 		return nil, fmt.Errorf("GEMINI_API_KEY is required")
 	}
-	return &GeminiProvider{apiKey: apiKey}, nil
+	
+	model := os.Getenv("GEMINI_MODEL")
+	if model == "" {
+		model = "gemini-3.5-flash"
+	}
+	
+	return &GeminiProvider{
+		apiKey: apiKey,
+		model:  model,
+	}, nil
 }
 
 func (p *GeminiProvider) ExtractProfile(ctx context.Context, chatHistory string) (*ExtractionResult, error) {
@@ -52,7 +62,7 @@ func (p *GeminiProvider) ExtractProfile(ctx context.Context, chatHistory string)
 }
 
 func (p *GeminiProvider) generateContent(ctx context.Context, prompt string) (string, error) {
-	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=%s", p.apiKey)
+	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", p.model, p.apiKey)
 	reqBody := map[string]interface{}{
 		"contents": []interface{}{
 			map[string]interface{}{

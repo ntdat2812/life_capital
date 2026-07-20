@@ -14,6 +14,7 @@ import (
 
 type GroqProvider struct {
 	apiKey string
+	model  string
 }
 
 func NewGroqProvider() (*GroqProvider, error) {
@@ -21,7 +22,16 @@ func NewGroqProvider() (*GroqProvider, error) {
 	if apiKey == "" {
 		return nil, fmt.Errorf("GROQ_API_KEY is required")
 	}
-	return &GroqProvider{apiKey: apiKey}, nil
+	
+	model := os.Getenv("GROQ_MODEL")
+	if model == "" {
+		model = "llama-3.3-70b-versatile"
+	}
+	
+	return &GroqProvider{
+		apiKey: apiKey,
+		model:  model,
+	}, nil
 }
 
 func (p *GroqProvider) ExtractProfile(ctx context.Context, chatHistory string) (*ExtractionResult, error) {
@@ -50,7 +60,7 @@ func (p *GroqProvider) ExtractProfile(ctx context.Context, chatHistory string) (
 func (p *GroqProvider) generateContent(ctx context.Context, prompt string) (string, error) {
 	url := "https://api.groq.com/openai/v1/chat/completions"
 	reqBody := map[string]interface{}{
-		"model": "llama-3.3-70b-versatile",
+		"model": p.model,
 		"messages": []map[string]interface{}{
 			{
 				"role":    "user",
