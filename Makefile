@@ -15,6 +15,12 @@ migrate-down:
 run-back:
 	cd backend && go run cmd/server/main.go
 
+down-back:
+	fuser -k 8080/tcp || true
+
 # Run frontend dev server
 run-front:
 	cd frontend && npm run dev
+
+down-front:
+	fuser -k 5173/tcp || true

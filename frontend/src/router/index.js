@@ -39,10 +39,10 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/onboarding',
-    name: 'onboarding',
+    path: '/onboarding/interview',
+    name: 'onboarding-interview',
     component: () => import('../views/OnboardingView.vue'),
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: true }
   },
   {
     path: '/login',

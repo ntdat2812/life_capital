@@ -230,6 +230,118 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/profile/me": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get the current active investor profile for the logged in user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "summary": "Get Active Profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.InvestorProfile"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/profile/onboarding": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Submit the 8-step chat history to let AI analyze and create an Investor Profile.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "summary": "Submit AI Onboarding Interview",
+                "parameters": [
+                    {
+                        "description": "Chat history data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.OnboardingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.InvestorProfile"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -244,6 +356,19 @@ const docTemplate = `{
                 }
             }
         },
+        "model.ChatMessage": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "description": "The text content",
+                    "type": "string"
+                },
+                "role": {
+                    "description": "\"user\" or \"assistant\"",
+                    "type": "string"
+                }
+            }
+        },
         "model.GoogleLoginRequest": {
             "type": "object",
             "required": [
@@ -252,6 +377,55 @@ const docTemplate = `{
             "properties": {
                 "id_token": {
                     "type": "string"
+                }
+            }
+        },
+        "model.InvestorProfile": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "date_of_birth": {
+                    "type": "string"
+                },
+                "fi_target_amount": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "life_constraints": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "marital_status": {
+                    "type": "string"
+                },
+                "risk_score": {
+                    "type": "integer"
+                },
+                "risk_tolerance": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "active, superseded",
+                    "type": "string"
+                },
+                "total_monthly_expense": {
+                    "type": "number"
+                },
+                "total_monthly_income": {
+                    "type": "number"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "integer"
                 }
             }
         },
@@ -267,6 +441,17 @@ const docTemplate = `{
                 },
                 "password": {
                     "type": "string"
+                }
+            }
+        },
+        "model.OnboardingRequest": {
+            "type": "object",
+            "properties": {
+                "chat_history": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.ChatMessage"
+                    }
                 }
             }
         },
@@ -312,6 +497,14 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Type \"Bearer\" followed by a space and JWT token.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

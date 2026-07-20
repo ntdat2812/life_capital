@@ -7,12 +7,54 @@ definitions:
       user:
         $ref: '#/definitions/model.User'
     type: object
+  model.ChatMessage:
+    properties:
+      content:
+        description: The text content
+        type: string
+      role:
+        description: '"user" or "assistant"'
+        type: string
+    type: object
   model.GoogleLoginRequest:
     properties:
       id_token:
         type: string
     required:
     - id_token
+    type: object
+  model.InvestorProfile:
+    properties:
+      created_at:
+        type: string
+      date_of_birth:
+        type: string
+      fi_target_amount:
+        type: number
+      id:
+        type: string
+      life_constraints:
+        additionalProperties: true
+        type: object
+      marital_status:
+        type: string
+      risk_score:
+        type: integer
+      risk_tolerance:
+        type: string
+      status:
+        description: active, superseded
+        type: string
+      total_monthly_expense:
+        type: number
+      total_monthly_income:
+        type: number
+      updated_at:
+        type: string
+      user_id:
+        type: string
+      version:
+        type: integer
     type: object
   model.LoginRequest:
     properties:
@@ -23,6 +65,13 @@ definitions:
     required:
     - email
     - password
+    type: object
+  model.OnboardingRequest:
+    properties:
+      chat_history:
+        items:
+          $ref: '#/definitions/model.ChatMessage'
+        type: array
     type: object
   model.SignupRequest:
     properties:
@@ -200,4 +249,82 @@ paths:
       summary: Health Check
       tags:
       - system
+  /api/v1/profile/me:
+    get:
+      consumes:
+      - application/json
+      description: Get the current active investor profile for the logged in user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.InvestorProfile'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get Active Profile
+      tags:
+      - profile
+  /api/v1/profile/onboarding:
+    post:
+      consumes:
+      - application/json
+      description: Submit the 8-step chat history to let AI analyze and create an
+        Investor Profile.
+      parameters:
+      - description: Chat history data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.OnboardingRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.InvestorProfile'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Submit AI Onboarding Interview
+      tags:
+      - profile
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

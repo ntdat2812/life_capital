@@ -81,3 +81,8 @@ Tất cả các thẻ hiển thị (cards), sidebar và modal đều kế thừa
 - Form bao gồm các trường thông tin tiêu chuẩn (Email, Mật khẩu, Tên).
 - Cung cấp tính năng "Đăng nhập bằng Google" nổi bật (Sử dụng `vue3-google-login`).
 - Hiển thị cảnh báo lỗi bằng chữ đỏ nhạt viền đỏ khi nhập sai hoặc trùng lặp tài khoản.
+
+### 4.4 Giao diện Investor Profile (Hồ sơ đầu tư)
+- **Header**: Avatar, tên, tổng thu nhập/chi phí và điểm FI (Tự do tài chính).
+- **Trái (Risk & Status)**: Risk Gauge (thước đo rủi ro từ 1-100 với các màu thay đổi từ xanh tới đỏ), Tình trạng hiện tại (Trạng thái hôn nhân, Số người phụ thuộc).
+- **Phải (AI Insights & Constraints)**: Hiển thị các phân tích từ AI (Life Constraints) dưới dạng thẻ highlight và đề xuất phân bổ vốn.

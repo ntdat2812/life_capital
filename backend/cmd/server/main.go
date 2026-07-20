@@ -15,10 +15,11 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	_ "github.com/datnguyen/life_capital/backend/docs"
+	"github.com/datnguyen/life_capital/backend/internal/ai"
 	"github.com/datnguyen/life_capital/backend/internal/handler"
+	customMiddleware "github.com/datnguyen/life_capital/backend/internal/middleware"
 	"github.com/datnguyen/life_capital/backend/internal/repository"
 	"github.com/datnguyen/life_capital/backend/internal/service"
-	customMiddleware "github.com/datnguyen/life_capital/backend/internal/middleware"
 )
 
 // @title Life Capital (WealthOS) API
@@ -26,6 +27,10 @@ import (
 // @description API server for Personal Wealth Operating System.
 // @host localhost:8080
 // @BasePath /
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 func main() {
 	// Load .env file
 	if err := godotenv.Load(); err != nil {
@@ -60,18 +65,27 @@ func main() {
 
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(dbPool)
+	investorProfileRepo := repository.NewInvestorProfileRepository(dbPool)
+
+	// Initialize AI Provider
+	geminiProvider, err := ai.NewGeminiProvider()
+	if err != nil {
+		log.Fatalf("Failed to initialize Gemini provider: %v", err)
+	}
 
 	// Initialize services
 	jwtSecret := os.Getenv("JWT_SECRET")
 	googleClientID := os.Getenv("GOOGLE_CLIENT_ID")
 	authService := service.NewAuthService(userRepo, jwtSecret, googleClientID)
+	profileService := service.NewInvestorProfileService(investorProfileRepo, geminiProvider)
 
 	// Initialize handlers
 	healthHandler := handler.NewHealthHandler()
 	authHandler := handler.NewAuthHandler(authService)
+	profileHandler := handler.NewProfileHandler(profileService)
 
 	// Register routes
-	registerRoutes(e, healthHandler, authHandler)
+	registerRoutes(e, healthHandler, authHandler, profileHandler)
 
 	// Get PORT from environment variable (default: 8080)
 	port := os.Getenv("PORT")
@@ -88,7 +102,7 @@ func main() {
 }
 
 // registerRoutes maps all API routes to their handlers.
-func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHandler *handler.AuthHandler) {
+func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHandler *handler.AuthHandler, profileHandler *handler.ProfileHandler) {
 	api := e.Group("/api/v1")
 
 	// Public routes
@@ -103,4 +117,9 @@ func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHand
 	protected := api.Group("")
 	protected.Use(customMiddleware.JWTMiddleware(os.Getenv("JWT_SECRET")))
 	protected.GET("/auth/me", authHandler.Me)
+
+	// Profile routes
+	profile := protected.Group("/profile")
+	profile.POST("/onboarding", profileHandler.Onboarding)
+	profile.GET("/me", profileHandler.GetMe)
 }
