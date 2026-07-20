@@ -86,3 +86,29 @@ Tất cả các thẻ hiển thị (cards), sidebar và modal đều kế thừa
 - **Header**: Avatar, tên, tổng thu nhập/chi phí và điểm FI (Tự do tài chính).
 - **Trái (Risk & Status)**: Risk Gauge (thước đo rủi ro từ 1-100 với các màu thay đổi từ xanh tới đỏ), Tình trạng hiện tại (Trạng thái hôn nhân, Số người phụ thuộc).
 - **Phải (AI Insights & Constraints)**: Hiển thị các phân tích từ AI (Life Constraints) dưới dạng thẻ highlight và đề xuất phân bổ vốn.
+
+### 4.5 Giao diện Assets & Liabilities (Quản lý Tài sản & Nợ)
+- **Khu vực Top (Summary Cards)**:
+  - 3 thẻ Glassmorphism lớn nằm ngang với viền, bóng đổ và biểu tượng chìm (watermark) cực kỳ nổi bật:
+    - `Tổng Tài Sản`: Gradient Emerald (Xanh ngọc).
+    - `Tổng Nợ`: Gradient Amber (Vàng hổ phách).
+    - `Tài Sản Ròng (Net Worth)`: Card nổi bật nhất, bọc viền gradient Indigo/Violet, chữ siêu lớn.
+- **Khu vực Toolbar (Bộ lọc - Filters)**:
+  - Thanh công cụ nằm dưới thẻ Summary, chứa các Dropdown cho phép lọc riêng biệt theo danh mục (Category) cho cả Tài sản và Nợ.
+- **Khu vực Bottom (2 Columns Grid)**:
+  - **Cột Trái (Tài Sản)**: 
+    - Tiêu đề "Tài sản của bạn" + Nút `[+ Thêm Tài Sản]`.
+    - Danh sách tài sản được bọc trong một container cố định chiều cao (max-height), hỗ trợ cuộn vô hạn (infinite scrolling) thông qua Virtual Scroll.
+    - Dữ liệu được gom nhóm theo Category. Tiêu đề nhóm có thể click để mở Popup chi tiết.
+  - **Cột Phải (Khoản Nợ)**: 
+    - Tiêu đề "Các khoản nợ" + Nút `[+ Thêm Khoản Nợ]`.
+    - Danh sách khoản nợ tương tự cột trái (Gom nhóm, có thể click xem chi tiết).
+  - Từng Item trong danh sách có nút `Sửa` và `Xóa` xuất hiện khi hover.
+- **Modal Thêm Mới / Cập Nhật (Edit)**: 
+  - Form nổi (Overlay) mờ ảo dùng chung cho cả tính năng Thêm và Sửa.
+  - Dropdown chọn Category (Khóa không cho sửa khi đang ở chế độ Edit).
+  - Tự động thay đổi các trường dữ liệu tùy theo Loại tài sản (Ví dụ: Vàng sẽ hiện form chọn thương hiệu/tuổi vàng thay vì nhập tay).
+- **Modal Chi Tiết Nhóm (Group Detail Popup)**:
+  - Hiện ra giữa màn hình khi click vào tiêu đề Nhóm (Ví dụ: Cổ phiếu).
+  - Hiển thị danh sách các tài sản/nợ con thuộc nhóm đó.
+  - Mỗi item đi kèm một thanh tiến trình (Progress Bar) trực quan để biểu thị tỷ trọng (%) của item đó so với tổng giá trị nội bộ nhóm.

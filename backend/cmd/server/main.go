@@ -66,6 +66,8 @@ func main() {
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(dbPool)
 	investorProfileRepo := repository.NewInvestorProfileRepository(dbPool)
+	assetRepo := repository.NewAssetRepository(dbPool)
+	liabilityRepo := repository.NewLiabilityRepository(dbPool)
 
 	// Initialize AI Provider
 	geminiProvider, err := ai.NewGeminiProvider()
@@ -78,14 +80,16 @@ func main() {
 	googleClientID := os.Getenv("GOOGLE_CLIENT_ID")
 	authService := service.NewAuthService(userRepo, jwtSecret, googleClientID)
 	profileService := service.NewInvestorProfileService(investorProfileRepo, geminiProvider)
+	wealthService := service.NewWealthService(assetRepo, liabilityRepo, userRepo)
 
 	// Initialize handlers
 	healthHandler := handler.NewHealthHandler()
 	authHandler := handler.NewAuthHandler(authService)
 	profileHandler := handler.NewProfileHandler(profileService)
+	wealthHandler := handler.NewWealthHandler(wealthService)
 
 	// Register routes
-	registerRoutes(e, healthHandler, authHandler, profileHandler)
+	registerRoutes(e, healthHandler, authHandler, profileHandler, wealthHandler)
 
 	// Get PORT from environment variable (default: 8080)
 	port := os.Getenv("PORT")
@@ -102,7 +106,7 @@ func main() {
 }
 
 // registerRoutes maps all API routes to their handlers.
-func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHandler *handler.AuthHandler, profileHandler *handler.ProfileHandler) {
+func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHandler *handler.AuthHandler, profileHandler *handler.ProfileHandler, wealthHandler *handler.WealthHandler) {
 	api := e.Group("/api/v1")
 
 	// Public routes
@@ -122,4 +126,17 @@ func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHand
 	profile := protected.Group("/profile")
 	profile.POST("/onboarding", profileHandler.Onboarding)
 	profile.GET("/me", profileHandler.GetMe)
+
+	// Wealth routes
+	wealthGroup := protected.Group("/wealth")
+	wealthGroup.GET("/net-worth", wealthHandler.GetNetWorthSummary)
+	wealthGroup.POST("/assets", wealthHandler.CreateAsset)
+	wealthGroup.GET("/assets", wealthHandler.GetAssets)
+	wealthGroup.PUT("/assets/:id", wealthHandler.UpdateAsset)
+	wealthGroup.DELETE("/assets/:id", wealthHandler.DeleteAsset)
+
+	wealthGroup.POST("/liabilities", wealthHandler.CreateLiability)
+	wealthGroup.GET("/liabilities", wealthHandler.GetLiabilities)
+	wealthGroup.PUT("/liabilities/:id", wealthHandler.UpdateLiability)
+	wealthGroup.DELETE("/liabilities/:id", wealthHandler.DeleteLiability)
 }

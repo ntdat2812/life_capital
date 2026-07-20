@@ -1,5 +1,54 @@
 basePath: /
 definitions:
+  model.Asset:
+    properties:
+      avg_price:
+        type: number
+      category:
+        $ref: '#/definitions/model.AssetCategory'
+      cost_basis:
+        type: number
+      created_at:
+        type: string
+      current_price:
+        type: number
+      current_value:
+        type: number
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      notes:
+        type: string
+      quantity:
+        type: number
+      ticker:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  model.AssetCategory:
+    enum:
+    - cash
+    - deposit
+    - gold
+    - stock
+    - fund
+    - crypto
+    - real_estate
+    type: string
+    x-enum-varnames:
+    - AssetCategoryCash
+    - AssetCategoryDeposit
+    - AssetCategoryGold
+    - AssetCategoryStock
+    - AssetCategoryFund
+    - AssetCategoryCrypto
+    - AssetCategoryRealEstate
   model.AuthResponse:
     properties:
       token:
@@ -15,6 +64,52 @@ definitions:
       role:
         description: '"user" or "assistant"'
         type: string
+    type: object
+  model.CreateAssetRequest:
+    properties:
+      avg_price:
+        type: number
+      category:
+        $ref: '#/definitions/model.AssetCategory'
+      cost_basis:
+        type: number
+      current_price:
+        type: number
+      current_value:
+        type: number
+      name:
+        type: string
+      notes:
+        type: string
+      quantity:
+        type: number
+      ticker:
+        type: string
+    required:
+    - category
+    - current_value
+    - name
+    type: object
+  model.CreateLiabilityRequest:
+    properties:
+      category:
+        $ref: '#/definitions/model.LiabilityCategory'
+      interest_rate:
+        type: number
+      lender:
+        type: string
+      monthly_payment:
+        type: number
+      name:
+        type: string
+      notes:
+        type: string
+      remaining_balance:
+        type: number
+    required:
+    - category
+    - name
+    - remaining_balance
     type: object
   model.GoogleLoginRequest:
     properties:
@@ -56,6 +151,49 @@ definitions:
       version:
         type: integer
     type: object
+  model.Liability:
+    properties:
+      category:
+        $ref: '#/definitions/model.LiabilityCategory'
+      created_at:
+        type: string
+      id:
+        type: string
+      interest_rate:
+        type: number
+      is_active:
+        type: boolean
+      lender:
+        type: string
+      monthly_payment:
+        type: number
+      name:
+        type: string
+      notes:
+        type: string
+      remaining_balance:
+        type: number
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  model.LiabilityCategory:
+    enum:
+    - mortgage
+    - auto_loan
+    - student_loan
+    - credit_card
+    - personal_loan
+    - other
+    type: string
+    x-enum-varnames:
+    - LiabilityCategoryMortgage
+    - LiabilityCategoryAutoLoan
+    - LiabilityCategoryStudentLoan
+    - LiabilityCategoryCreditCard
+    - LiabilityCategoryPersonalLoan
+    - LiabilityCategoryOther
   model.LoginRequest:
     properties:
       email:
@@ -66,12 +204,53 @@ definitions:
     - email
     - password
     type: object
+  model.NetWorthSummary:
+    properties:
+      base_currency:
+        type: string
+      net_worth:
+        type: number
+      total_assets:
+        type: number
+      total_liabilities:
+        type: number
+    type: object
   model.OnboardingRequest:
     properties:
       chat_history:
         items:
           $ref: '#/definitions/model.ChatMessage'
         type: array
+    type: object
+  model.PaginatedAssets:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.Asset'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  model.PaginatedLiabilities:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.Liability'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
     type: object
   model.SignupRequest:
     properties:
@@ -87,9 +266,57 @@ definitions:
     - name
     - password
     type: object
+  model.UpdateAssetRequest:
+    properties:
+      avg_price:
+        type: number
+      category:
+        $ref: '#/definitions/model.AssetCategory'
+      cost_basis:
+        type: number
+      current_price:
+        type: number
+      current_value:
+        type: number
+      name:
+        type: string
+      notes:
+        type: string
+      quantity:
+        type: number
+      ticker:
+        type: string
+    required:
+    - category
+    - current_value
+    - name
+    type: object
+  model.UpdateLiabilityRequest:
+    properties:
+      category:
+        $ref: '#/definitions/model.LiabilityCategory'
+      interest_rate:
+        type: number
+      lender:
+        type: string
+      monthly_payment:
+        type: number
+      name:
+        type: string
+      notes:
+        type: string
+      remaining_balance:
+        type: number
+    required:
+    - category
+    - name
+    - remaining_balance
+    type: object
   model.User:
     properties:
       auth_provider:
+        type: string
+      base_currency:
         type: string
       created_at:
         type: string
@@ -321,6 +548,208 @@ paths:
       summary: Submit AI Onboarding Interview
       tags:
       - profile
+  /api/v1/wealth/assets:
+    get:
+      parameters:
+      - description: Category filter
+        in: query
+        name: category
+        type: string
+      - description: Limit for pagination
+        in: query
+        name: limit
+        type: integer
+      - description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PaginatedAssets'
+      security:
+      - Bearer: []
+      summary: Get all assets for current user
+      tags:
+      - Wealth
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Asset info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateAssetRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Asset'
+      security:
+      - Bearer: []
+      summary: Create a new asset
+      tags:
+      - Wealth
+  /api/v1/wealth/assets/{id}:
+    delete:
+      parameters:
+      - description: Asset ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - Bearer: []
+      summary: Delete an asset
+      tags:
+      - Wealth
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Asset ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Asset info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateAssetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Asset'
+      security:
+      - Bearer: []
+      summary: Update an asset
+      tags:
+      - Wealth
+  /api/v1/wealth/liabilities:
+    get:
+      parameters:
+      - description: Category filter
+        in: query
+        name: category
+        type: string
+      - description: Limit for pagination
+        in: query
+        name: limit
+        type: integer
+      - description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PaginatedLiabilities'
+      security:
+      - Bearer: []
+      summary: Get all liabilities for current user
+      tags:
+      - Wealth
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Liability info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateLiabilityRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Liability'
+      security:
+      - Bearer: []
+      summary: Create a new liability
+      tags:
+      - Wealth
+  /api/v1/wealth/liabilities/{id}:
+    delete:
+      parameters:
+      - description: Liability ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - Bearer: []
+      summary: Delete a liability
+      tags:
+      - Wealth
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Liability ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Liability info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateLiabilityRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Liability'
+      security:
+      - Bearer: []
+      summary: Update a liability
+      tags:
+      - Wealth
+  /api/v1/wealth/net-worth:
+    get:
+      consumes:
+      - application/json
+      description: Get total assets, total liabilities and net worth for the current
+        user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.NetWorthSummary'
+      security:
+      - Bearer: []
+      summary: Get net worth summary
+      tags:
+      - Wealth
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and JWT token.

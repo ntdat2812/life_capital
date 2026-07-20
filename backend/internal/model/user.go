@@ -12,6 +12,7 @@ type User struct {
 	Name         string    `json:"name" db:"name"`
 	PasswordHash *string   `json:"-" db:"password_hash"`
 	AuthProvider string    `json:"auth_provider" db:"auth_provider"`
+	BaseCurrency string    `json:"base_currency" db:"base_currency"`
 	GoogleID     *string   `json:"-" db:"google_id"`
 	CreatedAt    time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`

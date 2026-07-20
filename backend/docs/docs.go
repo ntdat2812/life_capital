@@ -342,9 +342,405 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/wealth/assets": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Wealth"
+                ],
+                "summary": "Get all assets for current user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category filter",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit for pagination",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset for pagination",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.PaginatedAssets"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Wealth"
+                ],
+                "summary": "Create a new asset",
+                "parameters": [
+                    {
+                        "description": "Asset info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.CreateAssetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.Asset"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/wealth/assets/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Wealth"
+                ],
+                "summary": "Update an asset",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Asset ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Asset info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.UpdateAssetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Asset"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "Wealth"
+                ],
+                "summary": "Delete an asset",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Asset ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/v1/wealth/liabilities": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Wealth"
+                ],
+                "summary": "Get all liabilities for current user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category filter",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit for pagination",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset for pagination",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.PaginatedLiabilities"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Wealth"
+                ],
+                "summary": "Create a new liability",
+                "parameters": [
+                    {
+                        "description": "Liability info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.CreateLiabilityRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.Liability"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/wealth/liabilities/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Wealth"
+                ],
+                "summary": "Update a liability",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Liability ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Liability info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.UpdateLiabilityRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Liability"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "Wealth"
+                ],
+                "summary": "Delete a liability",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Liability ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/v1/wealth/net-worth": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get total assets, total liabilities and net worth for the current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Wealth"
+                ],
+                "summary": "Get net worth summary",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.NetWorthSummary"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "model.Asset": {
+            "type": "object",
+            "properties": {
+                "avg_price": {
+                    "type": "number"
+                },
+                "category": {
+                    "$ref": "#/definitions/model.AssetCategory"
+                },
+                "cost_basis": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "current_price": {
+                    "type": "number"
+                },
+                "current_value": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "number"
+                },
+                "ticker": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.AssetCategory": {
+            "type": "string",
+            "enum": [
+                "cash",
+                "deposit",
+                "gold",
+                "stock",
+                "fund",
+                "crypto",
+                "real_estate"
+            ],
+            "x-enum-varnames": [
+                "AssetCategoryCash",
+                "AssetCategoryDeposit",
+                "AssetCategoryGold",
+                "AssetCategoryStock",
+                "AssetCategoryFund",
+                "AssetCategoryCrypto",
+                "AssetCategoryRealEstate"
+            ]
+        },
         "model.AuthResponse": {
             "type": "object",
             "properties": {
@@ -366,6 +762,74 @@ const docTemplate = `{
                 "role": {
                     "description": "\"user\" or \"assistant\"",
                     "type": "string"
+                }
+            }
+        },
+        "model.CreateAssetRequest": {
+            "type": "object",
+            "required": [
+                "category",
+                "current_value",
+                "name"
+            ],
+            "properties": {
+                "avg_price": {
+                    "type": "number"
+                },
+                "category": {
+                    "$ref": "#/definitions/model.AssetCategory"
+                },
+                "cost_basis": {
+                    "type": "number"
+                },
+                "current_price": {
+                    "type": "number"
+                },
+                "current_value": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "number"
+                },
+                "ticker": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.CreateLiabilityRequest": {
+            "type": "object",
+            "required": [
+                "category",
+                "name",
+                "remaining_balance"
+            ],
+            "properties": {
+                "category": {
+                    "$ref": "#/definitions/model.LiabilityCategory"
+                },
+                "interest_rate": {
+                    "type": "number"
+                },
+                "lender": {
+                    "type": "string"
+                },
+                "monthly_payment": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "remaining_balance": {
+                    "type": "number"
                 }
             }
         },
@@ -429,6 +893,66 @@ const docTemplate = `{
                 }
             }
         },
+        "model.Liability": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "$ref": "#/definitions/model.LiabilityCategory"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "interest_rate": {
+                    "type": "number"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "lender": {
+                    "type": "string"
+                },
+                "monthly_payment": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "remaining_balance": {
+                    "type": "number"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.LiabilityCategory": {
+            "type": "string",
+            "enum": [
+                "mortgage",
+                "auto_loan",
+                "student_loan",
+                "credit_card",
+                "personal_loan",
+                "other"
+            ],
+            "x-enum-varnames": [
+                "LiabilityCategoryMortgage",
+                "LiabilityCategoryAutoLoan",
+                "LiabilityCategoryStudentLoan",
+                "LiabilityCategoryCreditCard",
+                "LiabilityCategoryPersonalLoan",
+                "LiabilityCategoryOther"
+            ]
+        },
         "model.LoginRequest": {
             "type": "object",
             "required": [
@@ -444,6 +968,23 @@ const docTemplate = `{
                 }
             }
         },
+        "model.NetWorthSummary": {
+            "type": "object",
+            "properties": {
+                "base_currency": {
+                    "type": "string"
+                },
+                "net_worth": {
+                    "type": "number"
+                },
+                "total_assets": {
+                    "type": "number"
+                },
+                "total_liabilities": {
+                    "type": "number"
+                }
+            }
+        },
         "model.OnboardingRequest": {
             "type": "object",
             "properties": {
@@ -452,6 +993,52 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/model.ChatMessage"
                     }
+                }
+            }
+        },
+        "model.PaginatedAssets": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Asset"
+                    }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.PaginatedLiabilities": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Liability"
+                    }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "type": "integer"
                 }
             }
         },
@@ -475,10 +1062,81 @@ const docTemplate = `{
                 }
             }
         },
+        "model.UpdateAssetRequest": {
+            "type": "object",
+            "required": [
+                "category",
+                "current_value",
+                "name"
+            ],
+            "properties": {
+                "avg_price": {
+                    "type": "number"
+                },
+                "category": {
+                    "$ref": "#/definitions/model.AssetCategory"
+                },
+                "cost_basis": {
+                    "type": "number"
+                },
+                "current_price": {
+                    "type": "number"
+                },
+                "current_value": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "number"
+                },
+                "ticker": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.UpdateLiabilityRequest": {
+            "type": "object",
+            "required": [
+                "category",
+                "name",
+                "remaining_balance"
+            ],
+            "properties": {
+                "category": {
+                    "$ref": "#/definitions/model.LiabilityCategory"
+                },
+                "interest_rate": {
+                    "type": "number"
+                },
+                "lender": {
+                    "type": "string"
+                },
+                "monthly_payment": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "remaining_balance": {
+                    "type": "number"
+                }
+            }
+        },
         "model.User": {
             "type": "object",
             "properties": {
                 "auth_provider": {
+                    "type": "string"
+                },
+                "base_currency": {
                     "type": "string"
                 },
                 "created_at": {

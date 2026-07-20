@@ -78,7 +78,26 @@ func CascadeLifeEvent(ctx context.Context, event model.LifeEvent) error {
 
 ---
 
-## 2. Chu kỳ Monthly Review Loop
+## 2. Quản lý Tài sản & Nợ (Assets & Liabilities)
+
+### 2.1. Thiết kế dữ liệu Tài sản biến động
+Để hỗ trợ việc tích hợp lấy giá Real-time từ API bên thứ 3 trong tương lai (Phase 2):
+- Các tài sản dạng biến động (Cổ phiếu, Quỹ, Vàng, Crypto) được cấu trúc để người dùng nhập `quantity` (Số lượng) và `ticker` (Mã tài sản).
+- Hệ thống hỗ trợ nhập tay `current_price` (Giá thị trường hiện tại) ở Phase 1.
+- `current_value` = `quantity` * `current_price` (Tính toán tự động tại giao diện hoặc bằng Job nền trong tương lai).
+
+### 2.2. API & Logic Lấy Dữ Liệu (Pagination & Filtering)
+- Backend cung cấp các API `GET /api/v1/wealth/assets` và `GET /api/v1/wealth/liabilities`.
+- **Query Parameters**: Hỗ trợ lọc (filtering) theo `category` và phân trang với `limit`, `offset`.
+- **Cơ chế Phân trang Frontend**: Sử dụng virtual scrolling (lắng nghe sự kiện `scroll` trên container `max-h`). Dữ liệu sẽ tự động được append (fetch thêm) khi người dùng cuộn xuống gần cuối danh sách mà không cần bấm chuyển trang truyền thống.
+- **Tính năng Chỉnh sửa**: Hỗ trợ `PUT /api/v1/wealth/assets/:id` để tái cập nhật thông tin tài sản (Ví dụ: Chỉnh sửa giá mua, thay đổi số lượng, hoặc nhập tổng vốn đầu tư thay cho giá vốn trung bình).
+
+### 2.3. Quản trị đa tiền tệ (Currency)
+- Cột `base_currency` mặc định được lưu ở bảng `users` (`VARCHAR(3) DEFAULT 'VND'`). Mọi tính toán tổng tài sản ròng (Net Worth) trên Dashboard và bảng tổng hợp sẽ được quy đổi về `base_currency` này. Các API và giao diện đều sử dụng biến toàn cục này để format số tiền hiển thị.
+
+---
+
+## 3. Chu kỳ Monthly Review Loop
 
 Mỗi tháng một lần, hệ thống thực hiện phân tích tổng thể:
 

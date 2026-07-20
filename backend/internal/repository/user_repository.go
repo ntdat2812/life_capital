@@ -18,24 +18,24 @@ func NewUserRepository(db *pgxpool.Pool) *UserRepository {
 
 func (r *UserRepository) CreateUser(ctx context.Context, user *model.User) error {
 	query := `
-		INSERT INTO users (email, name, password_hash, auth_provider, google_id)
-		VALUES ($1, $2, $3, $4, $5)
-		RETURNING id, created_at, updated_at
+		INSERT INTO users (email, name, password_hash, auth_provider, google_id, base_currency)
+		VALUES ($1, $2, $3, $4, $5, 'VND')
+		RETURNING id, base_currency, created_at, updated_at
 	`
 	err := r.db.QueryRow(ctx, query, user.Email, user.Name, user.PasswordHash, user.AuthProvider, user.GoogleID).
-		Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt)
+		Scan(&user.ID, &user.BaseCurrency, &user.CreatedAt, &user.UpdatedAt)
 	return err
 }
 
 func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*model.User, error) {
 	query := `
-		SELECT id, email, name, password_hash, auth_provider, google_id, created_at, updated_at
+		SELECT id, email, name, password_hash, auth_provider, google_id, base_currency, created_at, updated_at
 		FROM users
 		WHERE email = $1
 	`
 	user := &model.User{}
 	err := r.db.QueryRow(ctx, query, email).
-		Scan(&user.ID, &user.Email, &user.Name, &user.PasswordHash, &user.AuthProvider, &user.GoogleID, &user.CreatedAt, &user.UpdatedAt)
+		Scan(&user.ID, &user.Email, &user.Name, &user.PasswordHash, &user.AuthProvider, &user.GoogleID, &user.BaseCurrency, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, nil // Return nil for not found without an error
@@ -57,13 +57,13 @@ func (r *UserRepository) UpdateGoogleID(ctx context.Context, userID string, goog
 
 func (r *UserRepository) FindByID(ctx context.Context, id string) (*model.User, error) {
 	query := `
-		SELECT id, email, name, password_hash, auth_provider, google_id, created_at, updated_at
+		SELECT id, email, name, password_hash, auth_provider, google_id, base_currency, created_at, updated_at
 		FROM users
 		WHERE id = $1
 	`
 	user := &model.User{}
 	err := r.db.QueryRow(ctx, query, id).
-		Scan(&user.ID, &user.Email, &user.Name, &user.PasswordHash, &user.AuthProvider, &user.GoogleID, &user.CreatedAt, &user.UpdatedAt)
+		Scan(&user.ID, &user.Email, &user.Name, &user.PasswordHash, &user.AuthProvider, &user.GoogleID, &user.BaseCurrency, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, nil // Return nil for not found without an error
