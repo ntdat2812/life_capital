@@ -8,7 +8,7 @@
 
 **Life Capital** (also known as **WealthOS**) is a Personal Wealth Operating System.
 - **Core Goal**: Help the user answer: *"With all my current assets, what should I do this month to get closer to financial independence?"*
-- **Scope**: Single-user, self-hosted, focused on monthly analysis rhythm rather than daily trading.
+- **Scope**: Multi-user, self-hosted, focused on monthly analysis rhythm rather than daily trading.
 - **Key Paradigm**: Module 0 - Investor Profile & Life Timeline is the foundational layer. Every recommendation, risk limit, or target allocation must start from the current profile status and cascade when Life Events are logged.
 
 ---
@@ -19,7 +19,7 @@
 - **Frontend**: Vue 3 (Vite, Pinia, Vue Router) using **Tailwind CSS 4** and Vanilla CSS components.
 - **Database**: PostgreSQL 16 (relational data, JSONB for flexible attributes).
 - **AI Integration**: Prioritizes low-cost/free tiers (e.g., Gemini 2.5 Flash, local models via Ollama) and supports custom user API keys.
-- **Authentication**: JWT-based authentication with bcrypt hashed password. Single user signup/login dashboard.
+- **Authentication**: JWT-based authentication with bcrypt hashed password. Multi-user signup/login dashboard.
 
 ---
 
@@ -99,7 +99,7 @@ life_capital/
   - **Solution Architect**: Read [docs/erd.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/erd.md) & [docs/lld.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/lld.md).
   - **Developer (Backend/Frontend)**: Read [docs/lld.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/lld.md) & [docs/frontend_layout.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/frontend_layout.md).
   - **QA Tester**: Read [docs/features.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/features.md) & [docs/lld.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/lld.md).
-- Refer to `.agents/rules/standards.md` before making any coding modifications.
+- Refer to `.agents/rules/standards.md` before making any coding modifications. However, **do not let the documents strictly bind your thinking**; you are encouraged to be creative and propose innovative solutions that align with the product's vision.
 - Consult the specific roles under `.agents/skills/` depending on the current task (e.g. database change -> Solution Architect; Go code change -> Backend Developer).
 - **Project Documentation Updates**: Every design or database changes must be reflected in the relevant files inside the `docs/` directory. Solution Architect updates architecture/DB schemas, QA updates tests, etc.
 - **Swagger Sync**: After adding or modifying any backend API endpoint, regenerate Swagger docs by running `swag init -g cmd/server/main.go` inside `backend/` and commit the updated `backend/docs/` folder.

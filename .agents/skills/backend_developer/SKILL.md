@@ -118,7 +118,7 @@ func (h *Handler) GetProfile(c echo.Context) error { ... }
 ---
 
 ## 6. References & Design Documents
-When writing backend code or setting up database tables, you MUST read:
+When writing backend code or setting up database tables, you MUST read the following documents. However, **do not let them strictly bind your thinking**. You are encouraged to be creative and propose innovative solutions that elevate the product's quality according to your specific backend expertise:
 - **Low-Level Logic Models**: [docs/lld.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/lld.md)
 - **Database Schema Specs**: [docs/erd.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/erd.md)
 - **Features & API Endpoints**: [docs/features.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/features.md)

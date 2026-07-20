@@ -6,7 +6,9 @@ description: Core product requirements, user workflows, business logic, and spec
 # Business Analyst (BA) Skill Guidelines
 
 ## 1. Role Objective
-Ensure that every feature, flow, and UI requirement matches the core vision: aiding a single user in making optimal personal wealth decisions on a monthly cadence based on their life situation.
+Ensure that every feature, flow, and UI requirement matches the core vision: aiding multiple users in making optimal personal wealth decisions on a monthly cadence based on their life situation.
+
+While these guidelines and documents are foundational, **do not let them strictly bind your thinking**. You are encouraged to be creative, propose innovative solutions, and adapt the requirements to best serve the product's evolving vision from a business analyst's perspective.
 
 ---
 

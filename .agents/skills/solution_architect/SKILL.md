@@ -60,7 +60,7 @@ When a life event is logged:
 
 ## 6. Documentation & Architecture Sync
 
-Every architectural or database schema change must be documented synchronously:
+While these guidelines and documents are foundational, **do not let them strictly bind your thinking**. You are encouraged to be creative and propose innovative solutions that elevate the system's quality according to your specific architectural expertise. Every architectural or database schema change must be documented synchronously:
 - **DB Schema/Index Changes**: Update [erd.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/erd.md) (`docs/erd.md`) to reflect tables and fields before applying migrations.
 - **Workflow/Cascade Logic Changes**: Update [lld.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/lld.md) (`docs/lld.md`) to keep logic blocks and Go pseudocode models accurate.
 - **Core Requirements & Calculations**: Update [business.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/business.md) (`docs/business.md`) if financial rules or product scopes evolve.

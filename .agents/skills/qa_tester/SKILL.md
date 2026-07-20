@@ -63,7 +63,7 @@ Verify the visual layout and user interactions to preserve premium design standa
 ---
 
 ## 6. References & Design Documents
-When validating functions, UI/UX elements, or writing tests, you MUST refer to:
+When validating functions, UI/UX elements, or writing tests, you MUST refer to the following documents. However, **do not let them strictly bind your thinking**. You are encouraged to be creative and propose innovative solutions that elevate the product's quality according to your specific QA expertise:
 - **Features List & Routing Grid**: [docs/features.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/features.md)
 - **Logic Specs & Auth Controls**: [docs/lld.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/lld.md)
 - **UI Mockups & CSS Standards**: [docs/frontend_layout.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/frontend_layout.md)

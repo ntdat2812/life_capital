@@ -49,7 +49,7 @@
 - **AI Report**: AI quét toàn bộ danh mục, IPS, Thesis và KQKD mới để đưa ra báo cáo tổng quan tháng cùng lệnh phân bổ tiền mới cụ thể.
 
 ### 1.10 Module 9 — Authentication & Authorization
-- **Đăng ký (Signup)**: Single-user system. Chỉ cho phép tạo duy nhất 1 tài khoản. Nếu đã tồn tại user trong database, API sẽ trả về lỗi `409 Conflict`.
+- **Đăng ký (Signup)**: Multi-user system. Nếu email đăng ký đã tồn tại, API sẽ trả về lỗi `409 Conflict`.
 - **Đăng nhập (Login)**: Nhập email + mật khẩu. Backend kiểm tra mật khẩu bằng bcrypt, nếu khớp sẽ trả về JWT access token.
 - **JWT Token Flow**: Mọi API endpoint (trừ `/api/v1/auth/signup`, `/api/v1/auth/login`) yêu cầu header `Authorization: Bearer <token>`. Token hết hạn sau 24 giờ.
 - **Logout**: Phía client xóa token khỏi localStorage. Không cần API phía server (stateless JWT).
@@ -77,4 +77,4 @@
 | 15 | Onboarding Interview | `/onboarding/interview` | Conversational AI Chat, Progress Bar |
 | 16 | Login | `/login` | Form đăng nhập credentials |
 | 17 | Financial Goals | `/goals` | Goal Waterfall Cards, Add Goal Form |
-| 18 | Signup | `/signup` | Form đăng ký tài khoản (single-user) |
+| 18 | Signup | `/signup` | Form đăng ký tài khoản (multi-user) |

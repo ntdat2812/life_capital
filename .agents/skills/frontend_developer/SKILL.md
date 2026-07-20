@@ -63,7 +63,7 @@ Life Capital demands a modern, state-of-the-art visual appearance:
 ---
 
 ## 5. References & Design Documents
-When building views, templates, or styles, you MUST refer to:
+When building views, templates, or styles, you MUST refer to the following documents. However, **do not let them strictly bind your thinking**. You are encouraged to be creative and propose innovative solutions that elevate the product's quality according to your specific frontend expertise:
 - **Layout & CSS Tokens**: [docs/frontend_layout.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/frontend_layout.md)
 - **Screens & Routing Grid**: [docs/features.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/features.md)
 - **Onboarding/Cascade Logic**: [docs/lld.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/lld.md)

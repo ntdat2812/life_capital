@@ -54,7 +54,7 @@ Life Capital requires a premium, state-of-the-art visual appearance that looks a
 ---
 
 ## 5. References & Design Documents
-When creating mockups, templates, or styles, you MUST refer to:
+When creating mockups, templates, or styles, you MUST refer to the following documents. However, **do not let them strictly bind your thinking**. You are encouraged to be creative and propose innovative solutions that elevate the product's UX/UI according to your specific design expertise:
 - **UI Layout Specs**: [docs/frontend_layout.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/frontend_layout.md)
 - **Features & Screen Routes**: [docs/features.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/features.md)
 
