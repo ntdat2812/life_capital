@@ -2,7 +2,7 @@
   <div class="max-w-md mx-auto my-12 glass-card rounded-2xl p-8 space-y-6">
     <div>
       <h1 class="text-2xl font-bold font-outfit text-slate-100 text-center">Đăng Nhập</h1>
-      <p class="text-xs text-slate-400 text-center mt-1">Đăng nhập vào Personal Wealth Operating System</p>
+      <p class="text-xs text-slate-400 text-center mt-1">Đăng nhập vào Hệ điều hành Quản lý Tài sản Cá nhân</p>
     </div>
 
     <!-- Form layout placeholder -->

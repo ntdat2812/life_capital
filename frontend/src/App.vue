@@ -25,7 +25,7 @@
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition duration-150"
             :class="$route.name === 'dashboard' ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'"
           >
-            📊 Dashboard
+            📊 Tổng quan
           </router-link>
           
           <router-link 
@@ -33,7 +33,7 @@
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition duration-150"
             :class="$route.name === 'onboarding' ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'"
           >
-            🤖 AI Onboarding
+            🤖 Thiết lập ban đầu (AI)
           </router-link>
 
           <router-link 
@@ -41,7 +41,7 @@
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition duration-150"
             :class="$route.name === 'profile' ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'"
           >
-            👤 Profile
+            👤 Hồ sơ cá nhân
           </router-link>
 
           <router-link 
@@ -49,7 +49,7 @@
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition duration-150"
             :class="$route.name === 'assets' ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'"
           >
-            💰 Assets & Debts
+            💰 Tài sản & Nợ
           </router-link>
 
           <router-link 
@@ -57,7 +57,7 @@
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition duration-150"
             :class="$route.name === 'goals' ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'"
           >
-            🎯 Goals
+            🎯 Mục tiêu tài chính
           </router-link>
 
           <router-link 
@@ -65,7 +65,7 @@
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition duration-150"
             :class="$route.name === 'portfolio' ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'"
           >
-            📈 Portfolio
+            📈 Danh mục đầu tư
           </router-link>
 
           <router-link 
@@ -73,7 +73,7 @@
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition duration-150"
             :class="$route.name === 'review' ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'"
           >
-            🗓️ Monthly Review
+            🗓️ Đánh giá hàng tháng
           </router-link>
         </nav>
       </div>
