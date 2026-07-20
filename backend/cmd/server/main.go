@@ -68,6 +68,8 @@ func main() {
 	investorProfileRepo := repository.NewInvestorProfileRepository(dbPool)
 	assetRepo := repository.NewAssetRepository(dbPool)
 	liabilityRepo := repository.NewLiabilityRepository(dbPool)
+	incomeRepo := repository.NewIncomeRepository(dbPool)
+	dependentRepo := repository.NewDependentRepository(dbPool)
 
 	// Initialize AI Provider
 	geminiProvider, err := ai.NewGeminiProvider()
@@ -79,17 +81,19 @@ func main() {
 	jwtSecret := os.Getenv("JWT_SECRET")
 	googleClientID := os.Getenv("GOOGLE_CLIENT_ID")
 	authService := service.NewAuthService(userRepo, jwtSecret, googleClientID)
-	profileService := service.NewInvestorProfileService(investorProfileRepo, geminiProvider)
+	profileService := service.NewInvestorProfileService(investorProfileRepo, incomeRepo, geminiProvider)
 	wealthService := service.NewWealthService(assetRepo, liabilityRepo, userRepo)
+	cashflowService := service.NewCashflowService(incomeRepo, dependentRepo)
 
 	// Initialize handlers
 	healthHandler := handler.NewHealthHandler()
 	authHandler := handler.NewAuthHandler(authService)
 	profileHandler := handler.NewProfileHandler(profileService)
 	wealthHandler := handler.NewWealthHandler(wealthService)
+	cashflowHandler := handler.NewCashflowHandler(cashflowService)
 
 	// Register routes
-	registerRoutes(e, healthHandler, authHandler, profileHandler, wealthHandler)
+	registerRoutes(e, healthHandler, authHandler, profileHandler, wealthHandler, cashflowHandler)
 
 	// Get PORT from environment variable (default: 8080)
 	port := os.Getenv("PORT")
@@ -106,7 +110,7 @@ func main() {
 }
 
 // registerRoutes maps all API routes to their handlers.
-func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHandler *handler.AuthHandler, profileHandler *handler.ProfileHandler, wealthHandler *handler.WealthHandler) {
+func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHandler *handler.AuthHandler, profileHandler *handler.ProfileHandler, wealthHandler *handler.WealthHandler, cashflowHandler *handler.CashflowHandler) {
 	api := e.Group("/api/v1")
 
 	// Public routes
@@ -126,6 +130,19 @@ func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHand
 	profile := protected.Group("/profile")
 	profile.POST("/onboarding", profileHandler.Onboarding)
 	profile.GET("/me", profileHandler.GetMe)
+	profile.PUT("/me", profileHandler.UpdateProfile)
+
+	// Cashflow routes
+	cashflowGroup := protected.Group("/cashflow")
+	cashflowGroup.POST("/income", cashflowHandler.CreateIncomeStream)
+	cashflowGroup.GET("/income", cashflowHandler.GetIncomeStreams)
+	cashflowGroup.PUT("/income/:id", cashflowHandler.UpdateIncomeStream)
+	cashflowGroup.DELETE("/income/:id", cashflowHandler.DeleteIncomeStream)
+
+	cashflowGroup.POST("/dependents", cashflowHandler.CreateDependent)
+	cashflowGroup.GET("/dependents", cashflowHandler.GetDependents)
+	cashflowGroup.PUT("/dependents/:id", cashflowHandler.UpdateDependent)
+	cashflowGroup.DELETE("/dependents/:id", cashflowHandler.DeleteDependent)
 
 	// Wealth routes
 	wealthGroup := protected.Group("/wealth")

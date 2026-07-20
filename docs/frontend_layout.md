@@ -82,10 +82,18 @@ Tất cả các thẻ hiển thị (cards), sidebar và modal đều kế thừa
 - Cung cấp tính năng "Đăng nhập bằng Google" nổi bật (Sử dụng `vue3-google-login`).
 - Hiển thị cảnh báo lỗi bằng chữ đỏ nhạt viền đỏ khi nhập sai hoặc trùng lặp tài khoản.
 
-### 4.4 Giao diện Investor Profile (Hồ sơ đầu tư)
-- **Header**: Avatar, tên, tổng thu nhập/chi phí và điểm FI (Tự do tài chính).
-- **Trái (Risk & Status)**: Risk Gauge (thước đo rủi ro từ 1-100 với các màu thay đổi từ xanh tới đỏ), Tình trạng hiện tại (Trạng thái hôn nhân, Số người phụ thuộc).
-- **Phải (AI Insights & Constraints)**: Hiển thị các phân tích từ AI (Life Constraints) dưới dạng thẻ highlight và đề xuất phân bổ vốn.
+### 4.4 Giao diện Investor Profile (Hồ sơ đầu tư) & Quản lý Dòng tiền
+- **Bố cục Tab (Tabs Layout)**: Chuyển đổi trang Profile thành cấu trúc đa Tab:
+  - **Tab Tổng Quan (Overview)**:
+    - **Header**: Avatar, tên, điểm FI (Tự do tài chính) + Nút `[Chỉnh sửa Hồ Sơ]` mở Modal cho phép sửa tay (Tuổi, Mục tiêu FI, Tình trạng hôn nhân...).
+    - **Trái (Risk & Status)**: Risk Gauge (thước đo rủi ro từ 1-100 với các màu thay đổi từ xanh tới đỏ), Tình trạng hiện tại.
+    - **Phải (AI Insights & Constraints)**: Hiển thị các phân tích từ AI (Life Constraints) dưới dạng thẻ highlight và Tổng quan Thu/Chi.
+  - **Tab Dòng Tiền (Income Streams)**:
+    - Danh sách thẻ (Cards) hiển thị các nguồn thu nhập (Lương, Cho thuê nhà...). Có nhãn phân biệt Chủ động / Thụ động.
+    - Nút `[+ Thêm Nguồn Thu Nhập]`. Từng thẻ có nút Sửa/Xóa.
+  - **Tab Người Phụ Thuộc (Dependents)**:
+    - Danh sách thẻ hiển thị thông tin người phụ thuộc kèm chi phí nuôi dưỡng hàng tháng.
+    - Nút `[+ Thêm Người Phụ Thuộc]`. Từng thẻ có nút Sửa/Xóa.
 
 ### 4.5 Giao diện Assets & Liabilities (Quản lý Tài sản & Nợ)
 - **Khu vực Top (Summary Cards)**:

@@ -54,10 +54,9 @@ erDiagram
         string marital_status
         string risk_tolerance
         int risk_score
-        decimal total_monthly_income
-        decimal total_monthly_expense
+        decimal essential_monthly_expense
+        decimal discretionary_monthly_expense
         decimal fi_target_amount
-        jsonb life_constraints
         text ai_profile_summary
     }
 
@@ -258,12 +257,12 @@ CREATE TABLE investor_profiles (
     occupation          VARCHAR(255),
     employer            VARCHAR(255),
 
-    primary_income          DECIMAL(18,2),
-    secondary_income        DECIMAL(18,2),
-    total_monthly_income    DECIMAL(18,2),
-    total_monthly_expense   DECIMAL(18,2),
-    monthly_savings         DECIMAL(18,2),
-    monthly_investment      DECIMAL(18,2),
+    primary_income                DECIMAL(18,2),
+    secondary_income              DECIMAL(18,2),
+    essential_monthly_expense     DECIMAL(15,2),
+    discretionary_monthly_expense DECIMAL(15,2),
+    monthly_savings               DECIMAL(18,2),
+    monthly_investment            DECIMAL(18,2),
 
     fi_target_amount        DECIMAL(18,2),
     fi_target_date          DATE,
@@ -276,7 +275,6 @@ CREATE TABLE investor_profiles (
     investment_style        TEXT,
     investment_philosophy   TEXT,
 
-    life_constraints        JSONB,
     insurance_coverage      JSONB,
     debt_obligations        JSONB,
 

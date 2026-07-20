@@ -348,7 +348,7 @@
             <div>
               <label class="block text-sm font-medium text-slate-300 mb-1">Số lượng <span v-if="assetForm.category === 'gold'" class="text-slate-500 text-xs font-normal">(Tính theo Lượng)</span></label>
               <div class="flex gap-2">
-                <input type="text" v-model="formattedInputs.quantity" @input="updateAssetField('quantity'); quickGoldWeight = ''" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" />
+                <CurrencyInput v-model="assetForm.quantity" @update:modelValue="calculateCurrentValue(); quickGoldWeight = ''" />
                 <select v-if="assetForm.category === 'gold'" v-model="quickGoldWeight" @change="applyQuickGoldWeight" class="bg-slate-900/50 border border-slate-700 rounded-lg px-2 py-2 text-white text-sm focus:outline-none focus:border-indigo-500 shrink-0 w-[110px]">
                   <option value="">Tùy chỉnh</option>
                   <option value="1">1 Lượng</option>
@@ -361,17 +361,17 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-slate-300 mb-1">Giá Vốn <span class="text-slate-500 text-xs font-normal">(Tùy chọn)</span></label>
-              <input type="text" v-model="formattedInputs.avg_price" @input="updateAssetField('avg_price')" placeholder="Bỏ qua" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 placeholder:text-slate-600" />
+              <CurrencyInput v-model="assetForm.avg_price" placeholder="Bỏ qua" />
             </div>
             <div>
               <label class="block text-sm font-medium text-slate-300 mb-1">Giá Hiện Tại</label>
-              <input type="text" v-model="formattedInputs.current_price" @input="updateAssetField('current_price')" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" />
+              <CurrencyInput v-model="assetForm.current_price" @update:modelValue="calculateCurrentValue()" />
             </div>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-slate-300 mb-1">Tổng Giá Trị Hiện Tại</label>
-            <input type="text" v-model="formattedInputs.current_value" @input="updateAssetField('current_value')" required class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-emerald-400 font-bold text-lg focus:outline-none focus:border-indigo-500" :readonly="isFluctuatingAsset(assetForm.category)" :class="{ 'opacity-50 cursor-not-allowed': isFluctuatingAsset(assetForm.category) }" />
+            <CurrencyInput v-model="assetForm.current_value" required class="!text-emerald-400 font-bold text-lg" :readonly="isFluctuatingAsset(assetForm.category)" :class="{ 'opacity-50 cursor-not-allowed': isFluctuatingAsset(assetForm.category) }" />
           </div>
 
           <div v-if="assetError" class="text-red-400 text-sm">{{ assetError }}</div>
@@ -412,17 +412,17 @@
 
           <div>
             <label class="block text-sm font-medium text-slate-300 mb-1">Dư Nợ Còn Lại</label>
-            <input type="text" v-model="formattedInputs.remaining_balance" @input="updateLiabilityField('remaining_balance')" required class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-amber-500 font-bold text-lg focus:outline-none focus:border-indigo-500" />
+            <CurrencyInput v-model="liabilityForm.remaining_balance" required class="!text-amber-500 font-bold text-lg" />
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-slate-300 mb-1">Lãi Suất (%)</label>
-              <input type="text" v-model="formattedInputs.interest_rate" @input="updateLiabilityField('interest_rate')" placeholder="VD: 7.5" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" />
+              <CurrencyInput v-model="liabilityForm.interest_rate_percent" placeholder="VD: 7.5" />
             </div>
             <div>
               <label class="block text-sm font-medium text-slate-300 mb-1">Trả Góp Hàng Tháng</label>
-              <input type="text" v-model="formattedInputs.monthly_payment" @input="updateLiabilityField('monthly_payment')" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" />
+              <CurrencyInput v-model="liabilityForm.monthly_payment" />
             </div>
           </div>
 
@@ -437,12 +437,22 @@
         </form>
       </div>
     </div>
+    <!-- Confirm Delete Modal -->
+    <ConfirmModal 
+      :show="deleteConfirm.show" 
+      :title="deleteConfirm.type === 'asset' ? 'Xóa Tài Sản' : 'Xóa Khoản Nợ'" 
+      :message="'Bạn có chắc chắn muốn xóa mục này không? Thao tác này không thể hoàn tác.'" 
+      @confirm="executeDelete" 
+      @cancel="deleteConfirm.show = false" 
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useWealthStore } from '../stores/wealthStore'
+import CurrencyInput from '../components/common/CurrencyInput.vue'
+import ConfirmModal from '../components/common/ConfirmModal.vue'
 
 const wealthStore = useWealthStore()
 
@@ -485,15 +495,7 @@ const liabilityForm = ref({
   monthly_payment: null
 })
 
-const formattedInputs = ref({
-  quantity: '',
-  avg_price: '',
-  current_price: '',
-  current_value: '',
-  remaining_balance: '',
-  interest_rate: '',
-  monthly_payment: ''
-})
+// removed formattedInputs
 
 onMounted(() => {
   wealthStore.fetchAll()
@@ -623,73 +625,6 @@ const formatInputNumber = (value) => {
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 6 }).format(value)
 }
 
-const parseInputNumber = (valueStr) => {
-  if (!valueStr) return null
-  const cleanStr = valueStr.replace(/[^0-9.]/g, '')
-  if (!cleanStr) return null
-  return parseFloat(cleanStr)
-}
-
-const updateAssetField = (field) => {
-  const val = formattedInputs.value[field]
-  if (!val) {
-    assetForm.value[field] = null
-    formattedInputs.value[field] = ''
-    if (field === 'quantity' || field === 'current_price') calculateCurrentValue()
-    return
-  }
-  
-  const cleanStr = val.replace(/[^0-9.]/g, '')
-  const parts = cleanStr.split('.')
-  let integerPart = parts[0]
-  let decimalPart = parts.length > 1 ? parts.slice(1).join('') : null
-  
-  let rawValue = null
-  if (integerPart || decimalPart !== null) {
-    rawValue = parseFloat((integerPart || '0') + '.' + (decimalPart || '0'))
-  }
-  assetForm.value[field] = rawValue
-  
-  let formatted = ''
-  if (integerPart) formatted = new Intl.NumberFormat('en-US').format(parseInt(integerPart, 10))
-  else if (decimalPart !== null) formatted = '0'
-  
-  if (decimalPart !== null) formatted += '.' + decimalPart
-  
-  formattedInputs.value[field] = formatted
-  if (field === 'quantity' || field === 'current_price') calculateCurrentValue()
-}
-
-const updateLiabilityField = (field) => {
-  const val = formattedInputs.value[field]
-  let formField = field === 'interest_rate' ? 'interest_rate_percent' : field
-
-  if (!val) {
-    liabilityForm.value[formField] = null
-    formattedInputs.value[field] = ''
-    return
-  }
-  
-  const cleanStr = val.replace(/[^0-9.]/g, '')
-  const parts = cleanStr.split('.')
-  let integerPart = parts[0]
-  let decimalPart = parts.length > 1 ? parts.slice(1).join('') : null
-  
-  let rawValue = null
-  if (integerPart || decimalPart !== null) {
-    rawValue = parseFloat((integerPart || '0') + '.' + (decimalPart || '0'))
-  }
-  liabilityForm.value[formField] = rawValue
-  
-  let formatted = ''
-  if (integerPart) formatted = new Intl.NumberFormat('en-US').format(parseInt(integerPart, 10))
-  else if (decimalPart !== null) formatted = '0'
-  
-  if (decimalPart !== null) formatted += '.' + decimalPart
-  
-  formattedInputs.value[field] = formatted
-}
-
 // --- FORM LOGIC ---
 const isFluctuatingAsset = (category) => {
   return ['stock', 'fund', 'crypto', 'gold'].includes(category)
@@ -698,7 +633,6 @@ const isFluctuatingAsset = (category) => {
 const calculateCurrentValue = () => {
   if (assetForm.value.quantity && assetForm.value.current_price) {
     assetForm.value.current_value = assetForm.value.quantity * assetForm.value.current_price
-    formattedInputs.value.current_value = formatInputNumber(assetForm.value.current_value)
   }
 }
 
@@ -707,10 +641,6 @@ const openAddAsset = () => {
   editingAssetId.value = null
   quickGoldWeight.value = ''
   assetForm.value = { category: 'cash', name: '', ticker: '', quantity: null, avg_price: null, current_price: null, current_value: null }
-  formattedInputs.value.quantity = ''
-  formattedInputs.value.avg_price = ''
-  formattedInputs.value.current_price = ''
-  formattedInputs.value.current_value = ''
   showAddAssetModal.value = true
 }
 
@@ -719,11 +649,6 @@ const openEditAsset = (asset) => {
   editingAssetId.value = asset.id
   quickGoldWeight.value = ''
   assetForm.value = { ...asset }
-  
-  formattedInputs.value.quantity = formatInputNumber(asset.quantity)
-  formattedInputs.value.avg_price = formatInputNumber(asset.avg_price)
-  formattedInputs.value.current_price = formatInputNumber(asset.current_price)
-  formattedInputs.value.current_value = formatInputNumber(asset.current_value)
   
   if (asset.category === 'gold') {
     const parts = asset.name.split(' - ')
@@ -745,7 +670,6 @@ const openEditAsset = (asset) => {
 const applyQuickGoldWeight = () => {
   if (quickGoldWeight.value) {
     assetForm.value.quantity = parseFloat(quickGoldWeight.value)
-    formattedInputs.value.quantity = formatInputNumber(assetForm.value.quantity)
     calculateCurrentValue()
   }
 }
@@ -833,15 +757,24 @@ const submitLiabilityForm = async () => {
   }
 }
 
-const deleteAsset = async (id) => {
-  if (confirm('Bạn có chắc chắn muốn xóa tài sản này?')) {
-    await wealthStore.deleteAsset(id)
-  }
+const deleteConfirm = ref({ show: false, id: null, type: '' })
+
+const deleteAsset = (id) => {
+  deleteConfirm.value = { show: true, id, type: 'asset' }
 }
 
-const deleteLiability = async (id) => {
-  if (confirm('Bạn có chắc chắn muốn xóa khoản nợ này?')) {
-    await wealthStore.deleteLiability(id)
+const deleteLiability = (id) => {
+  deleteConfirm.value = { show: true, id, type: 'liability' }
+}
+
+const executeDelete = async () => {
+  if (deleteConfirm.value.id) {
+    if (deleteConfirm.value.type === 'asset') {
+      await wealthStore.deleteAsset(deleteConfirm.value.id)
+    } else {
+      await wealthStore.deleteLiability(deleteConfirm.value.id)
+    }
+    deleteConfirm.value.show = false
   }
 }
 

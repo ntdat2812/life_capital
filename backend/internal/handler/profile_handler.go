@@ -69,3 +69,32 @@ func (h *ProfileHandler) GetMe(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, profile)
 }
+
+// UpdateProfile godoc
+// @Summary      Update Active Profile
+// @Description  Update the current active investor profile for the logged in user.
+// @Tags         profile
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request body model.UpdateProfileRequest true "Profile Update Data"
+// @Success      200  {object}  model.InvestorProfile
+// @Failure      400  {object}  map[string]string
+// @Failure      401  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /api/v1/profile/me [put]
+func (h *ProfileHandler) UpdateProfile(c echo.Context) error {
+	userID := c.Get("user_id").(string)
+
+	req := new(model.UpdateProfileRequest)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request payload")
+	}
+
+	profile, err := h.profileService.UpdateProfile(c.Request().Context(), userID, req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, profile)
+}

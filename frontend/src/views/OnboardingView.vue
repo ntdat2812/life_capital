@@ -16,7 +16,7 @@
       <div class="flex-1 overflow-y-auto p-4 space-y-4" ref="chatContainer">
         <div v-for="(msg, index) in messages" :key="index" class="flex" :class="msg.role === 'user' ? 'justify-end' : 'justify-start'">
           <div 
-            class="max-w-[80%] rounded-2xl px-4 py-2"
+            class="max-w-[80%] rounded-2xl px-4 py-2 whitespace-pre-wrap"
             :class="msg.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-slate-700/50 text-slate-200'"
           >
             {{ msg.content }}
@@ -74,14 +74,11 @@ const chatContainer = ref(null);
 const onboardingComplete = ref(false);
 
 const scriptSteps = [
-  "Chào mừng bạn đến với WealthOS! Để tôi có thể tư vấn tốt nhất, hãy cho tôi biết bạn sinh năm bao nhiêu?",
-  "Cảm ơn! Tình trạng hôn nhân hiện tại của bạn là gì? Bạn có người phụ thuộc không?",
-  "Thu nhập bình quân mỗi tháng của bạn (sau thuế) khoảng bao nhiêu?",
-  "Còn chi phí sinh hoạt hàng tháng của bạn thì sao?",
-  "Công việc hiện tại của bạn có ổn định không? Bạn có dự định lớn nào tốn nhiều tiền trong 3-5 năm tới không? (ví dụ: Mua nhà, sinh con, khởi nghiệp...)",
-  "Hiện tại bạn có khoản nợ nào cần thanh toán hàng tháng không? (Vay mua nhà, thẻ tín dụng...)",
-  "Mức độ chấp nhận rủi ro của bạn như thế nào? (Thấp/Trung bình/Cao)",
-  "Cuối cùng, khi nghỉ hưu bạn mong muốn có mức sống như thế nào? (ví dụ: Chi tiêu khoảng 20tr/tháng, hay chỉ cần sống giản dị...). Tôi sẽ dựa vào đó để tự tính ra con số Tự Do Tài Chính cần thiết cho bạn."
+  "Chào mừng bạn đến với WealthOS! Để tôi có thể tư vấn tốt nhất, hãy cho tôi biết ngày tháng năm sinh và tình trạng hôn nhân hiện tại của bạn?\n👉 VD: Mình sinh ngày 15/08/1992, đã kết hôn.",
+  "Cảm ơn! Thu nhập bình quân mỗi tháng của bạn (sau thuế) khoảng bao nhiêu?\n👉 VD: Lương 25tr/tháng, hoặc Tổng khoảng 30tr.",
+  "Còn chi phí sinh hoạt hàng tháng của bạn thì sao? Hãy chia thành 2 phần: Chi phí thiết yếu (nhà ở, ăn uống) và Chi phí hưởng thụ (du lịch, mua sắm) nhé.\n👉 VD: Thiết yếu 10tr, Hưởng thụ 3tr.",
+  "Mức độ chấp nhận rủi ro của bạn như thế nào? Bạn có chịu được cảnh tài khoản đầu tư giảm 20% trong 1 năm không?\n👉 VD: Chấp nhận rủi ro Cao, hoặc Chỉ muốn an toàn.",
+  "Cuối cùng, mục tiêu tự do tài chính của bạn là gì? (Khi nghỉ hưu bạn muốn có mức chi tiêu bao nhiêu mỗi tháng?)\n👉 VD: Mình muốn có 15tr/tháng để tiêu khi nghỉ hưu."
 ];
 
 let currentStep = 0;

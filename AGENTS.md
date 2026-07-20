@@ -72,7 +72,8 @@ life_capital/
 │   ├── erd.md                         # SQL Schema & DB architecture
 │   ├── lld.md                         # Low level design of key features
 │   ├── frontend_layout.md             # UI layout details & templates
-│   └── features.md                    # Breakdown of system features
+│   ├── features.md                    # Breakdown of system features
+│   └── IMPLEMENTATION_STATUS.md       # Real-time progress tracker of features
 │
 ├── docker-compose.yml
 └── README.md
@@ -103,5 +104,6 @@ life_capital/
 - Refer to `.agents/rules/standards.md` before making any coding modifications. However, **do not let the documents strictly bind your thinking**; you are encouraged to be creative and propose innovative solutions that align with the product's vision.
 - Consult the specific roles under `.agents/skills/` depending on the current task (e.g. database change -> Solution Architect; Go code change -> Backend Developer).
 - **Project Documentation Updates (Crucial)**: Every change related to database structure (ERD), UI layout, or business logic MUST be synchronously updated in the corresponding `docs/` files (`erd.md`, `frontend_layout.md`, `business.md`, `lld.md`). Maintaining documentation in sync with the codebase is a strict requirement for all agents.
+- **Progress Tracking (Crucial)**: ALWAYS check `docs/IMPLEMENTATION_STATUS.md` to see what is currently implemented. After completing any feature or task from `features.md`, you MUST update `docs/IMPLEMENTATION_STATUS.md` to reflect the latest state (Done/WIP/Pending).
 - **Swagger Sync**: After adding or modifying any backend API endpoint, regenerate Swagger docs by running `swag init -g cmd/server/main.go` inside `backend/` and commit the updated `backend/docs/` folder.
 - Always verify changes with unit tests and document updates in the `/walkthrough.md` file.

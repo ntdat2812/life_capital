@@ -14,12 +14,14 @@ import (
 
 type InvestorProfileService struct {
 	repo       *repository.InvestorProfileRepository
+	incomeRepo *repository.IncomeRepository
 	aiProvider ai.AIProvider
 }
 
-func NewInvestorProfileService(repo *repository.InvestorProfileRepository, aiProvider ai.AIProvider) *InvestorProfileService {
+func NewInvestorProfileService(repo *repository.InvestorProfileRepository, incomeRepo *repository.IncomeRepository, aiProvider ai.AIProvider) *InvestorProfileService {
 	return &InvestorProfileService{
 		repo:       repo,
+		incomeRepo: incomeRepo,
 		aiProvider: aiProvider,
 	}
 }
@@ -67,21 +69,37 @@ func (s *InvestorProfileService) ProcessOnboarding(ctx context.Context, userID s
 	}
 
 	profile := &model.InvestorProfile{
-		UserID:              uid,
-		Version:             newVersion,
-		Status:              "active",
-		DateOfBirth:         dob,
-		MaritalStatus:       extraction.MaritalStatus,
-		RiskTolerance:       extraction.RiskTolerance,
-		RiskScore:           extraction.RiskScore,
-		TotalMonthlyIncome:  extraction.TotalMonthlyIncome,
-		TotalMonthlyExpense: extraction.TotalMonthlyExpense,
-		FITargetAmount:      extraction.FITargetAmount,
-		LifeConstraints:     extraction.LifeConstraints,
+		UserID:                      uid,
+		Version:                     newVersion,
+		Status:                      "active",
+		DateOfBirth:                 dob,
+		MaritalStatus:               extraction.MaritalStatus,
+		RiskTolerance:               extraction.RiskTolerance,
+		RiskScore:                   extraction.RiskScore,
+		EssentialMonthlyExpense:     extraction.EssentialMonthlyExpense,
+		DiscretionaryMonthlyExpense: extraction.DiscretionaryMonthlyExpense,
+		FITargetAmount:              extraction.FITargetAmount,
 	}
 
 	if err := s.repo.CreateProfile(ctx, profile); err != nil {
 		return nil, fmt.Errorf("failed to save profile: %w", err)
+	}
+
+	// 5. If AI extracted an income, create an initial Income Stream
+	if extraction.TotalMonthlyIncome > 0 {
+		income := &model.IncomeStream{
+			UserID:    uid,
+			Name:      "Thu nhập chính (AI ước tính)",
+			Type:      "salary",
+			IsPassive: false,
+			Amount:    extraction.TotalMonthlyIncome,
+			Frequency: "monthly",
+			IsActive:  true,
+		}
+		if err := s.incomeRepo.CreateIncomeStream(ctx, income); err != nil {
+			// Just log the error, don't fail the onboarding
+			fmt.Printf("Warning: failed to create initial income stream: %v\n", err)
+		}
 	}
 
 	return profile, nil
@@ -89,4 +107,42 @@ func (s *InvestorProfileService) ProcessOnboarding(ctx context.Context, userID s
 
 func (s *InvestorProfileService) GetActiveProfile(ctx context.Context, userID string) (*model.InvestorProfile, error) {
 	return s.repo.GetActiveProfileByUserID(ctx, userID)
+}
+
+func (s *InvestorProfileService) UpdateProfile(ctx context.Context, userID string, req *model.UpdateProfileRequest) (*model.InvestorProfile, error) {
+	currentProfile, err := s.repo.GetActiveProfileByUserID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if currentProfile == nil {
+		return nil, fmt.Errorf("profile not found")
+	}
+
+	if req.DateOfBirth != nil {
+		currentProfile.DateOfBirth = req.DateOfBirth
+	}
+	if req.MaritalStatus != "" {
+		currentProfile.MaritalStatus = req.MaritalStatus
+	}
+	if req.RiskTolerance != "" {
+		currentProfile.RiskTolerance = req.RiskTolerance
+	}
+	if req.RiskScore > 0 {
+		currentProfile.RiskScore = req.RiskScore
+	}
+	if req.EssentialMonthlyExpense >= 0 {
+		currentProfile.EssentialMonthlyExpense = req.EssentialMonthlyExpense
+	}
+	if req.DiscretionaryMonthlyExpense >= 0 {
+		currentProfile.DiscretionaryMonthlyExpense = req.DiscretionaryMonthlyExpense
+	}
+	if req.FITargetAmount >= 0 {
+		currentProfile.FITargetAmount = req.FITargetAmount
+	}
+
+	if err := s.repo.UpdateProfile(ctx, currentProfile); err != nil {
+		return nil, err
+	}
+
+	return currentProfile, nil
 }

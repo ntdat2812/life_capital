@@ -1,9 +1,9 @@
 Analyze the following chat history and extract the user's financial profile into a JSON format.
 
 CRITICAL INSTRUCTIONS:
-1. All string values (like marital_status, risk_tolerance, and keys/values inside life_constraints) MUST be translated to Vietnamese.
+1. All string values (like marital_status, risk_tolerance) MUST be translated to Vietnamese.
 2. The current year is %d. If the user provides their age instead of birth year, calculate their birth year (Current Year - Age) and return it in "YYYY-01-01" format.
-3. For FI Target Amount: If the user provides a desired monthly retirement spending, calculate FI = Desired Monthly Spending * 12 * 25. If they don't specify or just say "bình thường", calculate it using their current total_monthly_expense: FI = total_monthly_expense * 12 * 25. If they give an exact total amount, use it.
+3. For FI Target Amount: If the user provides a desired monthly retirement spending, calculate FI = Desired Monthly Spending * 12 * 25. If they don't specify or just say "bình thường", calculate it using their essential_monthly_expense: FI = essential_monthly_expense * 12 * 25. If they give an exact total amount, use it.
 4. If a value is completely missing and cannot be calculated, use 0 for numbers or null for strings.
 5. For risk_score: Calculate a score from 1-100 based on risk_tolerance (Thấp = 15-30, Trung bình = 40-60, Cao = 75-95). Adjust the exact number within the range based on age/dependents (e.g. younger/no dependents = higher score).
 
@@ -13,10 +13,10 @@ Ensure the output is ONLY valid JSON matching this schema exactly, do not includ
   "risk_score": integer (1-100),
   "risk_tolerance": string (Thấp, Trung bình, Cao),
   "marital_status": string (Độc thân, Đã kết hôn, Ly hôn...),
-  "total_monthly_income": number,
-  "total_monthly_expense": number,
-  "fi_target_amount": number,
-  "life_constraints": object (key-value pairs of ANY relevant constraints. YOU MUST INVENT appropriate UPPERCASE VIETNAMESE keys based on the user's unique context. Values should start with a concise summary, followed by detailed context in parentheses. E.g. "CHU CẤP BỐ MẸ": "Mức cao (Gửi 10tr/tháng cho bố mẹ ở quê)")
+  "total_monthly_income": number (If user mentions their income, extract it here),
+  "essential_monthly_expense": number (Estimate their basic living cost, rent, food if they mention a total expense, put it here unless specified otherwise),
+  "discretionary_monthly_expense": number (Estimate their non-essential cost: travel, coffee, etc. Default 0 if unknown),
+  "fi_target_amount": number
 }
 
 Chat History:

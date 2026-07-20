@@ -16,12 +16,30 @@ export const useWealthStore = defineStore('wealth', {
     liabilityPage: 1,
     liabilityTotalPages: 1,
     loading: false,
-    error: null,
     assetCategoryFilter: '',
     liabilityCategoryFilter: '',
     assetSort: 'value_desc',
-    liabilitySort: 'value_desc'
+    liabilitySort: 'value_desc',
+    
+    // For Dashboard Charts
+    allAssets: [],
+    allLiabilities: []
   }),
+
+  getters: {
+    assetAllocation() {
+      const groups = {}
+      this.allAssets.forEach(a => {
+        if (!groups[a.category]) groups[a.category] = 0
+        groups[a.category] += a.current_value
+      })
+      return groups
+    },
+    totalFIProgress() {
+      // Return percentage based on a target if we had it. We'll implement this logic in Dashboard component instead.
+      return 0
+    }
+  },
 
   actions: {
     async fetchNetWorthSummary() {
@@ -153,6 +171,25 @@ export const useWealthStore = defineStore('wealth', {
         await this.fetchNetWorthSummary()
       } catch (err) {
         throw err.response?.data?.message || 'Failed to delete liability'
+      }
+    },
+
+    async fetchAllForDashboard() {
+      this.loading = true
+      try {
+        const [netWorthRes, assetsRes, liabRes] = await Promise.all([
+          api.get('/wealth/net-worth'),
+          api.get('/wealth/assets?limit=0'), // Fetch all for accurate pie charts
+          api.get('/wealth/liabilities?limit=0')
+        ])
+        
+        this.netWorthSummary = netWorthRes.data
+        this.allAssets = assetsRes.data.data || []
+        this.allLiabilities = liabRes.data.data || []
+      } catch (err) {
+        console.error('Failed to load dashboard data', err)
+      } finally {
+        this.loading = false
       }
     },
 

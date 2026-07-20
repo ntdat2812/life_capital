@@ -25,7 +25,7 @@ Life Capital là **hệ điều hành quản lý tài sản cá nhân** (Persona
 ### 1.3 Design Philosophy
 
 1. **Life-Context First > Portfolio-Only Thinking**: Các thay đổi trong đời sống thực tế (lập gia đình, tăng lương, sinh con) quyết định mức độ chấp nhận rủi ro và cách phân bổ tài sản, chứ không chỉ dựa vào biến động của thị trường.
-2. **Minimum Input, Maximum Insight**: Hạn chế tối đa thao tác nhập tay. Người dùng chỉ cung cấp dữ liệu cơ bản, AI chịu trách nhiệm tổng hợp phân tích sâu.
+2. **Minimum Input, Maximum Insight**: Hạn chế tối đa thao tác nhập tay. Áp dụng phương pháp "Khoán Chi Phí" (Lump Sum Budgeting) chia làm Chi phí Thiết yếu và Chi phí Hưởng thụ thay vì ghi chép lắt nhắt (Micro-budgeting). AI chịu trách nhiệm tổng hợp phân tích sâu.
 3. **Monthly Rhythm > Daily Noise**: Ứng dụng khuyên khích tư duy đầu tư dài hạn. Không có cập nhật giá từng giây, chỉ có cập nhật sức khỏe định kỳ mỗi tháng.
 4. **Thesis-Driven > Price-Driven**: Đầu tư dựa vào lý do mua/bán (thesis) và kết quả kinh doanh doanh nghiệp thay vì bảng điện tử.
 5. **Decision Quality > Trading Frequency**: Chú trọng chất lượng quyết định đầu tư thông qua Nhật ký quyết định (Decision Journal) để kiểm soát tâm lý và sai lầm.

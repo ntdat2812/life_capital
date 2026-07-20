@@ -90,6 +90,43 @@ definitions:
     - current_value
     - name
     type: object
+  model.CreateDependentRequest:
+    properties:
+      date_of_birth:
+        type: string
+      monthly_cost:
+        minimum: 0
+        type: number
+      name:
+        type: string
+      notes:
+        type: string
+      relationship:
+        type: string
+    required:
+    - name
+    - relationship
+    type: object
+  model.CreateIncomeStreamRequest:
+    properties:
+      amount:
+        type: number
+      frequency:
+        description: e.g., "monthly", "yearly"
+        type: string
+      is_passive:
+        type: boolean
+      name:
+        type: string
+      notes:
+        type: string
+      type:
+        type: string
+    required:
+    - amount
+    - name
+    - type
+    type: object
   model.CreateLiabilityRequest:
     properties:
       category:
@@ -111,6 +148,31 @@ definitions:
     - name
     - remaining_balance
     type: object
+  model.Dependent:
+    properties:
+      added_date:
+        type: string
+      created_at:
+        type: string
+      date_of_birth:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      monthly_cost:
+        type: number
+      name:
+        type: string
+      notes:
+        type: string
+      relationship:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
   model.GoogleLoginRequest:
     properties:
       id_token:
@@ -118,12 +180,45 @@ definitions:
     required:
     - id_token
     type: object
+  model.IncomeStream:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      end_date:
+        type: string
+      frequency:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      is_passive:
+        type: boolean
+      name:
+        type: string
+      notes:
+        type: string
+      start_date:
+        type: string
+      type:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
   model.InvestorProfile:
     properties:
       created_at:
         type: string
       date_of_birth:
         type: string
+      discretionary_monthly_expense:
+        type: number
+      essential_monthly_expense:
+        type: number
       fi_target_amount:
         type: number
       id:
@@ -140,10 +235,6 @@ definitions:
       status:
         description: active, superseded
         type: string
-      total_monthly_expense:
-        type: number
-      total_monthly_income:
-        type: number
       updated_at:
         type: string
       user_id:
@@ -291,6 +382,46 @@ definitions:
     - current_value
     - name
     type: object
+  model.UpdateDependentRequest:
+    properties:
+      date_of_birth:
+        type: string
+      is_active:
+        type: boolean
+      monthly_cost:
+        minimum: 0
+        type: number
+      name:
+        type: string
+      notes:
+        type: string
+      relationship:
+        type: string
+    required:
+    - name
+    - relationship
+    type: object
+  model.UpdateIncomeStreamRequest:
+    properties:
+      amount:
+        type: number
+      frequency:
+        type: string
+      is_active:
+        type: boolean
+      is_passive:
+        type: boolean
+      name:
+        type: string
+      notes:
+        type: string
+      type:
+        type: string
+    required:
+    - amount
+    - name
+    - type
+    type: object
   model.UpdateLiabilityRequest:
     properties:
       category:
@@ -311,6 +442,23 @@ definitions:
     - category
     - name
     - remaining_balance
+    type: object
+  model.UpdateProfileRequest:
+    properties:
+      date_of_birth:
+        type: string
+      discretionary_monthly_expense:
+        type: number
+      essential_monthly_expense:
+        type: number
+      fi_target_amount:
+        type: number
+      marital_status:
+        type: string
+      risk_score:
+        type: integer
+      risk_tolerance:
+        type: string
     type: object
   model.User:
     properties:
@@ -461,6 +609,168 @@ paths:
       summary: Local Account Signup
       tags:
       - auth
+  /api/v1/cashflow/dependents:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Dependent'
+            type: array
+      security:
+      - Bearer: []
+      summary: Get all dependents
+      tags:
+      - Cashflow
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Dependent info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateDependentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Dependent'
+      security:
+      - Bearer: []
+      summary: Create a dependent
+      tags:
+      - Cashflow
+  /api/v1/cashflow/dependents/{id}:
+    delete:
+      parameters:
+      - description: Dependent ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - Bearer: []
+      summary: Delete a dependent
+      tags:
+      - Cashflow
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Dependent ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dependent info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateDependentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Dependent'
+      security:
+      - Bearer: []
+      summary: Update a dependent
+      tags:
+      - Cashflow
+  /api/v1/cashflow/income:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.IncomeStream'
+            type: array
+      security:
+      - Bearer: []
+      summary: Get all income streams
+      tags:
+      - Cashflow
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Income Stream info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateIncomeStreamRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.IncomeStream'
+      security:
+      - Bearer: []
+      summary: Create an income stream
+      tags:
+      - Cashflow
+  /api/v1/cashflow/income/{id}:
+    delete:
+      parameters:
+      - description: Income ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - Bearer: []
+      summary: Delete an income stream
+      tags:
+      - Cashflow
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Income ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Income Stream info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateIncomeStreamRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.IncomeStream'
+      security:
+      - Bearer: []
+      summary: Update an income stream
+      tags:
+      - Cashflow
   /api/v1/health:
     get:
       description: Check backend health status
@@ -503,6 +813,47 @@ paths:
       security:
       - BearerAuth: []
       summary: Get Active Profile
+      tags:
+      - profile
+    put:
+      consumes:
+      - application/json
+      description: Update the current active investor profile for the logged in user.
+      parameters:
+      - description: Profile Update Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.InvestorProfile'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update Active Profile
       tags:
       - profile
   /api/v1/profile/onboarding:

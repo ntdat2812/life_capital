@@ -208,6 +208,272 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/cashflow/dependents": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cashflow"
+                ],
+                "summary": "Get all dependents",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Dependent"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cashflow"
+                ],
+                "summary": "Create a dependent",
+                "parameters": [
+                    {
+                        "description": "Dependent info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.CreateDependentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.Dependent"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/cashflow/dependents/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cashflow"
+                ],
+                "summary": "Update a dependent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Dependent ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dependent info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.UpdateDependentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Dependent"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "Cashflow"
+                ],
+                "summary": "Delete a dependent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Dependent ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/v1/cashflow/income": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cashflow"
+                ],
+                "summary": "Get all income streams",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.IncomeStream"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cashflow"
+                ],
+                "summary": "Create an income stream",
+                "parameters": [
+                    {
+                        "description": "Income Stream info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.CreateIncomeStreamRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.IncomeStream"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/cashflow/income/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cashflow"
+                ],
+                "summary": "Update an income stream",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Income ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Income Stream info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.UpdateIncomeStreamRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.IncomeStream"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "Cashflow"
+                ],
+                "summary": "Delete an income stream",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Income ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/api/v1/health": {
             "get": {
                 "description": "Check backend health status",
@@ -267,6 +533,70 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update the current active investor profile for the logged in user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "summary": "Update Active Profile",
+                "parameters": [
+                    {
+                        "description": "Profile Update Data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.UpdateProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.InvestorProfile"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -802,6 +1132,60 @@ const docTemplate = `{
                 }
             }
         },
+        "model.CreateDependentRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "relationship"
+            ],
+            "properties": {
+                "date_of_birth": {
+                    "type": "string"
+                },
+                "monthly_cost": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "relationship": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.CreateIncomeStreamRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "name",
+                "type"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "frequency": {
+                    "description": "e.g., \"monthly\", \"yearly\"",
+                    "type": "string"
+                },
+                "is_passive": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "model.CreateLiabilityRequest": {
             "type": "object",
             "required": [
@@ -833,6 +1217,44 @@ const docTemplate = `{
                 }
             }
         },
+        "model.Dependent": {
+            "type": "object",
+            "properties": {
+                "added_date": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "date_of_birth": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "monthly_cost": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "relationship": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "model.GoogleLoginRequest": {
             "type": "object",
             "required": [
@@ -840,6 +1262,50 @@ const docTemplate = `{
             ],
             "properties": {
                 "id_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.IncomeStream": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "frequency": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "is_passive": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
@@ -852,6 +1318,12 @@ const docTemplate = `{
                 },
                 "date_of_birth": {
                     "type": "string"
+                },
+                "discretionary_monthly_expense": {
+                    "type": "number"
+                },
+                "essential_monthly_expense": {
+                    "type": "number"
                 },
                 "fi_target_amount": {
                     "type": "number"
@@ -875,12 +1347,6 @@ const docTemplate = `{
                 "status": {
                     "description": "active, superseded",
                     "type": "string"
-                },
-                "total_monthly_expense": {
-                    "type": "number"
-                },
-                "total_monthly_income": {
-                    "type": "number"
                 },
                 "updated_at": {
                     "type": "string"
@@ -1099,6 +1565,65 @@ const docTemplate = `{
                 }
             }
         },
+        "model.UpdateDependentRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "relationship"
+            ],
+            "properties": {
+                "date_of_birth": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "monthly_cost": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "relationship": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.UpdateIncomeStreamRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "name",
+                "type"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "frequency": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "is_passive": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "model.UpdateLiabilityRequest": {
             "type": "object",
             "required": [
@@ -1127,6 +1652,32 @@ const docTemplate = `{
                 },
                 "remaining_balance": {
                     "type": "number"
+                }
+            }
+        },
+        "model.UpdateProfileRequest": {
+            "type": "object",
+            "properties": {
+                "date_of_birth": {
+                    "type": "string"
+                },
+                "discretionary_monthly_expense": {
+                    "type": "number"
+                },
+                "essential_monthly_expense": {
+                    "type": "number"
+                },
+                "fi_target_amount": {
+                    "type": "number"
+                },
+                "marital_status": {
+                    "type": "string"
+                },
+                "risk_score": {
+                    "type": "integer"
+                },
+                "risk_tolerance": {
+                    "type": "string"
                 }
             }
         },
