@@ -13,16 +13,16 @@ import (
 )
 
 type InvestorProfileService struct {
-	repo       *repository.InvestorProfileRepository
-	incomeRepo *repository.IncomeRepository
-	aiProvider ai.AIProvider
+	repo        *repository.InvestorProfileRepository
+	incomeRepo  *repository.IncomeRepository
+	aiProviders []ai.AIProvider
 }
 
-func NewInvestorProfileService(repo *repository.InvestorProfileRepository, incomeRepo *repository.IncomeRepository, aiProvider ai.AIProvider) *InvestorProfileService {
+func NewInvestorProfileService(repo *repository.InvestorProfileRepository, incomeRepo *repository.IncomeRepository, aiProviders ...ai.AIProvider) *InvestorProfileService {
 	return &InvestorProfileService{
-		repo:       repo,
-		incomeRepo: incomeRepo,
-		aiProvider: aiProvider,
+		repo:        repo,
+		incomeRepo:  incomeRepo,
+		aiProviders: aiProviders,
 	}
 }
 
@@ -33,8 +33,10 @@ func (s *InvestorProfileService) ProcessOnboarding(ctx context.Context, userID s
 		chatText += fmt.Sprintf("%s: %s\n", msg.Role, msg.Content)
 	}
 
-	// 2. Extract profile using AI
-	extraction, err := s.aiProvider.ExtractProfile(ctx, chatText)
+	// 2. Extract profile using AI with fallback mechanism
+	extraction, err := ai.ExecuteWithFallback(s.aiProviders, func(p ai.AIProvider) (*ai.ExtractionResult, error) {
+		return p.ExtractProfile(ctx, chatText)
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to extract profile via AI: %w", err)
 	}

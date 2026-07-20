@@ -11,8 +11,8 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 
-	"github.com/joho/godotenv"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
 
 	_ "github.com/datnguyen/life_capital/backend/docs"
 	"github.com/datnguyen/life_capital/backend/internal/ai"
@@ -77,11 +77,20 @@ func main() {
 		log.Fatalf("Failed to initialize Gemini provider: %v", err)
 	}
 
+	aiProviders := []ai.AIProvider{geminiProvider}
+	
+	if groqProvider, err := ai.NewGroqProvider(); err == nil {
+		aiProviders = append(aiProviders, groqProvider)
+		log.Println("Groq provider initialized and added as fallback")
+	} else {
+		log.Println("Groq provider not configured (GROQ_API_KEY missing), using Gemini only")
+	}
+
 	// Initialize services
 	jwtSecret := os.Getenv("JWT_SECRET")
 	googleClientID := os.Getenv("GOOGLE_CLIENT_ID")
 	authService := service.NewAuthService(userRepo, jwtSecret, googleClientID)
-	profileService := service.NewInvestorProfileService(investorProfileRepo, incomeRepo, geminiProvider)
+	profileService := service.NewInvestorProfileService(investorProfileRepo, incomeRepo, aiProviders...)
 	wealthService := service.NewWealthService(assetRepo, liabilityRepo, userRepo)
 	cashflowService := service.NewCashflowService(incomeRepo, dependentRepo)
 
@@ -115,7 +124,7 @@ func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHand
 
 	// Public routes
 	api.GET("/health", healthHandler.HealthCheck)
-	
+
 	auth := api.Group("/auth")
 	auth.POST("/signup", authHandler.Signup)
 	auth.POST("/login", authHandler.Login)

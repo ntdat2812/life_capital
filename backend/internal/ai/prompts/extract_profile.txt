@@ -7,7 +7,7 @@ CRITICAL INSTRUCTIONS:
 4. If a value is completely missing and cannot be calculated, use 0 for numbers or null for strings.
 5. For risk_score: Calculate a score from 1-100 based on risk_tolerance (Thấp = 15-30, Trung bình = 40-60, Cao = 75-95). Adjust the exact number within the range based on age/dependents (e.g. younger/no dependents = higher score).
 
-Ensure the output is ONLY valid JSON matching this schema exactly, do not include markdown blocks like %s:
+Ensure the output matches this schema exactly:
 {
   "date_of_birth": string (Format YYYY-MM-DD. If user provides exact date, use it. If they only provide age/year, calculate and use YYYY-01-01. Or null if unknown),
   "risk_score": integer (1-100),

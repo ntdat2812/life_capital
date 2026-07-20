@@ -30,7 +30,8 @@ func NewGeminiProvider() (*GeminiProvider, error) {
 
 func (p *GeminiProvider) ExtractProfile(ctx context.Context, chatHistory string) (*ExtractionResult, error) {
 	currentYear := time.Now().Year()
-	prompt := fmt.Sprintf(extractProfilePrompt, currentYear, "```json", chatHistory)
+	cleanTemplate := strings.TrimSpace(extractProfilePrompt)
+	prompt := fmt.Sprintf(cleanTemplate, currentYear, chatHistory)
 
 	jsonText, err := p.generateContent(ctx, prompt)
 	if err != nil {
@@ -51,8 +52,7 @@ func (p *GeminiProvider) ExtractProfile(ctx context.Context, chatHistory string)
 }
 
 func (p *GeminiProvider) generateContent(ctx context.Context, prompt string) (string, error) {
-	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=%s", p.apiKey)
-
+	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=%s", p.apiKey)
 	reqBody := map[string]interface{}{
 		"contents": []interface{}{
 			map[string]interface{}{

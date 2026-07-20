@@ -6,10 +6,10 @@ db-up:
 
 # Run database migrations
 migrate-up:
-	cd backend && ~/go/bin/migrate -path migrations -database "postgres://lifecap:lifecap_secret@localhost:5433/life_capital?sslmode=disable" -verbose up
+	cd backend && migrate -path migrations -database "postgres://lifecap:lifecap_secret@localhost:5433/life_capital?sslmode=disable" -verbose up
 
 migrate-down:
-	cd backend && ~/go/bin/migrate -path migrations -database "postgres://lifecap:lifecap_secret@localhost:5433/life_capital?sslmode=disable" -verbose down
+	cd backend && migrate -path migrations -database "postgres://lifecap:lifecap_secret@localhost:5433/life_capital?sslmode=disable" -verbose down
 
 # Run backend server
 run-back:
