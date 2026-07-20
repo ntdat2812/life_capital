@@ -1,0 +1,20 @@
+.PHONY: db-up migrate-up migrate-down run-back run-front
+
+# Run PostgreSQL via Docker Compose
+db-up:
+	docker compose up -d
+
+# Run database migrations
+migrate-up:
+	cd backend && ~/go/bin/migrate -path migrations -database "postgres://lifecap:lifecap_secret@localhost:5433/life_capital?sslmode=disable" -verbose up
+
+migrate-down:
+	cd backend && ~/go/bin/migrate -path migrations -database "postgres://lifecap:lifecap_secret@localhost:5433/life_capital?sslmode=disable" -verbose down
+
+# Run backend server
+run-back:
+	cd backend && go run cmd/server/main.go
+
+# Run frontend dev server
+run-front:
+	cd frontend && npm run dev

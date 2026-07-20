@@ -8,6 +8,7 @@ description: Vue 3 Composition API, Pinia state stores, glassmorphism, transitio
 ## 1. Vue 3 Composition API & `<script setup>`
 
 - Always write stores and components using the Vue 3 Composition API.
+- **Language**: All user-facing text in the UI must be in Vietnamese. You can use English for internal code logic, variables, and components.
 - Use explicit TypeScript annotations or reactive objects:
   ```html
   <script setup>

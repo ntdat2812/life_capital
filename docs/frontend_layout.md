@@ -75,3 +75,9 @@ Tất cả các thẻ hiển thị (cards), sidebar và modal đều kế thừa
 - **Cột Trái**: Bảng cân đối Net Worth rút gọn (Assets | Liabilities | Net Worth) và danh sách thẻ tiến trình các mục tiêu tài chính (Emergency Fund, VinFast Auto, Retire Early...) được rót vốn tự động theo cơ chế Waterfall.
 - **Cột Phải**: Biểu đồ phân bổ tỷ trọng tài sản thực tế (Allocation Bar) và danh sách cảnh báo lệch mục tiêu IPS hoặc cảnh báo đòn bẩy nợ cao.
 - **Dưới**: Nút hành động nổi bật "Start Monthly Review" màu Violet.
+
+### 4.3 Giao diện Auth (Đăng nhập / Đăng ký)
+- Sử dụng cấu trúc Card đặt ở giữa màn hình (centered layout).
+- Form bao gồm các trường thông tin tiêu chuẩn (Email, Mật khẩu, Tên).
+- Cung cấp tính năng "Đăng nhập bằng Google" nổi bật (Sử dụng `vue3-google-login`).
+- Hiển thị cảnh báo lỗi bằng chữ đỏ nhạt viền đỏ khi nhập sai hoặc trùng lặp tài khoản.

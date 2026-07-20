@@ -40,7 +40,9 @@ erDiagram
         uuid id PK
         string email
         string name
-        string password_hash
+        string password_hash "Nullable for Google Auth"
+        string auth_provider "local or google"
+        string google_id "Nullable, Unique"
     }
 
     investor_profiles {

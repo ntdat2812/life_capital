@@ -89,6 +89,7 @@ life_capital/
 5. **No fully qualified imports in Go**: Always use standard imports.
 6. **Robust Error Handling**: Go returns clean, typed domain errors mapped to HTTP status codes inside middleware handlers.
 7. **Swagger API Documentation**: Every API endpoint MUST have Swagger annotations (`@Summary`, `@Description`, `@Tags`, `@Router`, etc.). Run `swag init -g cmd/server/main.go` in `backend/` after any API changes. Swagger UI is served at `/swagger/*`.
+8. **Language Guidelines**: Use Vietnamese primarily for all frontend UI text and content displayed to the user. English is acceptable and preferred for internal code (variables, functions, API responses, etc.).
 
 ---
 
@@ -101,6 +102,6 @@ life_capital/
   - **QA Tester**: Read [docs/features.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/features.md) & [docs/lld.md](file:///Users/datnguyen/Dev/Projects/Go/life_capital/docs/lld.md).
 - Refer to `.agents/rules/standards.md` before making any coding modifications. However, **do not let the documents strictly bind your thinking**; you are encouraged to be creative and propose innovative solutions that align with the product's vision.
 - Consult the specific roles under `.agents/skills/` depending on the current task (e.g. database change -> Solution Architect; Go code change -> Backend Developer).
-- **Project Documentation Updates**: Every design or database changes must be reflected in the relevant files inside the `docs/` directory. Solution Architect updates architecture/DB schemas, QA updates tests, etc.
+- **Project Documentation Updates (Crucial)**: Every change related to database structure (ERD), UI layout, or business logic MUST be synchronously updated in the corresponding `docs/` files (`erd.md`, `frontend_layout.md`, `business.md`, `lld.md`). Maintaining documentation in sync with the codebase is a strict requirement for all agents.
 - **Swagger Sync**: After adding or modifying any backend API endpoint, regenerate Swagger docs by running `swag init -g cmd/server/main.go` inside `backend/` and commit the updated `backend/docs/` folder.
 - Always verify changes with unit tests and document updates in the `/walkthrough.md` file.

@@ -19,7 +19,7 @@
         </div>
 
         <!-- Sidebar Navigation -->
-        <nav class="space-y-1">
+        <nav v-if="authStore.isAuthenticated" class="space-y-1">
           <router-link 
             to="/" 
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition duration-150"
@@ -80,12 +80,27 @@
 
       <!-- Footer / Auth trigger mock -->
       <div class="mt-8 border-t border-slate-800/60 pt-4">
-        <router-link 
-          to="/login"
-          class="flex items-center gap-3 px-4 py-2 text-xs font-medium text-slate-400 hover:text-slate-200 transition"
-        >
-          🔐 Đăng nhập hệ thống
-        </router-link>
+        <template v-if="authStore.isAuthenticated">
+          <div class="flex flex-col gap-2">
+            <div class="px-4 py-2 text-xs text-slate-400 font-semibold truncate">
+              👤 {{ authStore.user?.name }}
+            </div>
+            <button 
+              @click="handleLogout"
+              class="flex w-full items-center gap-3 px-4 py-2 text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-xl transition text-left"
+            >
+              🚪 Đăng xuất
+            </button>
+          </div>
+        </template>
+        <template v-else>
+          <router-link 
+            to="/login"
+            class="flex items-center gap-3 px-4 py-2 text-xs font-medium text-slate-400 hover:text-slate-200 transition"
+          >
+            🔐 Đăng nhập hệ thống
+          </router-link>
+        </template>
       </div>
     </aside>
 
@@ -101,7 +116,16 @@
 </template>
 
 <script setup>
-// Layout wrapper
+import { useAuthStore } from './stores/authStore'
+import { useRouter } from 'vue-router'
+
+const authStore = useAuthStore()
+const router = useRouter()
+
+const handleLogout = () => {
+  authStore.logout()
+  router.push('/login')
+}
 </script>
 
 <style>
