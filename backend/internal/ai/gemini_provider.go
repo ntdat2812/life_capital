@@ -3,7 +3,6 @@ package ai
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -44,10 +43,6 @@ func (p *GeminiProvider) ExtractProfile(ctx context.Context, chatHistory string)
 }
 
 func (p *GeminiProvider) generateContent(ctx context.Context, prompt string) (string, error) {
-
-	if true {
-		return "", errors.New("Gemini provider is currently not supported")
-	}
 	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", p.model, p.apiKey)
 	reqBody := map[string]interface{}{
 		"contents": []interface{}{
