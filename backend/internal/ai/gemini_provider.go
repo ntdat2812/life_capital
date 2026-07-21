@@ -1,20 +1,13 @@
 package ai
 
 import (
-	"bytes"
 	"context"
-	_ "embed"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
-	"strings"
-	"time"
 )
-
-//go:embed prompts/extract_profile.txt
-var extractProfilePrompt string
 
 type GeminiProvider struct {
 	apiKey string
@@ -26,42 +19,35 @@ func NewGeminiProvider() (*GeminiProvider, error) {
 	if apiKey == "" {
 		return nil, fmt.Errorf("GEMINI_API_KEY is required")
 	}
-	
+
 	model := os.Getenv("GEMINI_MODEL")
 	if model == "" {
 		model = "gemini-3.5-flash"
 	}
-	
+
 	return &GeminiProvider{
 		apiKey: apiKey,
 		model:  model,
 	}, nil
 }
 
+func (p *GeminiProvider) Name() string {
+	return "Gemini"
+}
+
+func (p *GeminiProvider) Model() string {
+	return p.model
+}
+
 func (p *GeminiProvider) ExtractProfile(ctx context.Context, chatHistory string) (*ExtractionResult, error) {
-	currentYear := time.Now().Year()
-	cleanTemplate := strings.TrimSpace(extractProfilePrompt)
-	prompt := fmt.Sprintf(cleanTemplate, currentYear, chatHistory)
-
-	jsonText, err := p.generateContent(ctx, prompt)
-	if err != nil {
-		return nil, err
-	}
-
-	jsonText = strings.TrimSpace(jsonText)
-	jsonText = strings.TrimPrefix(jsonText, "```json")
-	jsonText = strings.TrimSuffix(jsonText, "```")
-	jsonText = strings.TrimSpace(jsonText)
-
-	var result ExtractionResult
-	if err := json.Unmarshal([]byte(jsonText), &result); err != nil {
-		return nil, fmt.Errorf("failed to parse AI JSON: %v, raw text: %s", err, jsonText)
-	}
-
-	return &result, nil
+	return extractProfileHelper(ctx, chatHistory, p.generateContent)
 }
 
 func (p *GeminiProvider) generateContent(ctx context.Context, prompt string) (string, error) {
+
+	if true {
+		return "", errors.New("Gemini provider is currently not supported")
+	}
 	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", p.model, p.apiKey)
 	reqBody := map[string]interface{}{
 		"contents": []interface{}{
@@ -79,22 +65,14 @@ func (p *GeminiProvider) generateContent(ctx context.Context, prompt string) (st
 	}
 
 	bodyBytes, _ := json.Marshal(reqBody)
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(bodyBytes))
+
+	statusCode, respBody, err := doHTTPRequest(ctx, "POST", url, nil, bodyBytes)
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		respBody, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("gemini API error: status %d, body: %s", resp.StatusCode, string(respBody))
+	if statusCode != http.StatusOK {
+		return "", fmt.Errorf("gemini API error: status %d, body: %s", statusCode, string(respBody))
 	}
 
 	var geminiResp struct {
@@ -107,7 +85,7 @@ func (p *GeminiProvider) generateContent(ctx context.Context, prompt string) (st
 		} `json:"candidates"`
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(&geminiResp); err != nil {
+	if err := json.Unmarshal(respBody, &geminiResp); err != nil {
 		return "", err
 	}
 

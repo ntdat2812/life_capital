@@ -1,15 +1,11 @@
 package ai
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
-	"strings"
-	"time"
 )
 
 type GroqProvider struct {
@@ -22,39 +18,28 @@ func NewGroqProvider() (*GroqProvider, error) {
 	if apiKey == "" {
 		return nil, fmt.Errorf("GROQ_API_KEY is required")
 	}
-	
+
 	model := os.Getenv("GROQ_MODEL")
 	if model == "" {
 		model = "llama-3.3-70b-versatile"
 	}
-	
+
 	return &GroqProvider{
 		apiKey: apiKey,
 		model:  model,
 	}, nil
 }
 
+func (p *GroqProvider) Name() string {
+	return "Groq"
+}
+
+func (p *GroqProvider) Model() string {
+	return p.model
+}
+
 func (p *GroqProvider) ExtractProfile(ctx context.Context, chatHistory string) (*ExtractionResult, error) {
-	currentYear := time.Now().Year()
-	cleanTemplate := strings.TrimSpace(extractProfilePrompt)
-	prompt := fmt.Sprintf(cleanTemplate, currentYear, chatHistory)
-
-	jsonText, err := p.generateContent(ctx, prompt)
-	if err != nil {
-		return nil, err
-	}
-
-	jsonText = strings.TrimSpace(jsonText)
-	jsonText = strings.TrimPrefix(jsonText, "```json")
-	jsonText = strings.TrimSuffix(jsonText, "```")
-	jsonText = strings.TrimSpace(jsonText)
-
-	var result ExtractionResult
-	if err := json.Unmarshal([]byte(jsonText), &result); err != nil {
-		return nil, fmt.Errorf("failed to parse AI JSON (Groq): %v, raw text: %s", err, jsonText)
-	}
-
-	return &result, nil
+	return extractProfileHelper(ctx, chatHistory, p.generateContent)
 }
 
 func (p *GroqProvider) generateContent(ctx context.Context, prompt string) (string, error) {
@@ -73,57 +58,34 @@ func (p *GroqProvider) generateContent(ctx context.Context, prompt string) (stri
 	}
 
 	bodyBytes, _ := json.Marshal(reqBody)
-	
-	client := &http.Client{Timeout: 30 * time.Second}
-	var lastErr error
-
-	for attempt := 1; attempt <= 3; attempt++ {
-		req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(bodyBytes))
-		if err != nil {
-			return "", err
-		}
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Bearer "+p.apiKey)
-
-		resp, err := client.Do(req)
-		if err != nil {
-			lastErr = err
-			time.Sleep(time.Duration(attempt) * time.Second)
-			continue
-		}
-
-		if resp.StatusCode != http.StatusOK {
-			respBody, _ := io.ReadAll(resp.Body)
-			resp.Body.Close()
-			lastErr = fmt.Errorf("groq API error: status %d, body: %s", resp.StatusCode, string(respBody))
-			
-			if resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode >= 500 {
-				time.Sleep(time.Duration(attempt) * 2 * time.Second)
-				continue
-			}
-			return "", lastErr
-		}
-
-		var gptResp struct {
-			Choices []struct {
-				Message struct {
-					Content string `json:"content"`
-				} `json:"message"`
-			} `json:"choices"`
-		}
-
-		if err := json.NewDecoder(resp.Body).Decode(&gptResp); err != nil {
-			resp.Body.Close()
-			return "", err
-		}
-		resp.Body.Close()
-
-		if len(gptResp.Choices) == 0 {
-			return "", fmt.Errorf("groq returned empty response")
-		}
-
-		return gptResp.Choices[0].Message.Content, nil
+	headers := map[string]string{
+		"Authorization": "Bearer " + p.apiKey,
 	}
 
-	return "", fmt.Errorf("groq failed after 3 attempts: %v", lastErr)
+	statusCode, respBody, err := doHTTPRequest(ctx, "POST", url, headers, bodyBytes)
+	if err != nil {
+		return "", err
+	}
+
+	if statusCode != http.StatusOK {
+		return "", fmt.Errorf("groq API error: status %d, body: %s", statusCode, string(respBody))
+	}
+
+	var gptResp struct {
+		Choices []struct {
+			Message struct {
+				Content string `json:"content"`
+			} `json:"message"`
+		} `json:"choices"`
+	}
+
+	if err := json.Unmarshal(respBody, &gptResp); err != nil {
+		return "", err
+	}
+
+	if len(gptResp.Choices) == 0 {
+		return "", fmt.Errorf("groq returned empty response")
+	}
+
+	return gptResp.Choices[0].Message.Content, nil
 }

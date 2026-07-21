@@ -132,7 +132,7 @@ Mỗi tháng một lần, hệ thống thực hiện phân tích tổng thể:
    - Kết quả kinh doanh kỳ mới nhất (Earnings Review).
    - Watchlist (Mức định giá, target price).
 2. **Xây dựng Context**: Kết hợp các JSON thành một payload có cấu trúc.
-3. **Gọi LLM (Gemini 2.5 Flash)**: Yêu cầu đưa ra quyết định giải ngân tối ưu cho `new_investment_amount` dựa trên các quy tắc cứng của IPS và logic mềm của Thesis.
+3. **Gọi LLM (Thông qua AI Provider Pattern hỗ trợ nhiều models khác nhau)**: Yêu cầu đưa ra quyết định giải ngân tối ưu cho `new_investment_amount` dựa trên các quy tắc cứng của IPS và logic mềm của Thesis.
 
 ---
 
@@ -151,7 +151,7 @@ Hệ thống hỗ trợ nhiều người dùng (multi-user) và được bảo m
 Để đảm bảo hiệu năng và tính nhất quán của dữ liệu, quá trình load context và lưu các khuyến nghị của AI được thiết kế theo các pha trạng thái cụ thể:
 
 ### 4.1 Cơ chế Load Context lên AI (Context Aggregation)
-Trước khi gửi Prompt tới LLM (Gemini 2.5 Flash), backend thực hiện gom cụm dữ liệu đồng thời bằng `goroutine` để tối ưu hóa thời gian phản hồi:
+Trước khi gửi Prompt tới LLM (sử dụng AI Provider Pattern hỗ trợ linh hoạt các LLM Models), backend thực hiện gom cụm dữ liệu đồng thời bằng `goroutine` để tối ưu hóa thời gian phản hồi:
 
 ```
                   ┌───> GetActiveProfile() ──────┐
