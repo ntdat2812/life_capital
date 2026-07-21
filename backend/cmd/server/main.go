@@ -99,7 +99,7 @@ func main() {
 	cashflowService := service.NewCashflowService(incomeRepo, dependentRepo)
 	
 	notifService := service.NewNotificationService(notifRepo)
-	ipsService := service.NewIPSService(ipsRepo, investorProfileRepo, assetRepo, notifService, aiProviders)
+	ipsService := service.NewIPSService(ipsRepo, investorProfileRepo, assetRepo, incomeRepo, dependentRepo, notifService, aiProviders)
 	timelineService := service.NewTimelineService(aiProviders, investorProfileRepo, incomeRepo, dependentRepo, lifeEventRepo, txManager, ipsService)
 
 	// Initialize handlers

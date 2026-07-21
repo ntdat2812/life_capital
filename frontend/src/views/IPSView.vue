@@ -17,12 +17,25 @@
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
         </span>
-        Cập Nhật Lại Chiến Lược
+        ✨ Nhờ AI phân bổ lại
       </button>
     </div>
 
     <div v-if="ipsStore.isLoading" class="text-center py-20 text-slate-400">
       Đang tải dữ liệu...
+    </div>
+
+    <!-- Generating State (When generating or regenerating) -->
+    <div v-else-if="ipsStore.isGenerating" class="text-center py-24 bg-slate-900/50 rounded-3xl border border-slate-800 flex flex-col items-center justify-center">
+      <div class="relative w-24 h-24 mb-6">
+        <div class="absolute inset-0 border-4 border-indigo-500/20 rounded-full"></div>
+        <div class="absolute inset-0 border-4 border-indigo-500 rounded-full border-t-transparent animate-spin"></div>
+        <div class="absolute inset-0 flex items-center justify-center text-indigo-400">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+        </div>
+      </div>
+      <h3 class="text-xl font-bold font-outfit text-white mb-2">Đang phân tích dữ liệu...</h3>
+      <p class="text-slate-400 text-sm max-w-sm">AI Wealth Manager đang xây dựng chiến lược cá nhân hóa dựa trên hồ sơ của bạn. Vui lòng đợi trong giây lát.</p>
     </div>
 
     <!-- Empty State -->
@@ -115,6 +128,12 @@
                <h2 class="text-xl font-bold font-outfit text-white">Tư Vấn Chiến Lược Chuyên Sâu</h2>
                <p class="text-sm text-slate-400 mt-1">Goal-Aware Unified Strategy</p>
              </div>
+             <div class="ml-auto">
+               <button @click="openEditStrategyModal" class="px-4 py-2 text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition flex items-center border border-slate-700">
+                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                 Sửa văn bản (Nâng cao)
+               </button>
+             </div>
           </div>
           
           <div class="prose prose-invert prose-slate prose-sm md:prose-base max-w-none markdown-body" v-html="formattedStrategy">
@@ -153,7 +172,7 @@
     </div>
 
     <!-- 2. Danger Confirm Modal -->
-    <div v-if="showConfirmModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div v-if="showConfirmModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" @click="showConfirmModal = false"></div>
       <div class="bg-slate-900 border border-red-900/50 p-8 rounded-3xl shadow-2xl relative z-10 w-full max-w-md animate-fade-in-up">
         <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-6 border border-red-500/20">
@@ -161,24 +180,24 @@
         </div>
         <h3 class="text-xl font-bold text-white mb-2 font-outfit">Bạn có chắc chắn?</h3>
         <p class="text-slate-400 text-sm mb-4 leading-relaxed">
-          IPS là **Chiến lược xuyên suốt dài hạn**. Việc thay đổi toàn bộ kiến trúc chiến lược lúc này sẽ làm sai lệch các cảnh báo và số liệu hiện tại của bạn.
+          IPS là **Chiến lược xuyên suốt dài hạn**. Việc thay đổi này sẽ định hình lại toàn bộ mục tiêu và các quyết định đầu tư của bạn trong tương lai.
         </p>
         <p class="text-slate-400 text-sm mb-6">
-          Vui lòng gõ chữ <strong class="text-red-400">XAC NHAN</strong> để tiếp tục:
+          Vui lòng gõ chữ <strong class="text-red-400">OK</strong> để tiếp tục:
         </p>
         
         <input 
           v-model="confirmText" 
           type="text" 
-          placeholder="XAC NHAN"
+          placeholder="OK"
           class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white mb-8 focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none uppercase font-mono tracking-widest text-center"
         >
 
         <div class="flex justify-end gap-3">
           <button @click="showConfirmModal = false" class="px-5 py-2.5 text-sm font-medium text-slate-300 hover:text-white transition">Giữ nguyên</button>
           <button 
-            @click="proceedToSurvey" 
-            :disabled="confirmText !== 'XAC NHAN'"
+            @click="proceedConfirmAction" 
+            :disabled="confirmText.toUpperCase() !== 'OK'"
             class="px-5 py-2.5 bg-red-600 hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition"
           >
             Tiếp tục sửa đổi
@@ -222,11 +241,43 @@
         <div class="flex justify-end gap-3">
           <button @click="showEditModal = false" class="px-5 py-2.5 text-sm font-medium text-slate-300 hover:text-white transition">Hủy</button>
           <button 
-            @click="saveAllocation" 
+            @click="triggerSaveAllocation" 
             :disabled="totalAllocation !== 100"
             class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl font-medium transition"
           >
             Lưu thay đổi
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Edit Strategy Modal -->
+    <div v-if="showEditStrategyModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" @click="showEditStrategyModal = false"></div>
+      <div class="bg-slate-900 border border-slate-700 p-8 rounded-3xl shadow-2xl relative z-10 w-full max-w-4xl max-h-[90vh] flex flex-col animate-fade-in-up">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-white font-outfit">Sửa Văn Bản Chiến Lược (Markdown)</h3>
+          <button @click="showEditStrategyModal = false" class="text-slate-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+        </div>
+        
+        <div class="p-3 mb-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-sm text-amber-200">
+          <span class="font-bold">Lưu ý:</span> Hỗ trợ định dạng Markdown. Vui lòng giữ nguyên các tiêu đề (##) để đảm bảo cấu trúc bài phân tích.
+        </div>
+        
+        <textarea 
+          v-model="editStrategyText" 
+          class="w-full flex-1 bg-slate-950 border border-slate-700 rounded-xl p-4 text-slate-300 font-mono text-sm leading-relaxed focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none resize-none min-h-[400px] mb-6"
+          placeholder="Viết chiến lược của bạn vào đây..."
+        ></textarea>
+
+        <div class="flex justify-end gap-3 mt-auto">
+          <button @click="showEditStrategyModal = false" class="px-5 py-2.5 text-sm font-medium text-slate-300 hover:text-white transition">Hủy</button>
+          <button 
+            @click="triggerSaveStrategy" 
+            :disabled="!editStrategyText.trim()"
+            class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl font-medium transition flex items-center"
+          >
+            Lưu Chiến Lược
           </button>
         </div>
       </div>
@@ -249,6 +300,7 @@ onMounted(() => {
 // --- Data & Modals State ---
 const showConfirmModal = ref(false)
 const confirmText = ref('')
+const confirmAction = ref('')
 
 const showSurveyModal = ref(false)
 const selectedAssets = ref(['stock', 'cash'])
@@ -264,19 +316,29 @@ const availableAssetClasses = [
 const showEditModal = ref(false)
 const editAllocations = ref({})
 
+const showEditStrategyModal = ref(false)
+const editStrategyText = ref('')
+
 // --- Logic ---
 const openRegenerateConfirm = () => {
   if (ipsStore.latestIps) {
     confirmText.value = ''
+    confirmAction.value = 'regenerate'
     showConfirmModal.value = true
   } else {
     openPreSurvey()
   }
 }
 
-const proceedToSurvey = () => {
+const proceedConfirmAction = () => {
   showConfirmModal.value = false
-  openPreSurvey()
+  if (confirmAction.value === 'regenerate') {
+    openPreSurvey()
+  } else if (confirmAction.value === 'save_allocation') {
+    saveAllocation()
+  } else if (confirmAction.value === 'save_strategy') {
+    saveStrategy()
+  }
 }
 
 const openPreSurvey = () => {
@@ -294,27 +356,81 @@ const executeGenerate = async () => {
 
 // --- Edit Allocation Logic ---
 const openEditModal = () => {
-  if (!ipsStore.latestIps?.target_allocation) return
-  
-  const alloc = typeof ipsStore.latestIps.target_allocation === 'string' 
-                ? JSON.parse(ipsStore.latestIps.target_allocation) 
-                : ipsStore.latestIps.target_allocation
-                
-  editAllocations.value = { ...alloc }
-  showEditModal.value = true
+  if (!ipsStore.latestIps) return
+  try {
+    const alloc = typeof ipsStore.latestIps.target_allocation === 'string' 
+      ? JSON.parse(ipsStore.latestIps.target_allocation)
+      : ipsStore.latestIps.target_allocation
+      
+    // Đảm bảo hiển thị cả các lớp tài sản có sẵn nhưng AI đang set là 0%
+    const fullAlloc = { ...alloc }
+    availableAssetClasses.forEach(asset => {
+      if (fullAlloc[asset.id] === undefined) {
+        fullAlloc[asset.id] = 0
+      }
+    })
+      
+    editAllocations.value = fullAlloc
+    showEditModal.value = true
+  } catch (e) {
+    console.error("Invalid allocation format", e)
+  }
 }
 
 const totalAllocation = computed(() => {
   return Object.values(editAllocations.value).reduce((sum, val) => sum + Number(val), 0)
 })
 
+const triggerSaveAllocation = () => {
+  if (totalAllocation.value !== 100) return
+  confirmText.value = ''
+  confirmAction.value = 'save_allocation'
+  showConfirmModal.value = true
+}
+
 const saveAllocation = async () => {
   if (totalAllocation.value !== 100) return
+  
   try {
     await ipsStore.updateIps(editAllocations.value)
     showEditModal.value = false
-  } catch (err) {
-    alert("Đã có lỗi xảy ra: " + err)
+  } catch (e) {
+    alert(e)
+  }
+}
+
+const openEditStrategyModal = () => {
+  if (!ipsStore.latestIps) return
+  editStrategyText.value = ipsStore.latestIps.detailed_strategy
+  showEditStrategyModal.value = true
+}
+
+const triggerSaveStrategy = () => {
+  if (!editStrategyText.value.trim()) return
+  confirmText.value = ''
+  confirmAction.value = 'save_strategy'
+  showConfirmModal.value = true
+}
+
+const saveStrategy = async () => {
+  if (!editStrategyText.value.trim()) return
+  
+  try {
+    let finalStrategy = editStrategyText.value
+    // Replace old signatures if exist
+    finalStrategy = finalStrategy.replace(/\n\n---\n\*(Phân tích và tạo tự động|Chỉnh sửa thủ công).*?\*/g, '')
+    // Add new manual signature
+    const now = new Date().toLocaleString('vi-VN')
+    finalStrategy += `\n\n---\n*Chỉnh sửa thủ công bởi người dùng vào lúc ${now}*`
+
+    const alloc = typeof ipsStore.latestIps.target_allocation === 'string'
+      ? JSON.parse(ipsStore.latestIps.target_allocation)
+      : ipsStore.latestIps.target_allocation
+      
+    await ipsStore.updateIps(alloc, finalStrategy)
+    showEditStrategyModal.value = false
+  } catch (e) {
+    alert(e)
   }
 }
 
@@ -341,10 +457,15 @@ const formatAssetName = (key) => {
     'bond': 'Trái phiếu',
     'gold': 'Vàng',
     'cash': 'Tiền mặt',
+    'cash_equivalent': 'Tiền mặt / Tương đương tiền',
+    'cash_equivalents': 'Tiền mặt / Tương đương tiền',
     'real_estate': 'Bất động sản',
     'crypto': 'Tiền số (Crypto)'
   }
-  return map[key] || key
+  if (map[key]) return map[key]
+  
+  // Fallback for random AI generated keys
+  return key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
 }
 </script>
 

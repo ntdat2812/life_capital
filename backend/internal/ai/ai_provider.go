@@ -71,7 +71,7 @@ type AIProvider interface {
 	Model() string
 	ExtractProfile(ctx context.Context, chatHistory string) (*ExtractionResult, error)
 	AnalyzeLifeEvent(ctx context.Context, promptContext string) (*LifeEventAnalysisResult, error)
-	GenerateIPS(ctx context.Context, profile *model.InvestorProfile, assets []model.Asset, preferredAssets []string) (*IPSExtractionResult, error)
+	GenerateIPS(ctx context.Context, profile *model.InvestorProfile, assets []model.Asset, incomes []*model.IncomeStream, dependents []*model.Dependent, preferredAssets []string) (*IPSExtractionResult, error)
 }
 
 // GetMaxOutputTokens retrieves the maximum output tokens from the environment, defaulting to 8192
@@ -148,7 +148,7 @@ func analyzeLifeEventHelper(ctx context.Context, promptContext string, generateC
 	return &result, nil
 }
 
-func generateIPSHelper(ctx context.Context, profile *model.InvestorProfile, assets []model.Asset, preferredAssets []string, generate func(context.Context, string) (string, error)) (*IPSExtractionResult, error) {
+func generateIPSHelper(ctx context.Context, profile *model.InvestorProfile, assets []model.Asset, incomes []*model.IncomeStream, dependents []*model.Dependent, preferredAssets []string, generate func(context.Context, string) (string, error)) (*IPSExtractionResult, error) {
 	cleanTemplate := strings.TrimSpace(generateIPSPrompt)
 	
 	age := 0
@@ -198,10 +198,33 @@ func generateIPSHelper(ctx context.Context, profile *model.InvestorProfile, asse
 	}
 	currentTimeStr := time.Now().In(loc).Format("15:04 02/01/2006")
 
+	incomeListStr := ""
+	if len(incomes) == 0 {
+		incomeListStr = "Chưa có nguồn thu nhập nào được khai báo."
+	} else {
+		for _, i := range incomes {
+			incomeListStr += fmt.Sprintf("- %s (%s, %s): %f\n", i.Name, i.Type, i.Frequency, i.Amount)
+		}
+	}
+
+	dependentListStr := ""
+	if len(dependents) == 0 {
+		dependentListStr = "Không có người phụ thuộc."
+	} else {
+		for _, d := range dependents {
+			age := 0
+			if d.DateOfBirth != nil {
+				age = time.Now().Year() - d.DateOfBirth.Year()
+			}
+			dependentListStr += fmt.Sprintf("- %s (Tuổi: %d, Chi phí hàng tháng: %f)\n", d.Name, age, d.MonthlyCost)
+		}
+	}
+
 	prompt := fmt.Sprintf(cleanTemplate,
 		age,
 		maritalStatus,
-		0.0, // passive income omitted for now
+		incomeListStr,
+		dependentListStr,
 		essentialExpense,
 		discretionaryExpense,
 		riskScore,
@@ -260,7 +283,21 @@ func extractJSON(s string) string {
 	start := strings.Index(s, "{")
 	end := strings.LastIndex(s, "}")
 	if start != -1 && end != -1 && end > start {
-		return s[start : end+1]
+		candidate := s[start : end+1]
+		if json.Valid([]byte(candidate)) {
+			return candidate
+		}
+		
+		// Fallback: If AI appended an extra '}' at the end, try the second to last '}'
+		prevEnd := strings.LastIndex(s[:end], "}")
+		if prevEnd != -1 && prevEnd > start {
+			candidate2 := s[start : prevEnd+1]
+			if json.Valid([]byte(candidate2)) {
+				return candidate2
+			}
+		}
+		
+		return candidate
 	}
 	return s
 }

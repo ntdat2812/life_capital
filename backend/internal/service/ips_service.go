@@ -18,26 +18,32 @@ type IPSService interface {
 }
 
 type ipsService struct {
-	ipsRepo      repository.InvestmentPolicyRepository
-	profileRepo  *repository.InvestorProfileRepository
-	assetRepo    repository.AssetRepository
-	notifService NotificationService
-	aiProviders  []ai.AIProvider
+	ipsRepo       repository.InvestmentPolicyRepository
+	profileRepo   *repository.InvestorProfileRepository
+	assetRepo     repository.AssetRepository
+	incomeRepo    *repository.IncomeRepository
+	dependentRepo *repository.DependentRepository
+	notifService  NotificationService
+	aiProviders   []ai.AIProvider
 }
 
 func NewIPSService(
 	ipsRepo repository.InvestmentPolicyRepository,
 	profileRepo *repository.InvestorProfileRepository,
 	assetRepo repository.AssetRepository,
+	incomeRepo *repository.IncomeRepository,
+	dependentRepo *repository.DependentRepository,
 	notifService NotificationService,
 	aiProviders []ai.AIProvider,
 ) IPSService {
 	return &ipsService{
-		ipsRepo:      ipsRepo,
-		profileRepo:  profileRepo,
-		assetRepo:    assetRepo,
-		notifService: notifService,
-		aiProviders:  aiProviders,
+		ipsRepo:       ipsRepo,
+		profileRepo:   profileRepo,
+		assetRepo:     assetRepo,
+		incomeRepo:    incomeRepo,
+		dependentRepo: dependentRepo,
+		notifService:  notifService,
+		aiProviders:   aiProviders,
 	}
 }
 
@@ -55,9 +61,17 @@ func (s *ipsService) UpdateIPS(ctx context.Context, userID string, req *model.In
 	}
 
 	policy.TargetAllocation = req.TargetAllocation
+	if req.DetailedStrategy != "" {
+		policy.DetailedStrategy = req.DetailedStrategy
+	}
+	// We check if the request explicitly unsets it (or we just map it)
+	// Actually, if they edit it, IsAIRecommended should be false.
+	if !req.IsAIRecommended {
+		policy.IsAIRecommended = false
+	}
+	
 	// When user manually updates, it's no longer just an AI draft (if it was)
 	policy.Status = "active"
-	
 	return s.ipsRepo.Update(ctx, policy)
 }
 
@@ -71,19 +85,25 @@ func (s *ipsService) GenerateIPS(ctx context.Context, userID string, preferredAs
 		return nil, fmt.Errorf("no active profile found. please complete onboarding first")
 	}
 
-	// 2. Fetch Assets
+	// 2. Fetch Assets, Incomes, and Dependents
 	userUUID, err := uuid.Parse(userID)
 	var assets []model.Asset = nil
+	var incomes []*model.IncomeStream = nil
+	var dependents []*model.Dependent = nil
+	
 	if err == nil {
 		paginatedAssets, _ := s.assetRepo.GetAssetsByUserID(ctx, userUUID, "", "", 1000, 0)
 		if paginatedAssets != nil {
 			assets = paginatedAssets.Data
 		}
+		
+		incomes, _ = s.incomeRepo.GetIncomeStreamsByUserID(ctx, userUUID)
+		dependents, _ = s.dependentRepo.GetDependentsByUserID(ctx, userUUID)
 	}
 
 	var usedProvider string
 	result, err := ai.ExecuteWithFallback(s.aiProviders, func(p ai.AIProvider) (*ai.IPSExtractionResult, error) {
-		res, err := p.GenerateIPS(ctx, profile, assets, preferredAssets)
+		res, err := p.GenerateIPS(ctx, profile, assets, incomes, dependents, preferredAssets)
 		if err == nil {
 			usedProvider = p.Name()
 		}

@@ -46,8 +46,8 @@ func (p *GeminiProvider) ExtractProfile(ctx context.Context, chatHistory string)
 	return extractProfileHelper(ctx, chatHistory, p.generateContent)
 }
 
-func (p *GeminiProvider) GenerateIPS(ctx context.Context, profile *model.InvestorProfile, assets []model.Asset, preferredAssets []string) (*IPSExtractionResult, error) {
-	return generateIPSHelper(ctx, profile, assets, preferredAssets, p.generateContent)
+func (p *GeminiProvider) GenerateIPS(ctx context.Context, profile *model.InvestorProfile, assets []model.Asset, incomes []*model.IncomeStream, dependents []*model.Dependent, preferredAssets []string) (*IPSExtractionResult, error) {
+	return generateIPSHelper(ctx, profile, assets, incomes, dependents, preferredAssets, p.generateContent)
 }
 
 func (p *GeminiProvider) generateContent(ctx context.Context, prompt string) (string, error) {

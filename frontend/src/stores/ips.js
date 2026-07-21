@@ -42,13 +42,19 @@ export const useIpsStore = defineStore('ips', {
       }
     },
 
-    async updateIps(updatedAllocation) {
+    async updateIps(updatedAllocation, updatedStrategy = null) {
       this.isLoading = true
       try {
         const payload = {
           ...this.latestIps,
           target_allocation: JSON.stringify(updatedAllocation)
         }
+        
+        if (updatedStrategy !== null) {
+          payload.detailed_strategy = updatedStrategy
+          payload.is_ai_recommended = false
+        }
+        
         await api.put('/ips/latest', payload)
         this.latestIps = payload
       } catch (error) {

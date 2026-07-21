@@ -7,7 +7,10 @@ Dưới đây là thông tin Hồ sơ Đầu tư (Investor Profile) MỚI NHẤT
 
 - Tuổi: %d
 - Tình trạng hôn nhân: %s
-- Thu nhập thụ động: %.0f VND
+- Dòng tiền thu nhập hiện tại (Các nguồn thu nhập):
+%s
+- Người phụ thuộc (Cần chăm lo):
+%s
 - Chi phí thiết yếu: %.0f VND / tháng
 - Chi phí linh hoạt: %.0f VND / tháng
 - Điểm rủi ro (Risk Score): %d (Khẩu vị: %s)
@@ -29,7 +32,7 @@ Lưu ý quan trọng: Thông tin tài sản dưới đây là tình trạng tạ
    - `target_allocation` (Object): Tỷ trọng phân bổ mục tiêu của các lớp tài sản. Ví dụ: {"stock": 60, "crypto": 10, "cash": 30}. (Key của JSON này hoàn toàn linh hoạt dựa trên tài sản bạn đề xuất, KHÔNG CẦN CỐ ĐỊNH, tổng = 100).
    - `detailed_strategy` (String - Markdown): Bài văn tư vấn chi tiết và sâu sắc.
 
-QUAN TRỌNG: Câu trả lời BẮT BUỘC phải là một chuỗi JSON hợp lệ, có dấu ngoặc đóng `}` ở cuối. Đừng viết quá dài dòng không cần thiết để tránh việc nội dung bị cắt đứt giữa chừng do giới hạn độ dài.
+QUAN TRỌNG: Câu trả lời BẮT BUỘC phải là một chuỗi JSON hợp lệ. Đừng viết quá dài dòng không cần thiết để tránh việc nội dung bị cắt đứt giữa chừng do giới hạn độ dài.
 
 5. Bài tư vấn `detailed_strategy` BẮT BUỘC PHẢI tuân theo cấu trúc Dàn Bài sau:
 
