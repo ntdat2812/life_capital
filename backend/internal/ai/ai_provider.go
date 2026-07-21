@@ -25,6 +25,9 @@ var analyzeLifeEventPrompt string
 //go:embed prompts/generate_ips.txt
 var generateIPSPrompt string
 
+//go:embed prompts/generate_thesis.txt
+var generateThesisPrompt string
+
 type ExtractionResult struct {
 	DateOfBirth                 *string `json:"date_of_birth"`
 	RiskScore                   int     `json:"risk_score"`
@@ -72,6 +75,7 @@ type AIProvider interface {
 	ExtractProfile(ctx context.Context, chatHistory string) (*ExtractionResult, error)
 	AnalyzeLifeEvent(ctx context.Context, promptContext string) (*LifeEventAnalysisResult, error)
 	GenerateIPS(ctx context.Context, profile *model.InvestorProfile, assets []model.Asset, incomes []*model.IncomeStream, dependents []*model.Dependent, preferredAssets []string) (*IPSExtractionResult, error)
+	GenerateThesis(ctx context.Context, req *model.ThesisGenerationRequest) (*model.InvestmentThesis, error)
 }
 
 // GetMaxOutputTokens retrieves the maximum output tokens from the environment, defaulting to 8192
@@ -257,7 +261,6 @@ func doHTTPRequest(ctx context.Context, method, url string, headers map[string]s
 	if err != nil {
 		return 0, nil, err
 	}
-	
 	req.Header.Set("Content-Type", "application/json")
 	for k, v := range headers {
 		req.Header.Set(k, v)
@@ -300,4 +303,25 @@ func extractJSON(s string) string {
 		return candidate
 	}
 	return s
+}
+
+func generateThesisHelper(ctx context.Context, req *model.ThesisGenerationRequest, generator func(context.Context, string) (string, error)) (*model.InvestmentThesis, error) {
+	prompt := generateThesisPrompt
+	prompt = strings.ReplaceAll(prompt, "{{.Ticker}}", req.Ticker)
+	prompt = strings.ReplaceAll(prompt, "{{.CompanyName}}", req.CompanyName)
+	prompt = strings.ReplaceAll(prompt, "{{.AssetType}}", req.AssetType)
+	prompt = strings.ReplaceAll(prompt, "{{.UserProvided}}", req.UserProvided)
+
+	rawResponse, err := generator(ctx, prompt)
+	if err != nil {
+		return nil, err
+	}
+
+	rawResponse = extractJSON(rawResponse)
+	var thesis model.InvestmentThesis
+	if err := json.Unmarshal([]byte(rawResponse), &thesis); err != nil {
+		return nil, fmt.Errorf("failed to parse thesis JSON: %w\nRaw: %s", err, rawResponse)
+	}
+
+	return &thesis, nil
 }

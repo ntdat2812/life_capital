@@ -325,6 +325,70 @@ definitions:
       version:
         type: integer
     type: object
+  model.InvestmentThesis:
+    properties:
+      catalysts:
+        items:
+          type: string
+        type: array
+      company_name:
+        type: string
+      conviction_score:
+        description: 1-10
+        type: integer
+      created_at:
+        type: string
+      fair_value:
+        type: number
+      id:
+        type: string
+      initial_date:
+        type: string
+      key_metrics:
+        type: object
+      last_reviewed:
+        type: string
+      margin_of_safety:
+        type: number
+      moat:
+        description: Array of strings or complex objects
+        items:
+          type: string
+        type: array
+      notes:
+        type: string
+      quality_score:
+        description: 1-10
+        type: integer
+      risks:
+        items:
+          type: string
+        type: array
+      sell_conditions:
+        items:
+          type: string
+        type: array
+      status:
+        description: active, archived, sold
+        type: string
+      thesis_detail:
+        type: string
+      thesis_summary:
+        type: string
+      ticker:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+      valuation_score:
+        description: 1-10
+        type: integer
+      version:
+        type: integer
+      why_i_own:
+        type: string
+    type: object
   model.InvestorProfile:
     properties:
       created_at:
@@ -522,6 +586,22 @@ definitions:
     - name
     - password
     type: object
+  model.ThesisGenerationRequest:
+    properties:
+      asset_type:
+        description: stock, real_estate, crypto, etc.
+        type: string
+      company_name:
+        type: string
+      ticker:
+        type: string
+      user_provided_context:
+        type: string
+    required:
+    - asset_type
+    - company_name
+    - ticker
+    type: object
   model.UpdateAssetRequest:
     properties:
       avg_price:
@@ -640,6 +720,46 @@ definitions:
       name:
         type: string
       updated_at:
+        type: string
+    type: object
+  model.WatchlistItem:
+    properties:
+      added_date:
+        type: string
+      ai_alert:
+        type: string
+      company_name:
+        type: string
+      created_at:
+        type: string
+      current_price:
+        type: number
+      fair_value:
+        type: number
+      id:
+        type: string
+      last_ai_check:
+        type: string
+      notes:
+        type: string
+      priority:
+        description: 1-10 (higher is higher priority)
+        type: integer
+      quality_score:
+        type: integer
+      status:
+        description: watching, bought, dropped
+        type: string
+      target_price:
+        type: number
+      thesis_id:
+        description: Nullable
+        type: string
+      ticker:
+        type: string
+      updated_at:
+        type: string
+      user_id:
         type: string
     type: object
 host: localhost:8080
@@ -1093,6 +1213,31 @@ paths:
       summary: Get unread notification count
       tags:
       - Notifications
+  /api/v1/portfolio:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of assets that are considered investments (stocks, crypto,
+        real_estate, gold)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Asset'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user's investable assets
+      tags:
+      - portfolio
   /api/v1/profile/me:
     get:
       consumes:
@@ -1299,6 +1444,190 @@ paths:
       summary: Confirm and save a life event
       tags:
       - timeline
+  /api/v1/theses:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.InvestmentThesis'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get user's investment theses
+      tags:
+      - thesis
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Thesis Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.InvestmentThesis'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.InvestmentThesis'
+      security:
+      - BearerAuth: []
+      summary: Create an investment thesis
+      tags:
+      - thesis
+  /api/v1/theses/{id}:
+    delete:
+      parameters:
+      - description: Thesis ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete an investment thesis
+      tags:
+      - thesis
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Thesis ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Thesis Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.InvestmentThesis'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.InvestmentThesis'
+      security:
+      - BearerAuth: []
+      summary: Update an investment thesis
+      tags:
+      - thesis
+  /api/v1/theses/{ticker}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Ticker
+        in: path
+        name: ticker
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.InvestmentThesis'
+      security:
+      - BearerAuth: []
+      summary: Get thesis by ticker
+      tags:
+      - thesis
+  /api/v1/theses/generate:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Generation Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.ThesisGenerationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.InvestmentThesis'
+      security:
+      - BearerAuth: []
+      summary: Generate thesis using AI
+      tags:
+      - thesis
+  /api/v1/watchlist:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.WatchlistItem'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get user's watchlist
+      tags:
+      - watchlist
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Watchlist Item
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.WatchlistItem'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.WatchlistItem'
+      security:
+      - BearerAuth: []
+      summary: Create a watchlist item
+      tags:
+      - watchlist
+  /api/v1/watchlist/{id}:
+    delete:
+      parameters:
+      - description: Watchlist ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete a watchlist item
+      tags:
+      - watchlist
   /api/v1/wealth/assets:
     get:
       parameters:

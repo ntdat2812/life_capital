@@ -25,10 +25,11 @@
 - **Tự động tính toán ròng**: Tính toán tổng Assets, tổng Liabilities, tỷ lệ đòn bẩy (Debt-to-Asset) và Net Worth thực tế.
 
 ### 1.4 Module 3 — Portfolio & Market Data Sync
-- **Danh mục tài sản**: Bảng thống kê chi tiết các mã đang hold, số lượng, giá vốn, giá hiện tại, tỷ trọng thực tế và tỷ trọng mục tiêu (Target Allocation).
-- **Tự động cập nhật giá**: Sử dụng Background Worker (Cronjob) và tích hợp Public APIs (TCBS, SSI, Yahoo Finance) để cào giá trị tài sản hàng ngày (cuối ngày).
+- **Danh mục tài sản**: Bảng thống kê chi tiết các mã đang hold, số lượng, giá vốn, giá hiện tại, tỷ trọng thực tế và tỷ trọng mục tiêu (Target Allocation). Mở rộng từ dữ liệu của Module 2 (Assets) để tập trung vào các tài sản sinh lời (Investment Assets).
+- **Watchlist (Danh mục theo dõi)**: Người dùng có thể thêm các mã tài sản/cổ phiếu chưa sở hữu vào danh sách theo dõi kèm giá mục tiêu (Target Price).
+- **Tự động cập nhật giá**: Sử dụng Background Worker (Cronjob) chạy ngầm (End of Day) tích hợp Public APIs (TCBS, SSI, Yahoo Finance) để cào giá trị tài sản hàng ngày.
 - **Khuyến nghị & Conviction**: Điểm tin cậy (Conviction Score 1-10) của nhà đầu tư cho cổ phiếu và khuyến nghị hành động tương ứng (BUY/HOLD/SELL).
-- **Hệ thống Thông báo (Notification System)**: Bắn cảnh báo tự động khi giá chạm ngưỡng mua (Watchlist) hoặc tỷ trọng tài sản vượt quá giới hạn rủi ro.
+- **Hệ thống Thông báo (Notification System & Email Alerts)**: Bắn cảnh báo tự động vào App (Notification Bell) **VÀ gửi Email** cho user khi giá chạm ngưỡng mua (Watchlist) hoặc tỷ trọng tài sản thực tế bị lệch quá ngưỡng cho phép so với IPS.
 
 ### 1.5 Module 4 — Investment Policy Statement (IPS)
 - **Quy tắc đầu tư (IPS)**: Thiết lập mục tiêu chiến lược dài hạn, tỷ trọng tối đa/tối thiểu cho từng lớp tài sản (Target Allocation), quy tắc mua/bán và giới hạn rủi ro. (Đóng vai trò là "Luật chơi Vĩ mô" cho toàn bộ tài sản).
@@ -36,9 +37,9 @@
 - **Phiên bản (Versioning)**: IPS lưu lịch sử dưới dạng phiên bản (v1, v2, v3) để đối chiếu sự thay đổi tư duy đầu tư qua thời gian.
 
 ### 1.6 Module 5 — Investment Thesis (Luận điểm đầu tư)
-- **Tại sao tôi sở hữu? (Why I Own)**: Ghi lại lý do nắm giữ cốt lõi của từng doanh nghiệp/mã cụ thể. (Đóng vai trò là "Lý do Vi mô" cho 1 tài sản).
-- **AI Viết hộ Thesis**: Người dùng không chuyên chỉ cần nhập mã cổ phiếu, AI sẽ tự động phân tích doanh nghiệp và sinh ra một bản Thesis tiêu chuẩn (bao gồm Lợi thế cạnh tranh - Moats, Động lực - Catalysts, và Rủi ro) để user tham khảo.
-- **Sell Rules**: Điều kiện bắt buộc phải bán (Thesis bị phá vỡ, quản trị doanh nghiệp xấu đi).
+- **Tại sao tôi sở hữu? (Why I Own)**: Ghi lại lý do nắm giữ cốt lõi của từng tài sản cụ thể. Áp dụng cho **TẤT CẢ** các loại tài sản đầu tư (Cổ phiếu, Crypto, Bất động sản, Vàng...), không chỉ riêng chứng khoán. Đóng vai trò là "Lý do Vi mô" cho 1 tài sản.
+- **AI Viết hộ Thesis**: Người dùng chỉ cần nhập mã cổ phiếu hoặc tên tài sản (VD: FPT, BTC, Mảnh đất nền Vân Đồn), AI sẽ tự động phân tích và sinh ra một bản Thesis tiêu chuẩn (bao gồm Lợi thế cạnh tranh/Giá trị nội tại - Moats, Động lực tăng giá - Catalysts, và Rủi ro - Risks) để user tham khảo.
+- **Sell Rules**: Điều kiện bắt buộc phải bán (Thesis bị phá vỡ, quản trị doanh nghiệp xấu đi, quy hoạch thay đổi).
 
 ### 1.7 Module 6 — Earnings Review (Đánh giá BCTC)
 - **AI Đọc BCTC**: Sau mỗi quý, người dùng nhập link hoặc paste nội dung Báo cáo tài chính/KQKD của doanh nghiệp.
@@ -83,3 +84,25 @@
 | 16 | Login | `/login` | Form đăng nhập credentials |
 | 17 | Financial Goals | `/goals` | Goal Waterfall Cards, Add Goal Form |
 | 18 | Signup | `/signup` | Form đăng ký tài khoản (multi-user) |
+
+---
+
+## 3. Architecture & Deployment Strategy ($0 Cost)
+
+Để đảm bảo hệ thống WealthOS có thể vận hành ổn định cho cá nhân/gia đình mà không tốn chi phí (Free Tier), kiến trúc sẽ được thiết kế theo hướng Serverless và Micro-services nhẹ:
+
+1. **Frontend (Vue 3 / Vite)**: 
+   - Deploy dưới dạng Static Site lên **Vercel** hoặc **Cloudflare Pages**.
+   - Băng thông miễn phí, CDN toàn cầu, thời gian load trang cực nhanh.
+2. **Backend (Go / Echo)**: 
+   - Deploy lên **Render.com** (Free Tier) hoặc **Koyeb**. 
+   - Ngôn ngữ Go siêu nhẹ (chiếm ~30MB RAM khi chạy), hoàn toàn nằm gọn trong giới hạn 512MB RAM của các gói miễn phí.
+3. **Database (PostgreSQL)**: 
+   - Sử dụng **Supabase** hoặc **Neon.tech** (Serverless Postgres). 
+   - Dung lượng Free (500MB) là quá đủ để lưu trữ hàng triệu bản ghi text, JSON và cấu hình hệ thống.
+4. **Background Workers (Cronjobs)**:
+   - Chạy tích hợp trực tiếp bên trong Go Backend (thông qua `github.com/robfig/cron/v3`) để tiết kiệm chi phí không phải thuê Server riêng.
+   - Nhiệm vụ: Cập nhật giá tự động (EOD), đối chiếu IPS, và gửi Email Alert thông qua các dịch vụ SMTP miễn phí (như Resend hoặc SendGrid).
+5. **AI Inference**:
+   - Sử dụng **Gemini 2.5 Flash** (qua Google AI Studio) hoặc **Groq** APIs. 
+   - Cung cấp tốc độ siêu nhanh với Free Tier hào phóng (15 RPM), đủ sức xử lý các tác vụ sinh Thesis hoặc IPS cho luồng cá nhân.

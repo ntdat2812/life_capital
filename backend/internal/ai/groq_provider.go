@@ -50,6 +50,10 @@ func (p *GroqProvider) GenerateIPS(ctx context.Context, profile *model.InvestorP
 	return generateIPSHelper(ctx, profile, assets, incomes, dependents, preferredAssets, p.generateContent)
 }
 
+func (p *GroqProvider) GenerateThesis(ctx context.Context, req *model.ThesisGenerationRequest) (*model.InvestmentThesis, error) {
+	return generateThesisHelper(ctx, req, p.generateContent)
+}
+
 func (p *GroqProvider) generateContent(ctx context.Context, prompt string) (string, error) {
 	url := "https://api.groq.com/openai/v1/chat/completions"
 	reqBody := map[string]interface{}{

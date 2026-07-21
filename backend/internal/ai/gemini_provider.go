@@ -50,6 +50,10 @@ func (p *GeminiProvider) GenerateIPS(ctx context.Context, profile *model.Investo
 	return generateIPSHelper(ctx, profile, assets, incomes, dependents, preferredAssets, p.generateContent)
 }
 
+func (p *GeminiProvider) GenerateThesis(ctx context.Context, req *model.ThesisGenerationRequest) (*model.InvestmentThesis, error) {
+	return generateThesisHelper(ctx, req, p.generateContent)
+}
+
 func (p *GeminiProvider) generateContent(ctx context.Context, prompt string) (string, error) {
 	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", p.model, p.apiKey)
 	reqBody := map[string]interface{}{

@@ -32,14 +32,23 @@ Tài liệu này theo dõi tiến độ thực tế (Source Code) so với đặ
 - 🟢 **Tự động tính toán ròng**: Backend/Frontend tự động đồng bộ.
 
 ### Module 3 — Portfolio
-- 🔴 **Danh mục cổ phiếu**: Chưa code.
-- 🔴 **Khuyến nghị & Conviction**: Chưa code.
+- 🟡 **Danh mục đầu tư (Investable Assets)**: Đã xong API Backend. Chưa có Frontend.
+- 🟡 **Watchlist**: Đã xong API Backend. Chưa có Frontend.
 
-### Module 4 -> 8 (IPS, Thesis, Decision Journal, Monthly Review)
-- 🔴 **Tất cả**: Chưa code.
+### Module 4 — Goal-Aware Unified IPS
+- 🟢 **Khởi tạo & Phân tích Chiến lược (AI)**: Đã hoàn thành màn hình IPS (`IPSView.vue`). AI có khả năng phân tích dòng tiền, người phụ thuộc và tài sản hiện có để đề xuất tỷ trọng phân bổ (`target_allocation`) và bài văn chiến lược (`detailed_strategy`).
+- 🟢 **Chỉnh sửa linh hoạt (Manual Override)**: Cho phép người dùng chỉnh sửa bằng tay Tỷ trọng và Bài văn chiến lược. Có luồng cảnh báo rủi ro khi thay đổi.
+- 🟡 **Cảnh báo lệch tỷ trọng (Rebalancing Alerts)**: Đã có DB Notification, nhưng chưa có luồng tự động quét và sinh ra Notification khi tài sản thị trường làm lệch tỷ trọng so với IPS. (Đang chờ)
 
+### Module 5 -> 8 (Thesis, Decision Journal, Monthly Review)
+- 🟡 **Investment Thesis**: Đã hoàn thành API lưu trữ, phân tích và sinh Thesis bằng AI ở Backend. Chưa có Frontend.
+- 🔴 **Decision Journal, Monthly Review**: Chưa code.
 ### Module 9 — Authentication & Authorization
 - 🟢 **Đăng ký (Signup)**: Đã xong, hỗ trợ multi-user.
 - 🟢 **Đăng nhập (Login)**: Đã xong, kết nối DB với JWT Token.
 - 🟢 **Bảo mật (JWT Flow)**: API được bảo vệ qua middleware.
+
+---
+## Backlog / Future Enhancements (Ghi chú tính năng tương lai)
+- 📝 **Real-time Notifications**: Hiện tại Frontend đang dùng cơ chế Polling hoặc Fetch on Action để lấy thông báo. Trong tương lai, cân nhắc nâng cấp lên **Server-Sent Events (SSE)** hoặc **WebSockets** để có cảnh báo thời gian thực ngay khi Backend phân tích xong.
 

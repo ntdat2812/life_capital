@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS watchlist CASCADE;
+DROP TABLE IF EXISTS investment_theses CASCADE;

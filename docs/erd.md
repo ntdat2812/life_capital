@@ -13,7 +13,6 @@ erDiagram
     users ||--o{ dependents : supports
     users ||--o{ income_streams : earns
     users ||--o{ assets : owns
-    users ||--o{ portfolio_holdings : holds
     users ||--o{ investment_policies : defines
     users ||--o{ investment_theses : writes
     users ||--o{ earnings_reviews : reviews
@@ -121,16 +120,6 @@ erDiagram
         uuid liability_id FK
         date snapshot_date
         decimal remaining_balance
-    }
-
-    portfolio_holdings {
-        uuid id PK
-        uuid user_id FK
-        string ticker
-        decimal current_allocation
-        decimal target_allocation
-        int conviction_score
-        string recommendation
     }
 
     investment_policies {
@@ -469,27 +458,6 @@ CREATE TABLE net_worth_snapshots (
 -- PORTFOLIO (Module 3)
 -- =============================================
 
-CREATE TABLE portfolio_holdings (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id         UUID REFERENCES users(id) ON DELETE CASCADE,
-    ticker          VARCHAR(20) NOT NULL,
-    company_name    VARCHAR(255) NOT NULL,
-    quantity        DECIMAL(18,6) NOT NULL,
-    avg_price       DECIMAL(18,2) NOT NULL,
-    current_price   DECIMAL(18,2),
-    current_value   DECIMAL(18,2),
-    cost_basis      DECIMAL(18,2),
-    current_allocation DECIMAL(5,4),
-    target_allocation  DECIMAL(5,4),
-    conviction_score   INTEGER CHECK (conviction_score BETWEEN 1 AND 10),
-    recommendation     VARCHAR(20),
-    sector          VARCHAR(100),
-    exchange        VARCHAR(20),
-    notes           TEXT,
-    created_at      TIMESTAMPTZ DEFAULT NOW(),
-    updated_at      TIMESTAMPTZ DEFAULT NOW()
-);
-
 -- =============================================
 -- INVESTMENT POLICY STATEMENT (Module 4)
 -- =============================================
@@ -768,8 +736,6 @@ CREATE INDEX idx_dependents_user ON dependents(user_id);
 CREATE INDEX idx_income_streams_user ON income_streams(user_id);
 CREATE INDEX idx_assets_user ON assets(user_id);
 CREATE INDEX idx_assets_category ON assets(user_id, category);
-CREATE INDEX idx_portfolio_user ON portfolio_holdings(user_id);
-CREATE INDEX idx_portfolio_ticker ON portfolio_holdings(user_id, ticker);
 CREATE INDEX idx_theses_user ON investment_theses(user_id);
 CREATE INDEX idx_theses_ticker ON investment_theses(user_id, ticker);
 CREATE INDEX idx_earnings_ticker ON earnings_reviews(user_id, ticker);

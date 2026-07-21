@@ -120,3 +120,32 @@ Tất cả các thẻ hiển thị (cards), sidebar và modal đều kế thừa
   - Hiện ra giữa màn hình khi click vào tiêu đề Nhóm (Ví dụ: Cổ phiếu).
   - Hiển thị danh sách các tài sản/nợ con thuộc nhóm đó.
   - Mỗi item đi kèm một thanh tiến trình (Progress Bar) trực quan để biểu thị tỷ trọng (%) của item đó so với tổng giá trị nội bộ nhóm.
+
+### 4.6 Giao diện Portfolio & Watchlist (Danh mục đầu tư & Theo dõi)
+- **Top Bar (Controls)**:
+  - Nút Switch chuyển đổi giữa 2 chế độ: **[Portfolio]** và **[Watchlist]**.
+- **Chế độ Portfolio (Lấy dữ liệu từ bảng Assets)**:
+  - **Summary Panel**: 
+    - Tổng giá trị đầu tư, Lãi/Lỗ (P/L) tổng hợp, và một biểu đồ Doughnut nhỏ hiển thị Tỷ trọng danh mục.
+  - **Bảng Holding (Data Table)**:
+    - Bảng hiển thị: Tên tài sản (Mã), Giá vốn (Avg Price), Giá hiện tại, Khối lượng, Tổng giá trị, Tỷ trọng (%), Lãi/Lỗ.
+    - Cột Hành động: `[Xem Thesis]`, `[Chỉnh sửa]`.
+- **Chế độ Watchlist**:
+  - **Bảng Theo dõi**:
+    - Hiển thị các tài sản đang đưa vào tầm ngắm nhưng chưa mua.
+    - Bảng gồm: Mã, Tên, Giá hiện tại, Giá mục tiêu mua (Target Price), Điểm chất lượng (Quality Score), Độ ưu tiên.
+    - Phía bên phải mỗi dòng có nút `[Viết Thesis]`.
+
+### 4.7 Giao diện Investment Thesis (Luận điểm Đầu tư)
+- **Màn hình lưới (Grid View)**:
+  - Hiển thị danh sách các thẻ (Cards) Thesis. Mỗi thẻ đại diện cho 1 tài sản (VD: HPG, BTC).
+  - Thẻ hiển thị: Tên mã, Điểm tin cậy (Conviction Score 1-10), và một câu Tóm tắt luận điểm (Thesis Summary).
+  - Nút Nổi to ở góc dưới: `[+ AI Phân Tích Mã Mới]`.
+- **Modal Sinh Thesis bằng AI**:
+  - Nhập mã tài sản (Ví dụ: FPT).
+  - Nút bấm `[🪄 AI Tạo Luận Điểm]`. Hệ thống sẽ hiện Skeleton Loading Glassmorphic.
+  - Kết quả trả ra ngay trong Modal để User duyệt trước khi lưu.
+- **Trang Chi Tiết (Detail View)**:
+  - Chia làm 2 cột:
+    - **Cột Trái (Nội dung chính)**: "Tại sao tôi sở hữu?" (Văn bản dài), Lợi thế cạnh tranh (Moats), Động lực (Catalysts), Rủi ro (Risks). Mỗi mục là một thẻ Box có màu viền tương ứng (Xanh dương cho Moat, Xanh lá cho Catalyst, Đỏ cho Risk).
+    - **Cột Phải (Metrics & Rules)**: Điểm Conviction (Dạng đồng hồ đo Gauge), Điều kiện bắt buộc bán (Sell Rules). Cột này nằm cố định (Sticky) khi cuộn.

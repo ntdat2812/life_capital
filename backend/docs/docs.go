@@ -722,6 +722,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/portfolio": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a list of assets that are considered investments (stocks, crypto, real_estate, gold)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "portfolio"
+                ],
+                "summary": "Get user's investable assets",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Asset"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/profile/me": {
             "get": {
                 "security": [
@@ -1033,6 +1071,309 @@ const docTemplate = `{
                                 "type": "string"
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/api/v1/theses": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "thesis"
+                ],
+                "summary": "Get user's investment theses",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.InvestmentThesis"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "thesis"
+                ],
+                "summary": "Create an investment thesis",
+                "parameters": [
+                    {
+                        "description": "Thesis Data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.InvestmentThesis"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.InvestmentThesis"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/theses/generate": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "thesis"
+                ],
+                "summary": "Generate thesis using AI",
+                "parameters": [
+                    {
+                        "description": "Generation Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ThesisGenerationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.InvestmentThesis"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/theses/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "thesis"
+                ],
+                "summary": "Update an investment thesis",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Thesis ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Thesis Data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.InvestmentThesis"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.InvestmentThesis"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "thesis"
+                ],
+                "summary": "Delete an investment thesis",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Thesis ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/v1/theses/{ticker}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "thesis"
+                ],
+                "summary": "Get thesis by ticker",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Ticker",
+                        "name": "ticker",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.InvestmentThesis"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/watchlist": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "watchlist"
+                ],
+                "summary": "Get user's watchlist",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.WatchlistItem"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "watchlist"
+                ],
+                "summary": "Create a watchlist item",
+                "parameters": [
+                    {
+                        "description": "Watchlist Item",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.WatchlistItem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.WatchlistItem"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/watchlist/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "watchlist"
+                ],
+                "summary": "Delete a watchlist item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Watchlist ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -1851,6 +2192,100 @@ const docTemplate = `{
                 }
             }
         },
+        "model.InvestmentThesis": {
+            "type": "object",
+            "properties": {
+                "catalysts": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "company_name": {
+                    "type": "string"
+                },
+                "conviction_score": {
+                    "description": "1-10",
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "fair_value": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "initial_date": {
+                    "type": "string"
+                },
+                "key_metrics": {
+                    "type": "object"
+                },
+                "last_reviewed": {
+                    "type": "string"
+                },
+                "margin_of_safety": {
+                    "type": "number"
+                },
+                "moat": {
+                    "description": "Array of strings or complex objects",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "quality_score": {
+                    "description": "1-10",
+                    "type": "integer"
+                },
+                "risks": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "sell_conditions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "status": {
+                    "description": "active, archived, sold",
+                    "type": "string"
+                },
+                "thesis_detail": {
+                    "type": "string"
+                },
+                "thesis_summary": {
+                    "type": "string"
+                },
+                "ticker": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "valuation_score": {
+                    "description": "1-10",
+                    "type": "integer"
+                },
+                "version": {
+                    "type": "integer"
+                },
+                "why_i_own": {
+                    "type": "string"
+                }
+            }
+        },
         "model.InvestorProfile": {
             "type": "object",
             "properties": {
@@ -2144,6 +2579,29 @@ const docTemplate = `{
                 }
             }
         },
+        "model.ThesisGenerationRequest": {
+            "type": "object",
+            "required": [
+                "asset_type",
+                "company_name",
+                "ticker"
+            ],
+            "properties": {
+                "asset_type": {
+                    "description": "stock, real_estate, crypto, etc.",
+                    "type": "string"
+                },
+                "company_name": {
+                    "type": "string"
+                },
+                "ticker": {
+                    "type": "string"
+                },
+                "user_provided_context": {
+                    "type": "string"
+                }
+            }
+        },
         "model.UpdateAssetRequest": {
             "type": "object",
             "required": [
@@ -2319,6 +2777,65 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.WatchlistItem": {
+            "type": "object",
+            "properties": {
+                "added_date": {
+                    "type": "string"
+                },
+                "ai_alert": {
+                    "type": "string"
+                },
+                "company_name": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "current_price": {
+                    "type": "number"
+                },
+                "fair_value": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_ai_check": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "priority": {
+                    "description": "1-10 (higher is higher priority)",
+                    "type": "integer"
+                },
+                "quality_score": {
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "watching, bought, dropped",
+                    "type": "string"
+                },
+                "target_price": {
+                    "type": "number"
+                },
+                "thesis_id": {
+                    "description": "Nullable",
+                    "type": "string"
+                },
+                "ticker": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
