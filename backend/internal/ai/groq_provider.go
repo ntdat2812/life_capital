@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -56,6 +57,8 @@ func (p *GroqProvider) GenerateThesis(ctx context.Context, req *model.ThesisGene
 
 func (p *GroqProvider) generateContent(ctx context.Context, prompt string) (string, error) {
 	url := "https://api.groq.com/openai/v1/chat/completions"
+	log.Printf("=== [Groq] Sending Prompt to AI ===\n%s\n===================================\n", prompt)
+
 	reqBody := map[string]interface{}{
 		"model": p.model,
 		"messages": []map[string]interface{}{

@@ -307,6 +307,7 @@ const selectedAssets = ref(['stock', 'cash'])
 const availableAssetClasses = [
   { id: 'stock', name: 'Cổ phiếu', desc: 'Rủi ro cao, sinh lời cao dài hạn' },
   { id: 'bond', name: 'Trái phiếu', desc: 'An toàn, sinh lời cố định, ổn định' },
+  { id: 'fund', name: 'Chứng chỉ quỹ', desc: 'Đầu tư qua quỹ mở/ETF, rủi ro đa dạng' },
   { id: 'gold', name: 'Vàng', desc: 'Phòng ngừa lạm phát và khủng hoảng' },
   { id: 'real_estate', name: 'Bất động sản', desc: 'Tích sản, cần vốn lớn, thanh khoản chậm' },
   { id: 'crypto', name: 'Tiền số (Crypto)', desc: 'Biến động cực mạnh, rủi ro cực cao' },
@@ -454,6 +455,7 @@ const validAllocations = computed(() => {
 const formatAssetName = (key) => {
   const map = {
     'stock': 'Cổ phiếu',
+    'fund': 'Chứng chỉ quỹ',
     'bond': 'Trái phiếu',
     'gold': 'Vàng',
     'cash': 'Tiền mặt',

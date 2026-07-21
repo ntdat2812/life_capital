@@ -303,6 +303,11 @@
             <input type="text" v-model="assetForm.name" required class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" />
           </div>
 
+          <div v-if="assetForm.category === 'deposit'">
+            <label class="block text-sm font-medium text-slate-300 mb-1">Lãi suất (%/năm)</label>
+            <input type="number" step="0.1" v-model="depositInterestRate" placeholder="Ví dụ: 5.5" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" />
+          </div>
+
           <div v-if="assetForm.category === 'gold'" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block text-sm font-medium text-slate-300 mb-1">Loại vàng</label>
@@ -319,6 +324,8 @@
                 <option value="SJC">SJC</option>
                 <option value="DOJI">DOJI</option>
                 <option value="PNJ">PNJ</option>
+                <option value="Phú Quý">Phú Quý</option>
+                <option value="Mi Hồng">Mi Hồng</option>
                 <option value="Bảo Tín Minh Châu">Bảo Tín Minh Châu</option>
                 <option value="Bảo Tín Mạnh Hải">Bảo Tín Mạnh Hải</option>
                 <option value="Tư nhân">Tiệm vàng tư nhân</option>
@@ -476,6 +483,7 @@ const goldBrand = ref('SJC')
 const goldPurity = ref('9999')
 const customGoldPurity = ref('')
 const quickGoldWeight = ref('')
+const depositInterestRate = ref('')
 
 const assetForm = ref({
   category: 'cash',
@@ -640,6 +648,7 @@ const openAddAsset = () => {
   isEditingAsset.value = false
   editingAssetId.value = null
   quickGoldWeight.value = ''
+  depositInterestRate.value = ''
   assetForm.value = { category: 'cash', name: '', ticker: '', quantity: null, avg_price: null, current_price: null, current_value: null }
   showAddAssetModal.value = true
 }
@@ -662,6 +671,14 @@ const openEditAsset = (asset) => {
       else if (rest.includes('14K')) { goldPurity.value = '14K'; goldType.value = rest.replace('14K', '').trim() }
       else if (rest.includes('10K')) { goldPurity.value = '10K'; goldType.value = rest.replace('10K', '').trim() }
       else { goldPurity.value = 'Khác'; customGoldPurity.value = ''; goldType.value = rest }
+    }
+  } else if (asset.category === 'deposit') {
+    const match = asset.name.match(/(.+) - ([\d.]+)%$/)
+    if (match) {
+      assetForm.value.name = match[1].trim()
+      depositInterestRate.value = match[2]
+    } else {
+      depositInterestRate.value = ''
     }
   }
   showAddAssetModal.value = true
@@ -695,6 +712,14 @@ const submitAssetForm = async () => {
       payload.ticker = undefined
     } else if (payload.category === 'fund') {
       payload.ticker = undefined
+    } else if (payload.category === 'deposit') {
+      if (depositInterestRate.value) {
+        payload.name = `${payload.name} - ${depositInterestRate.value}%`
+      }
+      payload.ticker = undefined
+      payload.quantity = undefined
+      payload.avg_price = undefined
+      payload.current_price = undefined
     } else {
       payload.ticker = undefined
       payload.quantity = undefined

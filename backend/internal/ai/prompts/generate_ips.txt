@@ -26,7 +26,7 @@ Lưu ý quan trọng: Thông tin tài sản dưới đây là tình trạng tạ
 
 --- HƯỚNG DẪN BẮT BUỘC ---
 1. IPS này đóng vai trò như "Bản Hiến Pháp" đầu tư cho khách hàng (Unified IPS). Hệ thống của chúng tôi quản lý đa mục tiêu dựa trên 1 Master IPS. Nếu khách hàng không cung cấp mục tiêu ngắn hạn, hãy lấy Mục tiêu Tự do Tài chính (FI) làm mục tiêu cốt lõi.
-2. KHÔNG đề xuất MÃ CỔ PHIẾU CỤ THỂ (VD: KHÔNG khuyên "Hãy mua HPG, VCB"). Thay vào đó, đưa ra LỚP TÀI SẢN (Asset Class) mà KHÁCH HÀNG ĐÃ YÊU CẦU TRONG PHẦN SỞ THÍCH. Nếu họ không chọn, hãy tự động tư vấn phân bổ thông minh (như Cổ phiếu, Trái phiếu, Vàng, Tiền số, BĐS...).
+2. KHÔNG đề xuất MÃ CỔ PHIẾU CỤ THỂ (VD: KHÔNG khuyên "Hãy mua HPG, VCB"). Thay vào đó, đưa ra LỚP TÀI SẢN (Asset Class) mà KHÁCH HÀNG ĐÃ YÊU CẦU TRONG PHẦN SỞ THÍCH. Nếu họ không chọn, hãy tự động tư vấn phân bổ thông minh (như Cổ phiếu, Trái phiếu, Vàng, Tiền số, BĐS, Chứng chỉ quỹ...).
 3. Bạn BẮT BUỘC phải phân tách rõ ràng dòng tiền ngắn hạn (Short-term Bucket - phục vụ thanh khoản, rủi ro thấp) và dài hạn (Long-term Bucket - phục vụ mục tiêu FI, rủi ro cao hơn).
 4. Trả về định dạng JSON BẮT BUỘC với 2 trường:
    - `target_allocation` (Object): Tỷ trọng phân bổ mục tiêu của các lớp tài sản. Ví dụ: {"stock": 60, "crypto": 10, "cash": 30}. (Key của JSON này hoàn toàn linh hoạt dựa trên tài sản bạn đề xuất, KHÔNG CẦN CỐ ĐỊNH, tổng = 100).

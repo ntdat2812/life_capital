@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -56,6 +57,8 @@ func (p *GeminiProvider) GenerateThesis(ctx context.Context, req *model.ThesisGe
 
 func (p *GeminiProvider) generateContent(ctx context.Context, prompt string) (string, error) {
 	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", p.model, p.apiKey)
+	log.Printf("=== [Gemini] Sending Prompt to AI ===\n%s\n===================================\n", prompt)
+
 	reqBody := map[string]interface{}{
 		"contents": []interface{}{
 			map[string]interface{}{
