@@ -59,8 +59,8 @@ Tất cả các thẻ hiển thị (cards), sidebar và modal đều kế thừa
 └─────────────────┴──────────────────────────────────────┘
 ```
 
-- **Sidebar Layout**: Cố định bên trái đối với màn hình Desktop (tự động thu nhỏ thành dạng icon trên Tablet, chuyển xuống thanh tab bar phía dưới đối với Mobile).
-- **Header**: Hiển thị trạng thái Onboarding hoặc cảnh báo "Life Event" chưa xử lý kèm theo lối tắt tới công cụ hỏi đáp AI Advisor.
+- **Sidebar Layout**: Cố định bên trái đối với màn hình Desktop (tự động thu nhỏ thành dạng icon trên Tablet, chuyển xuống thanh tab bar phía dưới đối với Mobile). Tab Notifications độc lập đã được gỡ bỏ.
+- **Header**: Nằm cố định phía trên (Sticky Header). Chứa biểu tượng Cái chuông (Bell Icon) cho Notifications (Popover/Drawer) và hình đại diện User. Hiển thị trạng thái Onboarding hoặc cảnh báo "Life Event" chưa xử lý.
 
 ---
 

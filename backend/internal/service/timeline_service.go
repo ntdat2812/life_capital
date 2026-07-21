@@ -21,6 +21,7 @@ type TimelineService struct {
 	depRepo      *repository.DependentRepository
 	eventRepo    repository.LifeEventRepository
 	txManager    *repository.TxManager
+	ipsService   IPSService
 }
 
 func NewTimelineService(
@@ -30,6 +31,7 @@ func NewTimelineService(
 	depRepo *repository.DependentRepository,
 	eventRepo repository.LifeEventRepository,
 	txManager *repository.TxManager,
+	ipsService IPSService,
 ) *TimelineService {
 	return &TimelineService{
 		aiProviders:  aiProviders,
@@ -38,6 +40,7 @@ func NewTimelineService(
 		depRepo:      depRepo,
 		eventRepo:    eventRepo,
 		txManager:    txManager,
+		ipsService:   ipsService,
 	}
 }
 
@@ -150,7 +153,7 @@ func (s *TimelineService) ConfirmEvent(ctx context.Context, userID string, req *
 		return err
 	}
 
-	return s.txManager.ExecTx(ctx, func(tx pgx.Tx) error {
+	err = s.txManager.ExecTx(ctx, func(tx pgx.Tx) error {
 		txProfileRepo := repository.NewInvestorProfileRepository(tx)
 		txEventRepo := repository.NewLifeEventRepository(tx)
 		txIncomeRepo := repository.NewIncomeRepository(tx)
@@ -262,6 +265,8 @@ func (s *TimelineService) ConfirmEvent(ctx context.Context, userID string, req *
 
 		return nil
 	})
+
+	return err
 }
 
 func (s *TimelineService) GetTimeline(ctx context.Context, userID string) ([]model.LifeEvent, error) {

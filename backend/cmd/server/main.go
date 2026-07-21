@@ -71,6 +71,8 @@ func main() {
 	incomeRepo := repository.NewIncomeRepository(dbPool)
 	dependentRepo := repository.NewDependentRepository(dbPool)
 	lifeEventRepo := repository.NewLifeEventRepository(dbPool)
+	notifRepo := repository.NewNotificationRepository(dbPool)
+	ipsRepo := repository.NewInvestmentPolicyRepository(dbPool)
 	txManager := repository.NewTxManager(dbPool)
 
 	// Initialize AI Provider
@@ -95,7 +97,10 @@ func main() {
 	profileService := service.NewInvestorProfileService(investorProfileRepo, incomeRepo, aiProviders...)
 	wealthService := service.NewWealthService(assetRepo, liabilityRepo, userRepo)
 	cashflowService := service.NewCashflowService(incomeRepo, dependentRepo)
-	timelineService := service.NewTimelineService(aiProviders, investorProfileRepo, incomeRepo, dependentRepo, lifeEventRepo, txManager)
+	
+	notifService := service.NewNotificationService(notifRepo)
+	ipsService := service.NewIPSService(ipsRepo, investorProfileRepo, assetRepo, notifService, aiProviders)
+	timelineService := service.NewTimelineService(aiProviders, investorProfileRepo, incomeRepo, dependentRepo, lifeEventRepo, txManager, ipsService)
 
 	// Initialize handlers
 	healthHandler := handler.NewHealthHandler()
@@ -104,9 +109,11 @@ func main() {
 	wealthHandler := handler.NewWealthHandler(wealthService)
 	cashflowHandler := handler.NewCashflowHandler(cashflowService)
 	timelineHandler := handler.NewTimelineHandler(timelineService)
+	notifHandler := handler.NewNotificationHandler(notifService)
+	ipsHandler := handler.NewIPSHandler(ipsService)
 
 	// Register routes
-	registerRoutes(e, healthHandler, authHandler, profileHandler, wealthHandler, cashflowHandler, timelineHandler)
+	registerRoutes(e, healthHandler, authHandler, profileHandler, wealthHandler, cashflowHandler, timelineHandler, notifHandler, ipsHandler)
 
 	// Get PORT from environment variable (default: 8080)
 	port := os.Getenv("PORT")
@@ -123,7 +130,7 @@ func main() {
 }
 
 // registerRoutes maps all API routes to their handlers.
-func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHandler *handler.AuthHandler, profileHandler *handler.ProfileHandler, wealthHandler *handler.WealthHandler, cashflowHandler *handler.CashflowHandler, timelineHandler *handler.TimelineHandler) {
+func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHandler *handler.AuthHandler, profileHandler *handler.ProfileHandler, wealthHandler *handler.WealthHandler, cashflowHandler *handler.CashflowHandler, timelineHandler *handler.TimelineHandler, notifHandler *handler.NotificationHandler, ipsHandler *handler.IPSHandler) {
 	api := e.Group("/api/v1")
 
 	// Public routes
@@ -174,4 +181,16 @@ func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHand
 	wealthGroup.GET("/liabilities", wealthHandler.GetLiabilities)
 	wealthGroup.PUT("/liabilities/:id", wealthHandler.UpdateLiability)
 	wealthGroup.DELETE("/liabilities/:id", wealthHandler.DeleteLiability)
+
+	// Notification routes
+	notifGroup := protected.Group("/notifications")
+	notifGroup.GET("", notifHandler.GetNotifications)
+	notifGroup.GET("/unread-count", notifHandler.GetUnreadCount)
+	notifGroup.PUT("/:id/read", notifHandler.MarkAsRead)
+
+	// IPS routes
+	ipsGroup := protected.Group("/ips")
+	ipsGroup.GET("/latest", ipsHandler.GetLatestIPS)
+	ipsGroup.PUT("/latest", ipsHandler.UpdateIPS)
+	ipsGroup.POST("/generate", ipsHandler.GenerateIPS)
 }

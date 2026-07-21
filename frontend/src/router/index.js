@@ -56,6 +56,13 @@ const routes = [
     component: () => import('../views/OnboardingView.vue'),
     meta: { requiresAuth: true }
   },
+
+  {
+    path: '/ips',
+    name: 'ips',
+    component: () => import('../views/IPSView.vue'),
+    meta: { requiresAuth: true }
+  },
   {
     path: '/login',
     name: 'login',

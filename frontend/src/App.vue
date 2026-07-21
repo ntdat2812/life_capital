@@ -77,6 +77,14 @@
           </router-link>
 
           <router-link 
+            to="/ips" 
+            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition duration-150"
+            :class="$route.name === 'ips' ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'"
+          >
+            🧭 Chiến lược đầu tư
+          </router-link>
+
+          <router-link 
             to="/review" 
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition duration-150"
             :class="$route.name === 'review' ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'"
@@ -113,27 +121,57 @@
     </aside>
 
     <!-- Main Content Area -->
-    <main class="flex-grow p-4 md:p-8 relative z-10 overflow-y-auto">
-      <router-view v-slot="{ Component }">
-        <transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </transition>
-      </router-view>
+    <main class="flex-grow relative z-10 flex flex-col h-screen overflow-hidden">
+      
+      <!-- Top Header -->
+      <header v-if="authStore.isAuthenticated" class="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur-md flex items-center justify-end px-6 sticky top-0 z-40">
+        <div class="flex items-center gap-4">
+          <NotificationsPopover />
+          
+          <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold text-white shadow-lg border border-indigo-400">
+            {{ authStore.user?.name ? authStore.user.name.charAt(0).toUpperCase() : 'U' }}
+          </div>
+        </div>
+      </header>
+
+      <div class="flex-grow p-4 md:p-8 overflow-y-auto custom-scrollbar">
+        <router-view v-slot="{ Component }">
+          <transition name="fade" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
+      </div>
     </main>
   </div>
 </template>
 
 <script setup>
+import { onMounted, watch } from 'vue'
 import { useAuthStore } from './stores/authStore'
+import { useNotificationStore } from './stores/notificationStore'
 import { useRouter } from 'vue-router'
+import NotificationsPopover from './components/NotificationsPopover.vue'
 
 const authStore = useAuthStore()
+const notificationStore = useNotificationStore()
 const router = useRouter()
 
 const handleLogout = () => {
   authStore.logout()
   router.push('/login')
 }
+
+watch(() => authStore.isAuthenticated, (isAuth) => {
+  if (isAuth) {
+    notificationStore.fetchUnreadCount()
+  }
+})
+
+onMounted(() => {
+  if (authStore.isAuthenticated) {
+    notificationStore.fetchUnreadCount()
+  }
+})
 </script>
 
 <style>

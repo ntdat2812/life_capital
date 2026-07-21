@@ -299,6 +299,32 @@ definitions:
       user_id:
         type: string
     type: object
+  model.InvestmentPolicy:
+    properties:
+      created_at:
+        type: string
+      detailed_strategy:
+        type: string
+      id:
+        type: string
+      is_ai_recommended:
+        type: boolean
+      profile_version:
+        type: integer
+      status:
+        description: '''draft'', ''active'', ''superseded'''
+        type: string
+      target_allocation:
+        type: object
+      trigger_event_id:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+      version:
+        type: integer
+    type: object
   model.InvestorProfile:
     properties:
       created_at:
@@ -425,6 +451,25 @@ definitions:
         type: number
       total_liabilities:
         type: number
+    type: object
+  model.Notification:
+    properties:
+      action_link:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      is_read:
+        type: boolean
+      message:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+      user_id:
+        type: string
     type: object
   model.OnboardingRequest:
     properties:
@@ -906,6 +951,148 @@ paths:
       summary: Health Check
       tags:
       - system
+  /api/v1/ips/generate:
+    post:
+      consumes:
+      - application/json
+      description: Let AI analyze current profile and assets to generate a new IPS
+        strategy
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.InvestmentPolicy'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Generate IPS via AI
+      tags:
+      - IPS
+  /api/v1/ips/latest:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the latest Investment Policy Statement for the authenticated
+        user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.InvestmentPolicy'
+      security:
+      - BearerAuth: []
+      summary: Get latest IPS
+      tags:
+      - IPS
+    put:
+      consumes:
+      - application/json
+      description: Update the current Investment Policy Statement
+      parameters:
+      - description: Updated Policy
+        in: body
+        name: policy
+        required: true
+        schema:
+          $ref: '#/definitions/model.InvestmentPolicy'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update IPS
+      tags:
+      - IPS
+  /api/v1/notifications:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of notifications for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Notification'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get user notifications
+      tags:
+      - Notifications
+  /api/v1/notifications/{id}/read:
+    put:
+      consumes:
+      - application/json
+      description: Mark a specific notification as read for the authenticated user
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Mark a notification as read
+      tags:
+      - Notifications
+  /api/v1/notifications/unread-count:
+    get:
+      consumes:
+      - application/json
+      description: Get the number of unread notifications for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get unread notification count
+      tags:
+      - Notifications
   /api/v1/profile/me:
     get:
       consumes:

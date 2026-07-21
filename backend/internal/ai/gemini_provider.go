@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+
+	"github.com/datnguyen/life_capital/backend/internal/model"
 )
 
 type GeminiProvider struct {
@@ -42,6 +44,10 @@ func (p *GeminiProvider) Model() string {
 
 func (p *GeminiProvider) ExtractProfile(ctx context.Context, chatHistory string) (*ExtractionResult, error) {
 	return extractProfileHelper(ctx, chatHistory, p.generateContent)
+}
+
+func (p *GeminiProvider) GenerateIPS(ctx context.Context, profile *model.InvestorProfile, assets []model.Asset, preferredAssets []string) (*IPSExtractionResult, error) {
+	return generateIPSHelper(ctx, profile, assets, preferredAssets, p.generateContent)
 }
 
 func (p *GeminiProvider) generateContent(ctx context.Context, prompt string) (string, error) {

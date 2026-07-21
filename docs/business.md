@@ -48,3 +48,8 @@ Life Capital là **hệ điều hành quản lý tài sản cá nhân** (Persona
 ### 2.3 Life Timeline và Onboarding
 - Lần đầu onboarding, người dùng tham gia cuộc phỏng vấn dạng conversational với AI để thiết lập hồ sơ Investor Profile.
 - Mỗi khi có biến động lớn, hệ thống lưu lịch sử dòng thời gian và cascade cập nhật mục tiêu tài chính tự động.
+
+### 2.4 Khởi tạo và Quản lý IPS (Investment Policy Statement)
+- **User-Initiated:** IPS không tự sinh ra ngầm. Sau khi có Profile và (tùy chọn) khai báo tài sản ban đầu, người dùng chủ động yêu cầu AI "Tư vấn Chiến lược".
+- **Asset Class Level:** IPS đóng vai trò Hiến pháp, chỉ phân bổ ở mức Lớp tài sản (Cổ phiếu, Vàng, BĐS...) và định ra nguyên tắc quản trị rủi ro chung. Việc phím mã cụ thể sẽ nằm ở phần Watchlist & Monthly Review.
+- **Single Source of Truth:** Hệ thống duy trì duy nhất 1 bản IPS cho người dùng. Mỗi lần cập nhật, AI sẽ phân tích lại toàn cảnh (Profile, Assets, Idle Cash) và ghi đè nội dung mới, đảm bảo tính liền mạch.

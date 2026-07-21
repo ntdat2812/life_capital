@@ -140,9 +140,8 @@ erDiagram
         int profile_version
         uuid trigger_event_id FK
         jsonb target_allocation
-        jsonb buy_rules
-        jsonb sell_rules
-        text ai_rationale
+        text detailed_strategy
+        bool is_ai_recommended
     }
 
     investment_theses {
@@ -506,14 +505,8 @@ CREATE TABLE investment_policies (
     investment_goal         TEXT,
     investment_style        TEXT,
     target_allocation       JSONB,
-    buy_rules               JSONB,
-    sell_rules              JSONB,
-    risk_limits             JSONB,
-    rebalance_rules         TEXT,
-    review_frequency        VARCHAR(50),
-    notes                   TEXT,
-    effective_date          DATE,
-    ai_rationale            TEXT,
+    detailed_strategy       TEXT,
+    is_ai_recommended       BOOLEAN DEFAULT false,
     created_at      TIMESTAMPTZ DEFAULT NOW(),
     updated_at      TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE(user_id, version)

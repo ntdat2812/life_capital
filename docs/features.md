@@ -24,21 +24,26 @@
 - **Quản lý các khoản nợ (Liabilities)**: CRUD các khoản nợ vay mua nhà, mua xe, nợ thẻ tín dụng kèm theo dư nợ còn lại và số tiền trả góp hàng tháng.
 - **Tự động tính toán ròng**: Tính toán tổng Assets, tổng Liabilities, tỷ lệ đòn bẩy (Debt-to-Asset) và Net Worth thực tế.
 
-### 1.4 Module 3 — Portfolio
-- **Danh mục cổ phiếu**: Bảng thống kê chi tiết các mã đang hold, số lượng, giá vốn, giá hiện tại, tỷ trọng thực tế và tỷ trọng mục tiêu (Target Allocation).
+### 1.4 Module 3 — Portfolio & Market Data Sync
+- **Danh mục tài sản**: Bảng thống kê chi tiết các mã đang hold, số lượng, giá vốn, giá hiện tại, tỷ trọng thực tế và tỷ trọng mục tiêu (Target Allocation).
+- **Tự động cập nhật giá**: Sử dụng Background Worker (Cronjob) và tích hợp Public APIs (TCBS, SSI, Yahoo Finance) để cào giá trị tài sản hàng ngày (cuối ngày).
 - **Khuyến nghị & Conviction**: Điểm tin cậy (Conviction Score 1-10) của nhà đầu tư cho cổ phiếu và khuyến nghị hành động tương ứng (BUY/HOLD/SELL).
+- **Hệ thống Thông báo (Notification System)**: Bắn cảnh báo tự động khi giá chạm ngưỡng mua (Watchlist) hoặc tỷ trọng tài sản vượt quá giới hạn rủi ro.
 
 ### 1.5 Module 4 — Investment Policy Statement (IPS)
-- **Quy tắc đầu tư**: Thiết lập mục tiêu chiến lược dài hạn, tỷ trọng tối đa/tối thiểu cho từng tài sản, quy tắc mua khi nào, bán khi nào và giới hạn rủi ro.
+- **Quy tắc đầu tư (IPS)**: Thiết lập mục tiêu chiến lược dài hạn, tỷ trọng tối đa/tối thiểu cho từng lớp tài sản (Target Allocation), quy tắc mua/bán và giới hạn rủi ro. (Đóng vai trò là "Luật chơi Vĩ mô" cho toàn bộ tài sản).
+- **AI Tự động Đề xuất (AI Generator)**: Kể cả khi chưa có tài sản, AI sẽ tự động sinh ra một bản Nháp IPS (Draft) dựa trên Investor Profile và Life Event để gợi ý tỷ trọng nên phân bổ. User có toàn quyền tinh chỉnh (Manual Override) và lưu thành bản chính thức.
 - **Phiên bản (Versioning)**: IPS lưu lịch sử dưới dạng phiên bản (v1, v2, v3) để đối chiếu sự thay đổi tư duy đầu tư qua thời gian.
 
 ### 1.6 Module 5 — Investment Thesis (Luận điểm đầu tư)
-- **Tại sao tôi sở hữu? (Why I Own)**: Ghi lại lý do nắm giữ cốt lõi của doanh nghiệp.
-- **Moats & Catalyst**: Lợi thế cạnh tranh và động lực tăng trưởng tương lai.
+- **Tại sao tôi sở hữu? (Why I Own)**: Ghi lại lý do nắm giữ cốt lõi của từng doanh nghiệp/mã cụ thể. (Đóng vai trò là "Lý do Vi mô" cho 1 tài sản).
+- **AI Viết hộ Thesis**: Người dùng không chuyên chỉ cần nhập mã cổ phiếu, AI sẽ tự động phân tích doanh nghiệp và sinh ra một bản Thesis tiêu chuẩn (bao gồm Lợi thế cạnh tranh - Moats, Động lực - Catalysts, và Rủi ro) để user tham khảo.
 - **Sell Rules**: Điều kiện bắt buộc phải bán (Thesis bị phá vỡ, quản trị doanh nghiệp xấu đi).
 
-### 1.7 Module 6 — Earnings Review
-- **AI Phân Tích KQKD**: Sau mỗi quý, người dùng nhập số liệu tài chính cơ bản của doanh nghiệp, AI tự động quét so sánh với các chỉ số cần theo dõi trong Thesis và chấm điểm sức khỏe quý (1-10).
+### 1.7 Module 6 — Earnings Review (Đánh giá BCTC)
+- **AI Đọc BCTC**: Sau mỗi quý, người dùng nhập link hoặc paste nội dung Báo cáo tài chính/KQKD của doanh nghiệp.
+- **Tự động đối chiếu Thesis**: AI tự động đọc BCTC mới nhất và so sánh thẳng với các Luận điểm (Thesis) đã viết ở Module 5. Nếu phát hiện Moat bị phá vỡ hoặc tăng trưởng giảm, AI sẽ bắn Notification cảnh báo yêu cầu user xem xét bán.
+- **Chấm điểm**: AI chấm điểm sức khỏe quý (1-10).
 
 ### 1.8 Module 7 — Decision Journal (Nhật ký quyết định)
 - **Ghi nhận hành động**: Lưu lại nhật ký mua/bán, số tiền, giá, lý do ra quyết định và trạng thái tâm lý (FOMO, bình tĩnh, lo sợ).

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+
+	"github.com/datnguyen/life_capital/backend/internal/model"
 )
 
 type GroqProvider struct {
@@ -42,6 +44,10 @@ func (p *GroqProvider) Model() string {
 
 func (p *GroqProvider) ExtractProfile(ctx context.Context, chatHistory string) (*ExtractionResult, error) {
 	return extractProfileHelper(ctx, chatHistory, p.generateContent)
+}
+
+func (p *GroqProvider) GenerateIPS(ctx context.Context, profile *model.InvestorProfile, assets []model.Asset, preferredAssets []string) (*IPSExtractionResult, error) {
+	return generateIPSHelper(ctx, profile, assets, preferredAssets, p.generateContent)
 }
 
 func (p *GroqProvider) generateContent(ctx context.Context, prompt string) (string, error) {

@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/datnguyen/life_capital/backend/internal/model"
 )
 
 //go:embed prompts/extract_profile.txt
@@ -19,6 +21,9 @@ var extractProfilePrompt string
 
 //go:embed prompts/analyze_life_event.txt
 var analyzeLifeEventPrompt string
+
+//go:embed prompts/generate_ips.txt
+var generateIPSPrompt string
 
 type ExtractionResult struct {
 	DateOfBirth                 *string `json:"date_of_birth"`
@@ -56,11 +61,17 @@ type LifeEventAnalysisResult struct {
 	DependentsToAdd      []DependentDraft    `json:"dependents_to_add"`
 }
 
+type IPSExtractionResult struct {
+	TargetAllocation map[string]float64 `json:"target_allocation"`
+	DetailedStrategy string             `json:"detailed_strategy"`
+}
+
 type AIProvider interface {
 	Name() string
 	Model() string
 	ExtractProfile(ctx context.Context, chatHistory string) (*ExtractionResult, error)
 	AnalyzeLifeEvent(ctx context.Context, promptContext string) (*LifeEventAnalysisResult, error)
+	GenerateIPS(ctx context.Context, profile *model.InvestorProfile, assets []model.Asset, preferredAssets []string) (*IPSExtractionResult, error)
 }
 
 // GetMaxOutputTokens retrieves the maximum output tokens from the environment, defaulting to 8192
@@ -132,6 +143,86 @@ func analyzeLifeEventHelper(ctx context.Context, promptContext string, generateC
 	var result LifeEventAnalysisResult
 	if err := json.Unmarshal([]byte(jsonText), &result); err != nil {
 		return nil, fmt.Errorf("failed to parse AI JSON for event: %v, raw text: %s", err, jsonText)
+	}
+
+	return &result, nil
+}
+
+func generateIPSHelper(ctx context.Context, profile *model.InvestorProfile, assets []model.Asset, preferredAssets []string, generate func(context.Context, string) (string, error)) (*IPSExtractionResult, error) {
+	cleanTemplate := strings.TrimSpace(generateIPSPrompt)
+	
+	age := 0
+	if profile != nil && !profile.DateOfBirth.IsZero() {
+		age = time.Now().Year() - profile.DateOfBirth.Year()
+	}
+
+	maritalStatus := ""
+	essentialExpense := 0.0
+	discretionaryExpense := 0.0
+	riskScore := 0
+	riskTolerance := ""
+	fiTargetAmount := 0.0
+
+	if profile != nil {
+		maritalStatus = profile.MaritalStatus
+		essentialExpense = profile.EssentialMonthlyExpense
+		discretionaryExpense = profile.DiscretionaryMonthlyExpense
+		riskScore = profile.RiskScore
+		riskTolerance = profile.RiskTolerance
+		fiTargetAmount = profile.FITargetAmount
+	}
+
+	var assetListStr string
+	if len(assets) == 0 {
+		assetListStr = "Chưa có tài sản nào được khai báo."
+	} else {
+		for _, a := range assets {
+			qty := 0.0
+			if a.Quantity != nil {
+				qty = *a.Quantity
+			}
+			assetListStr += fmt.Sprintf("- %s (%s): %f (Giá trị: %f)\n", a.Name, a.Category, qty, a.CurrentValue)
+		}
+	}
+
+	preferredAssetsStr := ""
+	if len(preferredAssets) > 0 {
+		preferredAssetsStr = strings.Join(preferredAssets, ", ")
+	} else {
+		preferredAssetsStr = "Khách hàng không chỉ định. Vui lòng tự động tư vấn phân bổ thông minh dựa trên khẩu vị rủi ro và các mục tiêu."
+	}
+
+	loc, err := time.LoadLocation("Asia/Ho_Chi_Minh")
+	if err != nil {
+		loc = time.Local
+	}
+	currentTimeStr := time.Now().In(loc).Format("15:04 02/01/2006")
+
+	prompt := fmt.Sprintf(cleanTemplate,
+		age,
+		maritalStatus,
+		0.0, // passive income omitted for now
+		essentialExpense,
+		discretionaryExpense,
+		riskScore,
+		riskTolerance,
+		fiTargetAmount,
+		preferredAssetsStr,
+		currentTimeStr, // %s in Tình trạng tài sản
+		assetListStr,
+		currentTimeStr, // %s in 1. Bức tranh Dòng tiền
+	)
+
+	respText, err := generate(ctx, prompt)
+	if err != nil {
+		return nil, err
+	}
+
+	respText = extractJSON(respText)
+
+	var result IPSExtractionResult
+	if err := json.Unmarshal([]byte(respText), &result); err != nil {
+		return nil, fmt.Errorf("failed to parse AI JSON for IPS: %v, raw text: %s", err, respText)
 	}
 
 	return &result, nil
