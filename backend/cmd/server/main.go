@@ -70,6 +70,8 @@ func main() {
 	liabilityRepo := repository.NewLiabilityRepository(dbPool)
 	incomeRepo := repository.NewIncomeRepository(dbPool)
 	dependentRepo := repository.NewDependentRepository(dbPool)
+	lifeEventRepo := repository.NewLifeEventRepository(dbPool)
+	txManager := repository.NewTxManager(dbPool)
 
 	// Initialize AI Provider
 	geminiProvider, err := ai.NewGeminiProvider()
@@ -93,6 +95,7 @@ func main() {
 	profileService := service.NewInvestorProfileService(investorProfileRepo, incomeRepo, aiProviders...)
 	wealthService := service.NewWealthService(assetRepo, liabilityRepo, userRepo)
 	cashflowService := service.NewCashflowService(incomeRepo, dependentRepo)
+	timelineService := service.NewTimelineService(aiProviders, investorProfileRepo, incomeRepo, dependentRepo, lifeEventRepo, txManager)
 
 	// Initialize handlers
 	healthHandler := handler.NewHealthHandler()
@@ -100,9 +103,10 @@ func main() {
 	profileHandler := handler.NewProfileHandler(profileService)
 	wealthHandler := handler.NewWealthHandler(wealthService)
 	cashflowHandler := handler.NewCashflowHandler(cashflowService)
+	timelineHandler := handler.NewTimelineHandler(timelineService)
 
 	// Register routes
-	registerRoutes(e, healthHandler, authHandler, profileHandler, wealthHandler, cashflowHandler)
+	registerRoutes(e, healthHandler, authHandler, profileHandler, wealthHandler, cashflowHandler, timelineHandler)
 
 	// Get PORT from environment variable (default: 8080)
 	port := os.Getenv("PORT")
@@ -119,7 +123,7 @@ func main() {
 }
 
 // registerRoutes maps all API routes to their handlers.
-func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHandler *handler.AuthHandler, profileHandler *handler.ProfileHandler, wealthHandler *handler.WealthHandler, cashflowHandler *handler.CashflowHandler) {
+func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHandler *handler.AuthHandler, profileHandler *handler.ProfileHandler, wealthHandler *handler.WealthHandler, cashflowHandler *handler.CashflowHandler, timelineHandler *handler.TimelineHandler) {
 	api := e.Group("/api/v1")
 
 	// Public routes
@@ -140,6 +144,11 @@ func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHand
 	profile.POST("/onboarding", profileHandler.Onboarding)
 	profile.GET("/me", profileHandler.GetMe)
 	profile.PUT("/me", profileHandler.UpdateProfile)
+	
+	// Timeline routes
+	profile.POST("/timeline/analyze", timelineHandler.AnalyzeEvent)
+	profile.POST("/timeline/confirm", timelineHandler.ConfirmEvent)
+	profile.GET("/timeline", timelineHandler.GetTimeline)
 
 	// Cashflow routes
 	cashflowGroup := protected.Group("/cashflow")

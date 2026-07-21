@@ -9,8 +9,9 @@ import (
 )
 
 type GeminiProvider struct {
-	apiKey string
-	model  string
+	apiKey    string
+	model     string
+	maxTokens int
 }
 
 func NewGeminiProvider() (*GeminiProvider, error) {
@@ -25,8 +26,9 @@ func NewGeminiProvider() (*GeminiProvider, error) {
 	}
 
 	return &GeminiProvider{
-		apiKey: apiKey,
-		model:  model,
+		apiKey:    apiKey,
+		model:     model,
+		maxTokens: GetMaxOutputTokens(),
 	}, nil
 }
 
@@ -56,6 +58,7 @@ func (p *GeminiProvider) generateContent(ctx context.Context, prompt string) (st
 		},
 		"generationConfig": map[string]interface{}{
 			"responseMimeType": "application/json",
+			"maxOutputTokens":  p.maxTokens,
 		},
 	}
 
@@ -89,4 +92,8 @@ func (p *GeminiProvider) generateContent(ctx context.Context, prompt string) (st
 	}
 
 	return geminiResp.Candidates[0].Content.Parts[0].Text, nil
+}
+
+func (p *GeminiProvider) AnalyzeLifeEvent(ctx context.Context, promptContext string) (*LifeEventAnalysisResult, error) {
+	return analyzeLifeEventHelper(ctx, promptContext, p.generateContent)
 }

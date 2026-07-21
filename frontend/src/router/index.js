@@ -15,6 +15,18 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/profile/timeline',
+    name: 'timeline',
+    component: () => import('../views/TimelineView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/profile/timeline/new',
+    name: 'log-event',
+    component: () => import('../views/LogEventView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/assets',
     name: 'assets',
     component: () => import('../views/AssetsView.vue'),

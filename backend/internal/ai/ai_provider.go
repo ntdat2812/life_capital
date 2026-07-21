@@ -8,12 +8,17 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 )
 
 //go:embed prompts/extract_profile.txt
 var extractProfilePrompt string
+
+//go:embed prompts/analyze_life_event.txt
+var analyzeLifeEventPrompt string
 
 type ExtractionResult struct {
 	DateOfBirth                 *string `json:"date_of_birth"`
@@ -26,10 +31,47 @@ type ExtractionResult struct {
 	FITargetAmount              float64 `json:"fi_target_amount"`
 }
 
+type IncomeStreamDraft struct {
+	Name      string  `json:"name"`
+	Type      string  `json:"type"`
+	Amount    float64 `json:"amount"`
+	IsPassive bool    `json:"is_passive"`
+}
+
+type DependentDraft struct {
+	Name         string  `json:"name"`
+	Relationship string  `json:"relationship"`
+	MonthlyCost  float64 `json:"monthly_cost"`
+}
+
+type LifeEventAnalysisResult struct {
+	Category             string              `json:"category"`
+	AIImpactAnalysis     string              `json:"ai_impact_analysis"`
+	IncomeImpact         float64             `json:"income_impact"`
+	ExpenseImpact        float64             `json:"expense_impact"`
+	NewMaritalStatus     *string             `json:"new_marital_status"`
+	NewRiskScore         *int                `json:"new_risk_score"`
+	NewRiskTolerance     *string             `json:"new_risk_tolerance"`
+	IncomeStreamsToAdd   []IncomeStreamDraft `json:"income_streams_to_add"`
+	DependentsToAdd      []DependentDraft    `json:"dependents_to_add"`
+}
+
 type AIProvider interface {
 	Name() string
 	Model() string
 	ExtractProfile(ctx context.Context, chatHistory string) (*ExtractionResult, error)
+	AnalyzeLifeEvent(ctx context.Context, promptContext string) (*LifeEventAnalysisResult, error)
+}
+
+// GetMaxOutputTokens retrieves the maximum output tokens from the environment, defaulting to 8192
+func GetMaxOutputTokens() int {
+	maxTokens := 8192
+	if tokensStr := os.Getenv("AI_MAX_OUTPUT_TOKENS"); tokensStr != "" {
+		if val, err := strconv.Atoi(tokensStr); err == nil {
+			maxTokens = val
+		}
+	}
+	return maxTokens
 }
 
 // ExecuteWithFallback is a generic helper to run any AIProvider method with a fallback mechanism.
@@ -68,6 +110,28 @@ func extractProfileHelper(ctx context.Context, chatHistory string, generateConte
 	var result ExtractionResult
 	if err := json.Unmarshal([]byte(jsonText), &result); err != nil {
 		return nil, fmt.Errorf("failed to parse AI JSON: %v, raw text: %s", err, jsonText)
+	}
+
+	return &result, nil
+}
+
+// AnalyzeLifeEventHelper handles common JSON extraction logic for life events
+func analyzeLifeEventHelper(ctx context.Context, promptContext string, generateContent func(context.Context, string) (string, error)) (*LifeEventAnalysisResult, error) {
+	currentYear := time.Now().Year()
+	cleanTemplate := strings.TrimSpace(analyzeLifeEventPrompt)
+	
+	prompt := fmt.Sprintf(cleanTemplate, currentYear, promptContext)
+
+	jsonText, err := generateContent(ctx, prompt)
+	if err != nil {
+		return nil, err
+	}
+
+	jsonText = extractJSON(jsonText)
+
+	var result LifeEventAnalysisResult
+	if err := json.Unmarshal([]byte(jsonText), &result); err != nil {
+		return nil, fmt.Errorf("failed to parse AI JSON for event: %v, raw text: %s", err, jsonText)
 	}
 
 	return &result, nil

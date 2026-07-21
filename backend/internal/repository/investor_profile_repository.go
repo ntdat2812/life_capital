@@ -5,14 +5,13 @@ import (
 
 	"github.com/datnguyen/life_capital/backend/internal/model"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type InvestorProfileRepository struct {
-	db *pgxpool.Pool
+	db DBTX
 }
 
-func NewInvestorProfileRepository(db *pgxpool.Pool) *InvestorProfileRepository {
+func NewInvestorProfileRepository(db DBTX) *InvestorProfileRepository {
 	return &InvestorProfileRepository{db: db}
 }
 

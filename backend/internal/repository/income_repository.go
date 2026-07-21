@@ -6,14 +6,13 @@ import (
 	"github.com/datnguyen/life_capital/backend/internal/model"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type IncomeRepository struct {
-	db *pgxpool.Pool
+	db DBTX
 }
 
-func NewIncomeRepository(db *pgxpool.Pool) *IncomeRepository {
+func NewIncomeRepository(db DBTX) *IncomeRepository {
 	return &IncomeRepository{db: db}
 }
 

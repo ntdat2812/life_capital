@@ -6,14 +6,13 @@ import (
 	"github.com/datnguyen/life_capital/backend/internal/model"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type DependentRepository struct {
-	db *pgxpool.Pool
+	db DBTX
 }
 
-func NewDependentRepository(db *pgxpool.Pool) *DependentRepository {
+func NewDependentRepository(db DBTX) *DependentRepository {
 	return &DependentRepository{db: db}
 }
 

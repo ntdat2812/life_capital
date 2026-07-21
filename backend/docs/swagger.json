@@ -667,6 +667,145 @@
                 }
             }
         },
+        "/api/v1/profile/timeline": {
+            "get": {
+                "description": "Retrieve a list of all life events logged by the user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "timeline"
+                ],
+                "summary": "Get user's life timeline",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.LifeEvent"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/profile/timeline/analyze": {
+            "post": {
+                "description": "Send event text to AI to analyze its impact on the user's financial profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "timeline"
+                ],
+                "summary": "Analyze a new life event",
+                "parameters": [
+                    {
+                        "description": "Event Text",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.LogEventRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ai.LifeEventAnalysisResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/profile/timeline/confirm": {
+            "post": {
+                "description": "Apply the analyzed (and potentially edited) life event to the database, cascading profile changes",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "timeline"
+                ],
+                "summary": "Confirm and save a life event",
+                "parameters": [
+                    {
+                        "description": "Event Confirmation",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ConfirmEventRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/wealth/assets": {
             "get": {
                 "security": [
@@ -997,6 +1136,75 @@
         }
     },
     "definitions": {
+        "ai.DependentDraft": {
+            "type": "object",
+            "properties": {
+                "monthly_cost": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "relationship": {
+                    "type": "string"
+                }
+            }
+        },
+        "ai.IncomeStreamDraft": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "is_passive": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "ai.LifeEventAnalysisResult": {
+            "type": "object",
+            "properties": {
+                "ai_impact_analysis": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "dependents_to_add": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ai.DependentDraft"
+                    }
+                },
+                "expense_impact": {
+                    "type": "number"
+                },
+                "income_impact": {
+                    "type": "number"
+                },
+                "income_streams_to_add": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ai.IncomeStreamDraft"
+                    }
+                },
+                "new_marital_status": {
+                    "type": "string"
+                },
+                "new_risk_score": {
+                    "type": "integer"
+                },
+                "new_risk_tolerance": {
+                    "type": "string"
+                }
+            }
+        },
         "model.Asset": {
             "type": "object",
             "properties": {
@@ -1085,6 +1293,75 @@
                 },
                 "role": {
                     "description": "\"user\" or \"assistant\"",
+                    "type": "string"
+                }
+            }
+        },
+        "model.ConfirmEventRequest": {
+            "type": "object",
+            "properties": {
+                "ai_impact_analysis": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "dependents_to_add": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "monthly_cost": {
+                                "type": "number"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "relationship": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "event_text": {
+                    "type": "string"
+                },
+                "expense_impact": {
+                    "type": "number"
+                },
+                "income_impact": {
+                    "type": "number"
+                },
+                "income_streams_to_add": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "number"
+                            },
+                            "is_passive": {
+                                "type": "boolean"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "type": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "new_marital_status": {
+                    "type": "string"
+                },
+                "new_risk_score": {
+                    "type": "integer"
+                },
+                "new_risk_tolerance": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -1325,10 +1602,6 @@
                 "id": {
                     "type": "string"
                 },
-                "life_constraints": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
                 "marital_status": {
                     "type": "string"
                 },
@@ -1412,6 +1685,56 @@
                 "LiabilityCategoryPersonalLoan",
                 "LiabilityCategoryOther"
             ]
+        },
+        "model.LifeEvent": {
+            "type": "object",
+            "properties": {
+                "ai_impact_analysis": {
+                    "type": "string"
+                },
+                "category": {
+                    "description": "Uses life_event_category enum",
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "event_date": {
+                    "type": "string"
+                },
+                "expense_impact": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "income_impact": {
+                    "type": "number"
+                },
+                "requires_ips_update": {
+                    "type": "boolean"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "triggered_ips_version": {
+                    "type": "integer"
+                },
+                "triggered_profile_version": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.LogEventRequest": {
+            "type": "object",
+            "properties": {
+                "event_text": {
+                    "type": "string"
+                }
+            }
         },
         "model.LoginRequest": {
             "type": "object",

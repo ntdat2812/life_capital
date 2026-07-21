@@ -1,5 +1,50 @@
 basePath: /
 definitions:
+  ai.DependentDraft:
+    properties:
+      monthly_cost:
+        type: number
+      name:
+        type: string
+      relationship:
+        type: string
+    type: object
+  ai.IncomeStreamDraft:
+    properties:
+      amount:
+        type: number
+      is_passive:
+        type: boolean
+      name:
+        type: string
+      type:
+        type: string
+    type: object
+  ai.LifeEventAnalysisResult:
+    properties:
+      ai_impact_analysis:
+        type: string
+      category:
+        type: string
+      dependents_to_add:
+        items:
+          $ref: '#/definitions/ai.DependentDraft'
+        type: array
+      expense_impact:
+        type: number
+      income_impact:
+        type: number
+      income_streams_to_add:
+        items:
+          $ref: '#/definitions/ai.IncomeStreamDraft'
+        type: array
+      new_marital_status:
+        type: string
+      new_risk_score:
+        type: integer
+      new_risk_tolerance:
+        type: string
+    type: object
   model.Asset:
     properties:
       avg_price:
@@ -63,6 +108,51 @@ definitions:
         type: string
       role:
         description: '"user" or "assistant"'
+        type: string
+    type: object
+  model.ConfirmEventRequest:
+    properties:
+      ai_impact_analysis:
+        type: string
+      category:
+        type: string
+      dependents_to_add:
+        items:
+          properties:
+            monthly_cost:
+              type: number
+            name:
+              type: string
+            relationship:
+              type: string
+          type: object
+        type: array
+      event_text:
+        type: string
+      expense_impact:
+        type: number
+      income_impact:
+        type: number
+      income_streams_to_add:
+        items:
+          properties:
+            amount:
+              type: number
+            is_passive:
+              type: boolean
+            name:
+              type: string
+            type:
+              type: string
+          type: object
+        type: array
+      new_marital_status:
+        type: string
+      new_risk_score:
+        type: integer
+      new_risk_tolerance:
+        type: string
+      title:
         type: string
     type: object
   model.CreateAssetRequest:
@@ -223,9 +313,6 @@ definitions:
         type: number
       id:
         type: string
-      life_constraints:
-        additionalProperties: true
-        type: object
       marital_status:
         type: string
       risk_score:
@@ -285,6 +372,39 @@ definitions:
     - LiabilityCategoryCreditCard
     - LiabilityCategoryPersonalLoan
     - LiabilityCategoryOther
+  model.LifeEvent:
+    properties:
+      ai_impact_analysis:
+        type: string
+      category:
+        description: Uses life_event_category enum
+        type: string
+      created_at:
+        type: string
+      event_date:
+        type: string
+      expense_impact:
+        type: number
+      id:
+        type: string
+      income_impact:
+        type: number
+      requires_ips_update:
+        type: boolean
+      title:
+        type: string
+      triggered_ips_version:
+        type: integer
+      triggered_profile_version:
+        type: integer
+      user_id:
+        type: string
+    type: object
+  model.LogEventRequest:
+    properties:
+      event_text:
+        type: string
+    type: object
   model.LoginRequest:
     properties:
       email:
@@ -899,6 +1019,99 @@ paths:
       summary: Submit AI Onboarding Interview
       tags:
       - profile
+  /api/v1/profile/timeline:
+    get:
+      description: Retrieve a list of all life events logged by the user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.LifeEvent'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get user's life timeline
+      tags:
+      - timeline
+  /api/v1/profile/timeline/analyze:
+    post:
+      consumes:
+      - application/json
+      description: Send event text to AI to analyze its impact on the user's financial
+        profile
+      parameters:
+      - description: Event Text
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/model.LogEventRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ai.LifeEventAnalysisResult'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Analyze a new life event
+      tags:
+      - timeline
+  /api/v1/profile/timeline/confirm:
+    post:
+      consumes:
+      - application/json
+      description: Apply the analyzed (and potentially edited) life event to the database,
+        cascading profile changes
+      parameters:
+      - description: Event Confirmation
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/model.ConfirmEventRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Confirm and save a life event
+      tags:
+      - timeline
   /api/v1/wealth/assets:
     get:
       parameters:

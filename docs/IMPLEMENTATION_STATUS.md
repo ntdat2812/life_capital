@@ -16,8 +16,8 @@ Tài liệu này theo dõi tiến độ thực tế (Source Code) so với đặ
 - 🟡 **AI Phỏng vấn Onboarding**: Có giao diện chat (`OnboardingView.vue`), nhưng chưa linh hoạt (hardcode 8 bước).
 - 🟢 **Profile Của Tôi**: Giao diện hiển thị thông tin đa Tab (Overview, Thu nhập, Phụ thuộc). Đã có chức năng Edit thủ công (Sửa Tuổi, FI Target...).
 - 🟢 **Quản lý Dòng tiền (Income/Expense/Dependents)**: Đã có giao diện CRUD cho Income/Dependents. Đã cấu trúc Cashflow theo hướng vĩ mô (Lump Sum Budgeting cho Chi phí). Tự động tính tỷ lệ Thu nhập Thụ động.
-- 🔴 **Life Timeline**: Chưa code.
-- 🔴 **Cascade Engine**: Chưa code (chưa tự động tạo version mới khi có sự kiện đời sống).
+- 🟢 **Life Timeline**: Đã hoàn thành giao diện hiển thị sự kiện (`TimelineView.vue`) và log sự kiện mới có tích hợp AI phân tích tác động tài chính (`LogEventView.vue`). Đã kết nối với Database lưu bảng `life_events`.
+- 🟢 **Cascade Engine**: Đã hoàn thành luồng tạo version mới cho Profile. Đã cấu hình Transaction Manager xuyên suốt các Repositories để đảm bảo toàn vẹn dữ liệu khi cascade sự kiện thay đổi vào Profile, Incomes và Dependents.
 
 ### Module 1 — Dashboard
 - 🟢 **Tổng quan tài sản (Net Worth Card)**: Đã hiển thị số thực tế từ DB.

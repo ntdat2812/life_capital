@@ -9,8 +9,9 @@ import (
 )
 
 type GroqProvider struct {
-	apiKey string
-	model  string
+	apiKey    string
+	model     string
+	maxTokens int
 }
 
 func NewGroqProvider() (*GroqProvider, error) {
@@ -25,8 +26,9 @@ func NewGroqProvider() (*GroqProvider, error) {
 	}
 
 	return &GroqProvider{
-		apiKey: apiKey,
-		model:  model,
+		apiKey:    apiKey,
+		model:     model,
+		maxTokens: GetMaxOutputTokens(),
 	}, nil
 }
 
@@ -55,6 +57,7 @@ func (p *GroqProvider) generateContent(ctx context.Context, prompt string) (stri
 		"response_format": map[string]interface{}{
 			"type": "json_object",
 		},
+		"max_tokens": p.maxTokens,
 	}
 
 	bodyBytes, _ := json.Marshal(reqBody)
@@ -88,4 +91,8 @@ func (p *GroqProvider) generateContent(ctx context.Context, prompt string) (stri
 	}
 
 	return gptResp.Choices[0].Message.Content, nil
+}
+
+func (p *GroqProvider) AnalyzeLifeEvent(ctx context.Context, promptContext string) (*LifeEventAnalysisResult, error) {
+	return analyzeLifeEventHelper(ctx, promptContext, p.generateContent)
 }
