@@ -198,21 +198,25 @@
           <div v-for="(val, key) in editAllocations" :key="key">
             <div class="flex justify-between items-center mb-2">
               <label class="text-sm font-medium text-slate-300 capitalize">{{ formatAssetName(key) }}</label>
-              <span class="text-sm font-bold text-indigo-400">{{ val }}%</span>
             </div>
-            <input 
-              type="range" 
-              min="0" 
-              max="100" 
-              v-model.number="editAllocations[key]" 
-              class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
-            >
+            <div class="flex items-center">
+              <input 
+                type="number" 
+                min="0" 
+                max="100" 
+                v-model.number="editAllocations[key]" 
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+              >
+              <span class="ml-3 text-slate-400 font-bold">%</span>
+            </div>
           </div>
         </div>
 
-        <div class="p-4 rounded-xl mb-8 flex justify-between items-center border" :class="totalAllocation === 100 ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-red-500/10 border-red-500/30'">
-          <span class="text-sm font-medium" :class="totalAllocation === 100 ? 'text-emerald-400' : 'text-red-400'">Tổng Tỷ Trọng:</span>
-          <span class="text-lg font-bold" :class="totalAllocation === 100 ? 'text-emerald-400' : 'text-red-400'">{{ totalAllocation }}%</span>
+        <div class="p-4 rounded-xl mb-8 flex justify-between items-center border" :class="totalAllocation === 100 ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-amber-500/10 border-amber-500/30'">
+          <span class="text-sm font-medium" :class="totalAllocation === 100 ? 'text-emerald-400' : 'text-amber-400'">
+            {{ totalAllocation === 100 ? 'Tổng Tỷ Trọng Hợp Lệ' : (totalAllocation > 100 ? 'Vượt quá 100%' : 'Chưa phân bổ hết 100%') }}:
+          </span>
+          <span class="text-lg font-bold" :class="totalAllocation === 100 ? 'text-emerald-400' : 'text-amber-400'">{{ totalAllocation }}%</span>
         </div>
 
         <div class="flex justify-end gap-3">
