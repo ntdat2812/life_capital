@@ -114,7 +114,7 @@ func main() {
 	timelineHandler := handler.NewTimelineHandler(timelineService)
 	notifHandler := handler.NewNotificationHandler(notifService)
 	ipsHandler := handler.NewIPSHandler(ipsService)
-	portfolioHandler := handler.NewPortfolioHandler(portfolioService, aiProviders[0]) // using first provider (Gemini) by default or we can refactor later
+	portfolioHandler := handler.NewPortfolioHandler(portfolioService, aiProviders)
 
 	// Register routes
 	registerRoutes(e, healthHandler, authHandler, profileHandler, wealthHandler, cashflowHandler, timelineHandler, notifHandler, ipsHandler, portfolioHandler)

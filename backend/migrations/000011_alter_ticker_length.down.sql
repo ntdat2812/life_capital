@@ -1,0 +1,2 @@
+ALTER TABLE investment_theses ALTER COLUMN ticker TYPE VARCHAR(20);
+ALTER TABLE watchlist ALTER COLUMN ticker TYPE VARCHAR(20);

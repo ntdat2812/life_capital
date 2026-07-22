@@ -12,13 +12,13 @@ import (
 
 type PortfolioHandler struct {
 	portfolioService service.PortfolioService
-	aiProvider       ai.AIProvider
+	aiProviders      []ai.AIProvider
 }
 
-func NewPortfolioHandler(portfolioService service.PortfolioService, aiProvider ai.AIProvider) *PortfolioHandler {
+func NewPortfolioHandler(portfolioService service.PortfolioService, aiProviders []ai.AIProvider) *PortfolioHandler {
 	return &PortfolioHandler{
 		portfolioService: portfolioService,
-		aiProvider:       aiProvider,
+		aiProviders:      aiProviders,
 	}
 }
 
@@ -185,6 +185,7 @@ func (h *PortfolioHandler) CreateThesis(c echo.Context) error {
 	}
 
 	thesis.UserID = userID
+	clampScores(&thesis)
 	if err := h.portfolioService.CreateThesis(c.Request().Context(), &thesis); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -222,6 +223,7 @@ func (h *PortfolioHandler) UpdateThesis(c echo.Context) error {
 
 	thesis.ID = id
 	thesis.UserID = userID
+	clampScores(&thesis)
 	if err := h.portfolioService.UpdateThesis(c.Request().Context(), &thesis); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -263,11 +265,33 @@ func (h *PortfolioHandler) GenerateThesisAI(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+	if req.Ticker == "" || req.CompanyName == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Thiếu thông tin Ticker hoặc Tên công ty/tài sản")
+	}
 
-	thesis, err := h.aiProvider.GenerateThesis(c.Request().Context(), &req)
+	thesis, err := ai.ExecuteWithFallback(h.aiProviders, func(p ai.AIProvider) (*model.InvestmentThesis, error) {
+		return p.GenerateThesis(c.Request().Context(), &req)
+	})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, thesis)
+}
+func clampScores(thesis *model.InvestmentThesis) {
+	if thesis.ConvictionScore < 1 {
+		thesis.ConvictionScore = 5
+	} else if thesis.ConvictionScore > 10 {
+		thesis.ConvictionScore = 10
+	}
+	if thesis.QualityScore < 1 {
+		thesis.QualityScore = 5
+	} else if thesis.QualityScore > 10 {
+		thesis.QualityScore = 10
+	}
+	if thesis.ValuationScore < 1 {
+		thesis.ValuationScore = 5
+	} else if thesis.ValuationScore > 10 {
+		thesis.ValuationScore = 10
+	}
 }

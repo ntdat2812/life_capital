@@ -5,7 +5,7 @@
     <div class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-purple-900/10 blur-[120px] pointer-events-none"></div>
 
     <!-- Navigation Sidebar -->
-    <aside class="w-full md:w-64 glass-card md:min-h-screen p-6 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-800 relative z-20">
+    <aside class="w-full md:w-64 shrink-0 glass-card md:min-h-screen p-6 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-800 relative z-20">
       <div class="space-y-8">
         <!-- Logo -->
         <div class="flex items-center gap-3">
@@ -82,6 +82,14 @@
             :class="$route.name === 'ips' ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'"
           >
             🧭 Chiến lược đầu tư
+          </router-link>
+
+          <router-link 
+            to="/thesis" 
+            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition duration-150"
+            :class="$route.name === 'thesis' || $route.name === 'thesis-detail' || $route.name === 'thesis-new' ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'"
+          >
+            📝 Luận điểm đầu tư
           </router-link>
 
           <router-link 

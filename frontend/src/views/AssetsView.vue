@@ -122,7 +122,7 @@
               <!-- Header của nhóm -->
               <div class="bg-slate-800/60 px-4 py-3 flex justify-between items-center sticky top-0 z-10 cursor-pointer hover:bg-slate-700/60 transition-colors" @click="openGroupDetail(group, 'asset')">
                 <div class="flex items-center gap-3">
-                  <span class="text-xl">{{ getAssetIcon(group.category) }}</span>
+                  <span class="text-xl">{{ getCategoryIcon(group.category) }}</span>
                   <h3 class="text-white font-semibold">{{ group.categoryName }}</h3>
                 </div>
                 <div class="text-right flex items-center gap-3">
@@ -237,7 +237,7 @@
         <div class="p-6 pb-4 border-b border-slate-700/50 flex justify-between items-start">
           <div>
             <h2 class="text-2xl font-bold text-white mb-1 flex items-center gap-2">
-              <span>{{ selectedGroupType === 'asset' ? getAssetIcon(selectedGroup.category) : getLiabilityIcon(selectedGroup.category) }}</span>
+              <span>{{ selectedGroupType === 'asset' ? getCategoryIcon(selectedGroup.category) : getLiabilityIcon(selectedGroup.category) }}</span>
               Phân bổ: {{ selectedGroup.categoryName }}
             </h2>
             <p class="text-slate-400 text-sm">
@@ -457,7 +457,9 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { getCategoryName, getCategoryIcon, getLiabilityName, getLiabilityIcon } from '../utils/assetUtils'
 import { useWealthStore } from '../stores/wealthStore'
+import { useNotificationStore } from '../stores/notificationStore'
 import CurrencyInput from '../components/common/CurrencyInput.vue'
 import ConfirmModal from '../components/common/ConfirmModal.vue'
 
@@ -599,7 +601,7 @@ const groupedLiabilities = computed(() => {
     if (!groups[liability.category]) {
       groups[liability.category] = {
         category: liability.category,
-        categoryName: getLiabilityCategoryName(liability.category),
+        categoryName: getLiabilityName(liability.category),
         total_value: 0,
         items: []
       }
@@ -809,34 +811,9 @@ const openGroupDetail = (group, type) => {
   showGroupDetailModal.value = true
 }
 
-// --- UTILS ---
-const getCategoryName = (category) => {
-  const names = {
-    cash: 'Tiền mặt', deposit: 'Tiền gửi ngân hàng', gold: 'Vàng', stock: 'Cổ phiếu', fund: 'Chứng chỉ quỹ', crypto: 'Tiền điện tử', real_estate: 'Bất động sản'
-  }
-  return names[category] || category
-}
 
-const getLiabilityCategoryName = (category) => {
-  const names = {
-    mortgage: 'Vay mua nhà', auto_loan: 'Vay mua xe', student_loan: 'Vay học tập', credit_card: 'Thẻ tín dụng', personal_loan: 'Vay tín chấp', other: 'Khác'
-  }
-  return names[category] || category
-}
 
-const getAssetIcon = (category) => {
-  const icons = {
-    cash: '💵', deposit: '🏦', gold: '🪙', stock: '📈', fund: '📊', crypto: '₿', real_estate: '🏠'
-  }
-  return icons[category] || '💰'
-}
 
-const getLiabilityIcon = (category) => {
-  const icons = {
-    mortgage: '🏘️', auto_loan: '🚗', student_loan: '🎓', credit_card: '💳', personal_loan: '👤', other: '🧾'
-  }
-  return icons[category] || '💸'
-}
 </script>
 
 <style scoped>

@@ -64,6 +64,24 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/thesis',
+    name: 'thesis',
+    component: () => import('../views/ThesisView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/thesis/new',
+    name: 'thesis-new',
+    component: () => import('../views/ThesisDetailView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/thesis/:ticker',
+    name: 'thesis-detail',
+    component: () => import('../views/ThesisDetailView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/login',
     name: 'login',
     component: () => import('../views/LoginView.vue'),

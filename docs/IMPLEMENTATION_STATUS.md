@@ -32,8 +32,8 @@ Tài liệu này theo dõi tiến độ thực tế (Source Code) so với đặ
 - 🟢 **Tự động tính toán ròng**: Backend/Frontend tự động đồng bộ.
 
 ### Module 3 — Portfolio
-- 🟡 **Danh mục đầu tư (Investable Assets)**: Đã xong API Backend. Chưa có Frontend.
-- 🟡 **Watchlist**: Đã xong API Backend. Chưa có Frontend.
+- 🟢 **Danh mục đầu tư (Investable Assets)**: Đã hoàn thành API Backend và giao diện Frontend (Hiển thị tỷ trọng thực tế vs mục tiêu IPS).
+- 🟢 **Watchlist**: Đã hoàn thành API Backend và giao diện Frontend (Cảnh báo vùng giá mua, xếp hạng độ tự tin).
 
 ### Module 4 — Goal-Aware Unified IPS
 - 🟢 **Khởi tạo & Phân tích Chiến lược (AI)**: Đã hoàn thành màn hình IPS (`IPSView.vue`). AI có khả năng phân tích dòng tiền, người phụ thuộc và tài sản hiện có để đề xuất tỷ trọng phân bổ (`target_allocation`) và bài văn chiến lược (`detailed_strategy`).
@@ -41,7 +41,7 @@ Tài liệu này theo dõi tiến độ thực tế (Source Code) so với đặ
 - 🟡 **Cảnh báo lệch tỷ trọng (Rebalancing Alerts)**: Đã có DB Notification, nhưng chưa có luồng tự động quét và sinh ra Notification khi tài sản thị trường làm lệch tỷ trọng so với IPS. (Đang chờ)
 
 ### Module 5 -> 8 (Thesis, Decision Journal, Monthly Review)
-- 🟡 **Investment Thesis**: Đã hoàn thành API lưu trữ, phân tích và sinh Thesis bằng AI ở Backend. Chưa có Frontend.
+- 🟢 **Investment Thesis**: Đã hoàn thành API lưu trữ, giao diện dạng lưới Grid và tính năng nhờ AI sinh Thesis tự động.
 - 🔴 **Decision Journal, Monthly Review**: Chưa code.
 ### Module 9 — Authentication & Authorization
 - 🟢 **Đăng ký (Signup)**: Đã xong, hỗ trợ multi-user.
