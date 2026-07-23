@@ -1,15 +1,13 @@
+ifneq (,$(wildcard backend/.env))
+    include backend/.env
+    export
+endif
+
 .PHONY: db-up migrate-up migrate-down run-back run-front
 
 # Run PostgreSQL via Docker Compose
 db-up:
 	docker compose up -d
-
-# Run database migrations
-migrate-up:
-	cd backend && migrate -path migrations -database "postgres://lifecap:lifecap_secret@localhost:5433/life_capital?sslmode=disable" -verbose up
-
-migrate-down:
-	cd backend && migrate -path migrations -database "postgres://lifecap:lifecap_secret@localhost:5433/life_capital?sslmode=disable" -verbose down
 
 # Run backend server
 run-back:
@@ -24,3 +22,12 @@ run-front:
 
 down-front:
 	fuser -k 5173/tcp || true
+
+# --- MIGRATION COMMANDS (Uses DATABASE_URL from backend/.env) ---
+migrate-up:
+	@echo "Running up migrations to database..."
+	cd backend && migrate -path migrations -database "$${DATABASE_URL}" -verbose up
+
+migrate-down:
+	@echo "Running down migrations to database..."
+	cd backend && migrate -path migrations -database "$${DATABASE_URL}" -verbose down
