@@ -126,6 +126,10 @@
                   <h3 class="text-white font-semibold">{{ group.categoryName }}</h3>
                 </div>
                 <div class="text-right flex items-center gap-3">
+                  <div v-if="group.category === 'gold'" class="mr-4 text-right pr-4 border-r border-slate-700 hidden sm:block">
+                    <p class="text-amber-400 font-bold text-sm">{{ formatGoldVolume(group.totalGoldVolume) }}</p>
+                    <p class="text-xs text-slate-400">Khối lượng</p>
+                  </div>
                   <div>
                     <p class="text-emerald-400 font-bold">{{ formatCurrency(group.total_value) }}</p>
                     <p class="text-xs text-slate-400">Chiếm {{ group.percentage }}%</p>
@@ -353,25 +357,27 @@
               <input type="text" v-model="assetForm.ticker" :placeholder="tickerPlaceholder" required class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Số lượng <span v-if="assetForm.category === 'gold'" class="text-slate-500 text-xs font-normal">(Tính theo Lượng)</span></label>
+              <label class="block text-sm font-medium text-slate-300 mb-1">Số lượng <span v-if="assetForm.category === 'gold'" class="text-slate-500 text-xs font-normal">(Nhập số lượng theo Đơn vị tính)</span></label>
               <div class="flex gap-2">
-                <CurrencyInput v-model="assetForm.quantity" @update:modelValue="calculateCurrentValue(); quickGoldWeight = ''" />
-                <select v-if="assetForm.category === 'gold'" v-model="quickGoldWeight" @change="applyQuickGoldWeight" class="bg-slate-900/50 border border-slate-700 rounded-lg px-2 py-2 text-white text-sm focus:outline-none focus:border-indigo-500 shrink-0 w-[110px]">
-                  <option value="">Tùy chỉnh</option>
-                  <option value="1">1 Lượng</option>
-                  <option value="0.5">5 Chỉ</option>
-                  <option value="0.2">2 Chỉ</option>
-                  <option value="0.1">1 Chỉ</option>
-                  <option value="0.05">5 Phân</option>
+                <CurrencyInput v-model="assetForm.quantity" @update:modelValue="calculateCurrentValue()" class="flex-1" />
+                <select v-if="assetForm.category === 'gold'" v-model="goldUnit" @change="calculateCurrentValue()" class="bg-slate-900/50 border border-slate-700 rounded-lg px-2 py-2 text-white text-sm focus:outline-none focus:border-indigo-500 shrink-0 w-[140px]">
+                  <option value="Loại 1 Lượng">Loại 1 Lượng</option>
+                  <option value="Loại 5 Chỉ">Loại 5 Chỉ</option>
+                  <option value="Loại 2 Chỉ">Loại 2 Chỉ</option>
+                  <option value="Loại 1 Chỉ">Loại 1 Chỉ</option>
+                  <option value="Loại 0.5 Chỉ">Loại 0.5 Chỉ</option>
+                  <option value="Lượng">Tùy chỉnh (Lượng)</option>
+                  <option value="Chỉ">Tùy chỉnh (Chỉ)</option>
+                  <option value="Phân">Tùy chỉnh (Phân)</option>
                 </select>
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Giá Vốn <span class="text-slate-500 text-xs font-normal">(Tùy chọn)</span></label>
+              <label class="block text-sm font-medium text-slate-300 mb-1">Giá Vốn <span v-if="assetForm.category === 'gold'" class="text-slate-500 text-xs font-normal">(Nhập theo giá Lượng, tự quy đổi)</span><span v-else class="text-slate-500 text-xs font-normal">(Tùy chọn)</span></label>
               <CurrencyInput v-model="assetForm.avg_price" placeholder="Bỏ qua" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Giá Hiện Tại</label>
+              <label class="block text-sm font-medium text-slate-300 mb-1">Giá Hiện Tại <span v-if="assetForm.category === 'gold'" class="text-slate-500 text-xs font-normal">(Nhập theo giá Lượng, tự quy đổi)</span></label>
               <CurrencyInput v-model="assetForm.current_price" @update:modelValue="calculateCurrentValue()" />
             </div>
           </div>
@@ -484,7 +490,7 @@ const goldType = ref('Vàng miếng')
 const goldBrand = ref('SJC')
 const goldPurity = ref('9999')
 const customGoldPurity = ref('')
-const quickGoldWeight = ref('')
+const goldUnit = ref('Lượng')
 const depositInterestRate = ref('')
 
 const assetForm = ref({
@@ -570,11 +576,18 @@ const groupedAssets = computed(() => {
         category: asset.category,
         categoryName: getCategoryName(asset.category),
         total_value: 0,
+        totalGoldVolume: 0,
         items: []
       }
     }
     groups[asset.category].items.push(asset)
     groups[asset.category].total_value += asset.current_value
+
+    if (asset.category === 'gold') {
+      const match = asset.name?.match(/\((.+?)\)$/);
+      const unit = match ? match[1] : 'Lượng';
+      groups[asset.category].totalGoldVolume += (asset.quantity || 0) * getGoldMultiplier(unit);
+    }
   })
 
   // Avoid div by zero
@@ -640,16 +653,49 @@ const isFluctuatingAsset = (category) => {
   return ['stock', 'fund', 'crypto', 'gold'].includes(category)
 }
 
+const getGoldMultiplier = (unit) => {
+  if (unit === 'Loại 1 Lượng' || unit === 'Lượng') return 1;
+  if (unit === 'Loại 5 Chỉ') return 0.5;
+  if (unit === 'Loại 2 Chỉ') return 0.2;
+  if (unit === 'Loại 1 Chỉ' || unit === 'Chỉ') return 0.1;
+  if (unit === 'Loại 0.5 Chỉ') return 0.05;
+  if (unit === 'Phân') return 0.01;
+  return 1;
+}
+
+const formatGoldVolume = (volumeInLuong) => {
+  if (!volumeInLuong || volumeInLuong <= 0) return '0 Lượng';
+  
+  let totalPhan = Math.round(volumeInLuong * 100);
+  const luong = Math.floor(totalPhan / 100);
+  totalPhan %= 100;
+  
+  const chi = Math.floor(totalPhan / 10);
+  const phan = totalPhan % 10;
+  
+  let parts = [];
+  if (luong > 0) parts.push(`${luong} Lượng`);
+  if (chi > 0) parts.push(`${chi} Chỉ`);
+  if (phan > 0) parts.push(`${phan} Phân`);
+  
+  return parts.length > 0 ? parts.join(' ') : '0 Lượng';
+}
+
 const calculateCurrentValue = () => {
   if (assetForm.value.quantity && assetForm.value.current_price) {
-    assetForm.value.current_value = assetForm.value.quantity * assetForm.value.current_price
+    if (assetForm.value.category === 'gold') {
+      const multiplier = getGoldMultiplier(goldUnit.value)
+      assetForm.value.current_value = assetForm.value.quantity * (assetForm.value.current_price * multiplier)
+    } else {
+      assetForm.value.current_value = assetForm.value.quantity * assetForm.value.current_price
+    }
   }
 }
 
 const openAddAsset = () => {
   isEditingAsset.value = false
   editingAssetId.value = null
-  quickGoldWeight.value = ''
+  goldUnit.value = 'Lượng'
   depositInterestRate.value = ''
   assetForm.value = { category: 'cash', name: '', ticker: '', quantity: null, avg_price: null, current_price: null, current_value: null }
   showAddAssetModal.value = true
@@ -658,7 +704,7 @@ const openAddAsset = () => {
 const openEditAsset = (asset) => {
   isEditingAsset.value = true
   editingAssetId.value = asset.id
-  quickGoldWeight.value = ''
+  goldUnit.value = 'Lượng'
   assetForm.value = { ...asset }
   
   if (asset.category === 'gold') {
@@ -666,13 +712,28 @@ const openEditAsset = (asset) => {
     if (parts.length >= 2) {
       goldBrand.value = parts[0].trim()
       const rest = parts.slice(1).join(' - ').trim()
-      if (rest.includes('9999')) { goldPurity.value = '9999'; goldType.value = rest.replace('9999', '').trim() }
-      else if (rest.includes('999')) { goldPurity.value = '999'; goldType.value = rest.replace('999', '').trim() }
-      else if (rest.includes('99')) { goldPurity.value = '99'; goldType.value = rest.replace('99', '').trim() }
-      else if (rest.includes('18K')) { goldPurity.value = '18K'; goldType.value = rest.replace('18K', '').trim() }
-      else if (rest.includes('14K')) { goldPurity.value = '14K'; goldType.value = rest.replace('14K', '').trim() }
-      else if (rest.includes('10K')) { goldPurity.value = '10K'; goldType.value = rest.replace('10K', '').trim() }
-      else { goldPurity.value = 'Khác'; customGoldPurity.value = ''; goldType.value = rest }
+      
+      const unitMatch = rest.match(/\((.+?)\)$/)
+      let purityStr = rest
+      if (unitMatch) {
+        goldUnit.value = unitMatch[1]
+        purityStr = rest.replace(unitMatch[0], '').trim()
+      } else {
+        goldUnit.value = 'Lượng'
+      }
+
+      const multiplier = getGoldMultiplier(goldUnit.value)
+      
+      if (assetForm.value.current_price) assetForm.value.current_price = assetForm.value.current_price / multiplier
+      if (assetForm.value.avg_price) assetForm.value.avg_price = assetForm.value.avg_price / multiplier
+      
+      if (purityStr.includes('9999')) { goldPurity.value = '9999'; goldType.value = purityStr.replace('9999', '').trim() }
+      else if (purityStr.includes('999')) { goldPurity.value = '999'; goldType.value = purityStr.replace('999', '').trim() }
+      else if (purityStr.includes('99')) { goldPurity.value = '99'; goldType.value = purityStr.replace('99', '').trim() }
+      else if (purityStr.includes('18K')) { goldPurity.value = '18K'; goldType.value = purityStr.replace('18K', '').trim() }
+      else if (purityStr.includes('14K')) { goldPurity.value = '14K'; goldType.value = purityStr.replace('14K', '').trim() }
+      else if (purityStr.includes('10K')) { goldPurity.value = '10K'; goldType.value = purityStr.replace('10K', '').trim() }
+      else { goldPurity.value = 'Khác'; customGoldPurity.value = ''; goldType.value = purityStr }
     }
   } else if (asset.category === 'deposit') {
     const match = asset.name.match(/(.+) - ([\d.]+)%$/)
@@ -686,12 +747,7 @@ const openEditAsset = (asset) => {
   showAddAssetModal.value = true
 }
 
-const applyQuickGoldWeight = () => {
-  if (quickGoldWeight.value) {
-    assetForm.value.quantity = parseFloat(quickGoldWeight.value)
-    calculateCurrentValue()
-  }
-}
+// removed applyQuickGoldWeight
 
 const submitAssetForm = async () => {
   submitting.value = true
@@ -710,8 +766,13 @@ const submitAssetForm = async () => {
       payload.ticker = payload.ticker.toUpperCase()
     } else if (payload.category === 'gold') {
       const purity = goldPurity.value === 'Khác' ? customGoldPurity.value : goldPurity.value
-      payload.name = `${goldBrand.value} - ${goldType.value} ${purity}`.trim()
+      payload.name = `${goldBrand.value} - ${goldType.value} ${purity} (${goldUnit.value})`.trim()
       payload.ticker = undefined
+      
+      const multiplier = getGoldMultiplier(goldUnit.value)
+      
+      if (payload.current_price) payload.current_price = payload.current_price * multiplier
+      if (payload.avg_price) payload.avg_price = payload.avg_price * multiplier
     } else if (payload.category === 'fund') {
       payload.ticker = undefined
     } else if (payload.category === 'deposit') {

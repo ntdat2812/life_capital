@@ -68,19 +68,36 @@
           <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
             <span class="text-indigo-400">{{ getCategoryIcon(cat) }}</span> Nhóm {{ getCategoryName(cat) }}
           </h2>
-          <span class="text-sm font-medium text-slate-400">Tổng: <span class="text-white">{{ formatCurrency(group.totalValue) }}</span></span>
+          <span class="text-sm font-medium text-slate-400">
+            <span v-if="cat === 'gold'" class="mr-4 border-r border-slate-700 pr-4">
+              Khối lượng: <span class="text-amber-400 font-bold">{{ formatGoldVolume(group.totalGoldVolume) }}</span>
+            </span>
+            Tổng: <span class="text-white">{{ formatCurrency(group.totalValue) }}</span>
+          </span>
         </div>
         
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="border-b border-slate-800 bg-slate-900/50">
-                <th class="p-4 text-sm font-semibold text-slate-400">Mã / Tên</th>
-                <th class="p-4 text-sm font-semibold text-slate-400 text-right">Số lượng</th>
-                <th class="p-4 text-sm font-semibold text-slate-400 text-right">Giá vốn</th>
-                <th class="p-4 text-sm font-semibold text-slate-400 text-right">Giá hiện tại</th>
-                <th class="p-4 text-sm font-semibold text-slate-400 text-right">Tổng giá trị</th>
-                <th class="p-4 text-sm font-semibold text-slate-400 text-right">Tỷ trọng %</th>
+                <th class="p-4 text-sm font-semibold text-slate-400 cursor-pointer hover:text-white transition-colors select-none group/th" @click="setSort('name')">
+                  Mã / Tên <span class="text-indigo-400 ml-1">{{ sortCol === 'name' ? (sortDir === 'asc' ? '↑' : '↓') : '' }}</span>
+                </th>
+                <th class="p-4 text-sm font-semibold text-slate-400 text-right cursor-pointer hover:text-white transition-colors select-none group/th" @click="setSort('quantity')">
+                  Số lượng <span class="text-indigo-400 ml-1">{{ sortCol === 'quantity' ? (sortDir === 'asc' ? '↑' : '↓') : '' }}</span>
+                </th>
+                <th class="p-4 text-sm font-semibold text-slate-400 text-right cursor-pointer hover:text-white transition-colors select-none group/th" @click="setSort('avg_price')">
+                  Giá vốn <span class="text-indigo-400 ml-1">{{ sortCol === 'avg_price' ? (sortDir === 'asc' ? '↑' : '↓') : '' }}</span>
+                </th>
+                <th class="p-4 text-sm font-semibold text-slate-400 text-right cursor-pointer hover:text-white transition-colors select-none group/th" @click="setSort('current_price')">
+                  Giá hiện tại <span class="text-indigo-400 ml-1">{{ sortCol === 'current_price' ? (sortDir === 'asc' ? '↑' : '↓') : '' }}</span>
+                </th>
+                <th class="p-4 text-sm font-semibold text-slate-400 text-right cursor-pointer hover:text-white transition-colors select-none group/th" @click="setSort('current_value')">
+                  Tổng giá trị <span class="text-indigo-400 ml-1">{{ sortCol === 'current_value' ? (sortDir === 'asc' ? '↑' : '↓') : '' }}</span>
+                </th>
+                <th class="p-4 text-sm font-semibold text-slate-400 text-right cursor-pointer hover:text-white transition-colors select-none group/th" @click="setSort('current_value')">
+                  Tỷ trọng % <span class="text-indigo-400 ml-1">{{ sortCol === 'current_value' ? (sortDir === 'asc' ? '↑' : '↓') : '' }}</span>
+                </th>
                 <th class="p-4 text-sm font-semibold text-slate-400 text-center">Luận điểm (Thesis)</th>
               </tr>
             </thead>
@@ -261,7 +278,17 @@ onMounted(async () => {
   ])
 })
 
+const sortCol = ref('current_value')
+const sortDir = ref('desc')
 
+const setSort = (col) => {
+  if (sortCol.value === col) {
+    sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortCol.value = col
+    sortDir.value = 'desc'
+  }
+}
 
 const formatCurrency = (value) => {
   if (value === null || value === undefined) return '-'
@@ -286,23 +313,73 @@ const getScoreClass = (score) => {
   return 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
 }
 
-// Logic Tỷ trọng & Grouping
+const getGoldMultiplier = (unit) => {
+  if (unit === 'Loại 1 Lượng' || unit === 'Lượng') return 1;
+  if (unit === 'Loại 5 Chỉ') return 0.5;
+  if (unit === 'Loại 2 Chỉ') return 0.2;
+  if (unit === 'Loại 1 Chỉ' || unit === 'Chỉ') return 0.1;
+  if (unit === 'Loại 0.5 Chỉ') return 0.05;
+  if (unit === 'Phân') return 0.01;
+  return 1;
+}
+
+const formatGoldVolume = (volumeInLuong) => {
+  if (!volumeInLuong || volumeInLuong <= 0) return '0 Lượng';
+  
+  let totalPhan = Math.round(volumeInLuong * 100);
+  const luong = Math.floor(totalPhan / 100);
+  totalPhan %= 100;
+  
+  const chi = Math.floor(totalPhan / 10);
+  const phan = totalPhan % 10;
+  
+  let parts = [];
+  if (luong > 0) parts.push(`${luong} Lượng`);
+  if (chi > 0) parts.push(`${chi} Chỉ`);
+  if (phan > 0) parts.push(`${phan} Phân`);
+  
+  return parts.length > 0 ? parts.join(' ') : '0 Lượng';
+}
+
 const groupedHoldings = computed(() => {
   const groups = {}
   portfolioStore.holdings.forEach(asset => {
     if (!groups[asset.category]) {
       groups[asset.category] = {
         items: [],
-        totalValue: 0
+        totalValue: 0,
+        totalGoldVolume: 0
       }
     }
     groups[asset.category].items.push(asset)
     groups[asset.category].totalValue += (asset.current_value || 0)
+    
+    if (asset.category === 'gold') {
+      const match = asset.name?.match(/\((.+?)\)$/);
+      const unit = match ? match[1] : 'Lượng';
+      groups[asset.category].totalGoldVolume += (asset.quantity || 0) * getGoldMultiplier(unit);
+    }
   })
   
-  // Sort items within each group by value descending
+  // Sort items within each group
   for (const cat in groups) {
-    groups[cat].items.sort((a, b) => (b.current_value || 0) - (a.current_value || 0))
+    groups[cat].items.sort((a, b) => {
+      let valA = a[sortCol.value]
+      let valB = b[sortCol.value]
+      
+      if (sortCol.value === 'name') {
+        valA = (a.ticker || a.name || '').toLowerCase()
+        valB = (b.ticker || b.name || '').toLowerCase()
+        return sortDir.value === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA)
+      }
+      
+      valA = valA || 0
+      valB = valB || 0
+      
+      if (valA < valB) return sortDir.value === 'asc' ? -1 : 1
+      if (valA > valB) return sortDir.value === 'asc' ? 1 : -1
+      return 0
+    })
   }
   
   return groups
