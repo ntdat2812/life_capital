@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -27,6 +28,9 @@ var generateIPSPrompt string
 
 //go:embed prompts/generate_thesis.txt
 var generateThesisPrompt string
+
+//go:embed prompts/monthly_review.txt
+var generateMonthlyReviewPrompt string
 
 type ExtractionResult struct {
 	DateOfBirth                 *string `json:"date_of_birth"`
@@ -76,6 +80,7 @@ type AIProvider interface {
 	AnalyzeLifeEvent(ctx context.Context, promptContext string) (*LifeEventAnalysisResult, error)
 	GenerateIPS(ctx context.Context, profile *model.InvestorProfile, assets []model.Asset, incomes []*model.IncomeStream, dependents []*model.Dependent, preferredAssets []string) (*IPSExtractionResult, error)
 	GenerateThesis(ctx context.Context, req *model.ThesisGenerationRequest) (*model.InvestmentThesis, error)
+	GenerateMonthlyReview(ctx context.Context, replacements map[string]string) (*model.MonthlyReviewRecommendationResponse, error)
 }
 
 // GetMaxOutputTokens retrieves the maximum output tokens from the environment, defaulting to 8192
@@ -102,7 +107,7 @@ func ExecuteWithFallback[T any](providers []AIProvider, action func(AIProvider) 
 		if err == nil {
 			return result, nil
 		}
-		fmt.Printf("Warning: AI provider [%s] with model [%s] failed, trying next. Error: %v\n", provider.Name(), provider.Model(), err)
+		log.Printf("⚠️ AI provider [%s] model [%s] FAILED: %v", provider.Name(), provider.Model(), err)
 		lastErr = err
 	}
 
@@ -279,6 +284,28 @@ func doHTTPRequest(ctx context.Context, method, url string, headers map[string]s
 	}
 
 	return resp.StatusCode, respBody, nil
+}
+
+func generateMonthlyReviewHelper(ctx context.Context, replacements map[string]string, generateContent func(context.Context, string) (string, error)) (*model.MonthlyReviewRecommendationResponse, error) {
+	// Build prompt by replacing template variables with actual data
+	prompt := generateMonthlyReviewPrompt
+	for key, value := range replacements {
+		prompt = strings.ReplaceAll(prompt, key, value)
+	}
+
+	respText, err := generateContent(ctx, prompt)
+	if err != nil {
+		return nil, err
+	}
+
+	respText = extractJSON(respText)
+
+	var result model.MonthlyReviewRecommendationResponse
+	if err := json.Unmarshal([]byte(respText), &result); err != nil {
+		return nil, fmt.Errorf("failed to parse AI JSON for Monthly Review: %v, raw text: %s", err, respText)
+	}
+
+	return &result, nil
 }
 
 // extractJSON safely extracts the JSON object from a string that might contain markdown wrappers or random text.

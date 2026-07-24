@@ -87,7 +87,7 @@
           <router-link 
             to="/thesis" 
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition duration-150"
-            :class="$route.name === 'thesis' || $route.name === 'thesis-detail' || $route.name === 'thesis-new' ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'"
+            :class="$route.name && $route.name.includes('thesis') ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'"
           >
             📝 Luận điểm đầu tư
           </router-link>
@@ -95,9 +95,9 @@
           <router-link 
             to="/review" 
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition duration-150"
-            :class="$route.name === 'review' ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'"
+            :class="$route.name && $route.name.includes('review') ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'"
           >
-            🗓️ Đánh giá hàng tháng
+            📅 Chốt sổ tháng
           </router-link>
         </nav>
       </div>

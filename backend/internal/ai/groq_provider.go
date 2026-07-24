@@ -109,3 +109,7 @@ func (p *GroqProvider) generateContent(ctx context.Context, prompt string) (stri
 func (p *GroqProvider) AnalyzeLifeEvent(ctx context.Context, promptContext string) (*LifeEventAnalysisResult, error) {
 	return analyzeLifeEventHelper(ctx, promptContext, p.generateContent)
 }
+
+func (p *GroqProvider) GenerateMonthlyReview(ctx context.Context, replacements map[string]string) (*model.MonthlyReviewRecommendationResponse, error) {
+	return generateMonthlyReviewHelper(ctx, replacements, p.generateContent)
+}

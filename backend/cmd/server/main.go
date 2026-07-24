@@ -104,6 +104,9 @@ func main() {
 	ipsService := service.NewIPSService(ipsRepo, investorProfileRepo, assetRepo, incomeRepo, dependentRepo, notifService, aiProviders)
 	timelineService := service.NewTimelineService(aiProviders, investorProfileRepo, incomeRepo, dependentRepo, lifeEventRepo, txManager, ipsService)
 	portfolioService := service.NewPortfolioService(assetRepo, thesisRepo, watchlistRepo, txManager)
+	
+	monthlyReviewRepo := repository.NewMonthlyReviewRepository(dbPool)
+	monthlyReviewService := service.NewMonthlyReviewService(monthlyReviewRepo, portfolioService, liabilityRepo, ipsRepo, assetRepo, dependentRepo, thesisRepo, aiProviders)
 
 	// Initialize handlers
 	healthHandler := handler.NewHealthHandler()
@@ -115,9 +118,10 @@ func main() {
 	notifHandler := handler.NewNotificationHandler(notifService)
 	ipsHandler := handler.NewIPSHandler(ipsService)
 	portfolioHandler := handler.NewPortfolioHandler(portfolioService, aiProviders)
+	monthlyReviewHandler := handler.NewMonthlyReviewHandler(monthlyReviewService)
 
 	// Register routes
-	registerRoutes(e, healthHandler, authHandler, profileHandler, wealthHandler, cashflowHandler, timelineHandler, notifHandler, ipsHandler, portfolioHandler)
+	registerRoutes(e, healthHandler, authHandler, profileHandler, wealthHandler, cashflowHandler, timelineHandler, notifHandler, ipsHandler, portfolioHandler, monthlyReviewHandler)
 
 	// Get PORT from environment variable (default: 8080)
 	port := os.Getenv("PORT")
@@ -134,7 +138,7 @@ func main() {
 }
 
 // registerRoutes maps all API routes to their handlers.
-func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHandler *handler.AuthHandler, profileHandler *handler.ProfileHandler, wealthHandler *handler.WealthHandler, cashflowHandler *handler.CashflowHandler, timelineHandler *handler.TimelineHandler, notifHandler *handler.NotificationHandler, ipsHandler *handler.IPSHandler, portfolioHandler *handler.PortfolioHandler) {
+func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHandler *handler.AuthHandler, profileHandler *handler.ProfileHandler, wealthHandler *handler.WealthHandler, cashflowHandler *handler.CashflowHandler, timelineHandler *handler.TimelineHandler, notifHandler *handler.NotificationHandler, ipsHandler *handler.IPSHandler, portfolioHandler *handler.PortfolioHandler, monthlyReviewHandler *handler.MonthlyReviewHandler) {
 	api := e.Group("/api/v1")
 
 	// Public routes
@@ -213,4 +217,11 @@ func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHand
 	thesesGroup.PUT("/:id", portfolioHandler.UpdateThesis)
 	thesesGroup.DELETE("/:id", portfolioHandler.DeleteThesis)
 	thesesGroup.POST("/generate", portfolioHandler.GenerateThesisAI)
+
+	// Monthly Review routes
+	reviews := protected.Group("/reviews")
+	reviews.GET("", monthlyReviewHandler.GetReviewHistory)
+	reviews.POST("", monthlyReviewHandler.SaveReview)
+	reviews.POST("/generate", monthlyReviewHandler.GenerateReview)
+	reviews.GET("/:month", monthlyReviewHandler.GetReviewByMonth)
 }

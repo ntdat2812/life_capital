@@ -42,7 +42,8 @@ Tài liệu này theo dõi tiến độ thực tế (Source Code) so với đặ
 
 ### Module 5 -> 8 (Thesis, Decision Journal, Monthly Review)
 - 🟢 **Investment Thesis**: Đã hoàn thành API lưu trữ, giao diện dạng lưới Grid và tính năng nhờ AI sinh Thesis tự động.
-- 🔴 **Decision Journal, Monthly Review**: Chưa code.
+- 🟢 **Monthly Review**: Đã hoàn thành tính năng nhập vốn rải ngân, AI tổng hợp toàn bộ danh mục, IPS, nợ và gợi ý hành động.
+- 🔴 **Decision Journal**: Chưa code.
 ### Module 9 — Authentication & Authorization
 - 🟢 **Đăng ký (Signup)**: Đã xong, hỗ trợ multi-user.
 - 🟢 **Đăng nhập (Login)**: Đã xong, kết nối DB với JWT Token.

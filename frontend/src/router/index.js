@@ -92,6 +92,24 @@ const routes = [
     name: 'signup',
     component: () => import('../views/SignupView.vue'),
     meta: { requiresAuth: false }
+  },
+  {
+    path: '/review',
+    name: 'review',
+    component: () => import('../views/ReviewView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/review/active',
+    name: 'review-active',
+    component: () => import('../views/ActiveReviewView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/review/:month',
+    name: 'review-detail',
+    component: () => import('../views/ActiveReviewView.vue'),
+    meta: { requiresAuth: true }
   }
 ]
 

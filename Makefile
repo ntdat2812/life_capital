@@ -16,6 +16,9 @@ run-back:
 down-back:
 	fuser -k 8080/tcp || true
 
+down-back-mac:
+	sudo lsof -i tcp:8080 -t | xargs kill -9 || true
+
 # Run frontend dev server
 run-front:
 	cd frontend && npm run dev
