@@ -122,8 +122,15 @@
                   </div>
                 </td>
                 <td class="p-4 text-right font-bold text-white">{{ formatCurrency(asset.current_value) }}</td>
-                <td class="p-4 text-right font-medium text-emerald-400">
-                  {{ totalInvestableValue > 0 ? ((asset.current_value / totalInvestableValue) * 100).toFixed(1) : '0.0' }}%
+                <td class="p-4 text-right">
+                  <div class="flex flex-col items-end">
+                    <span class="font-bold text-emerald-400">
+                      {{ group.totalValue > 0 ? ((asset.current_value / group.totalValue) * 100).toFixed(1) : '0.0' }}% <span class="text-xs text-slate-500 font-normal ml-0.5">nhóm</span>
+                    </span>
+                    <span class="text-xs text-slate-400 mt-0.5">
+                      {{ totalInvestableValue > 0 ? ((asset.current_value / totalInvestableValue) * 100).toFixed(1) : '0.0' }}% <span class="text-slate-500">tổng</span>
+                    </span>
+                  </div>
                 </td>
                 <td class="p-4 text-center">
                   <router-link v-if="asset.ticker || asset.category !== 'cash'" :to="`/thesis/${asset.ticker || encodeURIComponent(asset.name)}`" class="inline-flex items-center justify-center p-1.5 bg-slate-800 hover:bg-indigo-600/20 text-slate-400 hover:text-indigo-400 rounded-lg transition-colors group" title="Xem Luận điểm đầu tư">
@@ -224,7 +231,7 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-slate-300 mb-1">Giá mục tiêu (Vùng giá mua an toàn)</label>
-            <input type="number" step="0.01" v-model="watchlistForm.target_price" required class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" />
+            <CurrencyInput v-model="watchlistForm.target_price" required />
           </div>
           <div>
             <label class="block text-sm font-medium text-slate-300 mb-1">Độ tự tin (Conviction Score: 1-10)</label>
@@ -258,6 +265,7 @@ import { useIpsStore } from '../stores/ips'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import { Doughnut } from 'vue-chartjs'
 import { getCategoryName, getCategoryIcon } from '../utils/assetUtils'
+import CurrencyInput from '../components/common/CurrencyInput.vue'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 

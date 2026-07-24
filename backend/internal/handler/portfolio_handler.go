@@ -89,6 +89,13 @@ func (h *PortfolioHandler) CreateWatchlistItem(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	if item.QualityScore == 0 {
+		item.QualityScore = 5
+	}
+	if item.Priority == 0 {
+		item.Priority = 5
+	}
+
 	item.UserID = userID
 	if err := h.portfolioService.CreateWatchlistItem(c.Request().Context(), &item); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

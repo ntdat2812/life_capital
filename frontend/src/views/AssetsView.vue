@@ -307,9 +307,52 @@
             <input type="text" v-model="assetForm.name" required class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" />
           </div>
 
-          <div v-if="assetForm.category === 'deposit'">
-            <label class="block text-sm font-medium text-slate-300 mb-1">Lãi suất (%/năm)</label>
-            <input type="number" step="0.1" v-model="depositInterestRate" placeholder="Ví dụ: 5.5" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" />
+          <div v-if="assetForm.category === 'deposit'" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-1">Ngân hàng</label>
+              <select v-model="depositBank" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
+                <option value="Vietcombank">Vietcombank</option>
+                <option value="BIDV">BIDV</option>
+                <option value="VietinBank">VietinBank</option>
+                <option value="Agribank">Agribank</option>
+                <option value="Techcombank">Techcombank</option>
+                <option value="MBBank">MBBank</option>
+                <option value="VPBank">VPBank</option>
+                <option value="ACB">ACB</option>
+                <option value="TPBank">TPBank</option>
+                <option value="Sacombank">Sacombank</option>
+                <option value="VIB">VIB</option>
+                <option value="HDBank">HDBank</option>
+                <option value="MSB">MSB</option>
+                <option value="SHB">SHB</option>
+                <option value="SeABank">SeABank</option>
+                <option value="OCB">OCB</option>
+                <option value="Eximbank">Eximbank</option>
+                <option value="LPBank">LPBank</option>
+                <option value="Nam A Bank">Nam A Bank</option>
+                <option value="Khác">Khác...</option>
+              </select>
+              <input v-if="depositBank === 'Khác'" type="text" v-model="customDepositBank" placeholder="Nhập tên NH..." class="mt-2 w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-1">Kỳ hạn</label>
+              <select v-model="depositTerm" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
+                <option value="Không kỳ hạn">Không kỳ hạn</option>
+                <option value="1 tháng">1 tháng</option>
+                <option value="3 tháng">3 tháng</option>
+                <option value="6 tháng">6 tháng</option>
+                <option value="12 tháng">12 tháng</option>
+                <option value="13 tháng">13 tháng</option>
+                <option value="18 tháng">18 tháng</option>
+                <option value="24 tháng">24 tháng</option>
+                <option value="Khác">Khác...</option>
+              </select>
+              <input v-if="depositTerm === 'Khác'" type="text" v-model="customDepositTerm" placeholder="Nhập kỳ hạn..." class="mt-2 w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-1">Lãi suất (%/năm)</label>
+              <input type="number" step="0.1" v-model="depositInterestRate" placeholder="Ví dụ: 5.5" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" />
+            </div>
           </div>
 
           <div v-if="assetForm.category === 'gold'" class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -491,6 +534,10 @@ const goldBrand = ref('SJC')
 const goldPurity = ref('9999')
 const customGoldPurity = ref('')
 const goldUnit = ref('Lượng')
+const depositBank = ref('Vietcombank')
+const customDepositBank = ref('')
+const depositTerm = ref('6 tháng')
+const customDepositTerm = ref('')
 const depositInterestRate = ref('')
 
 const assetForm = ref({
@@ -544,7 +591,7 @@ const handleLiabilityScroll = (e) => {
 }
 
 const showNameField = computed(() => {
-  return !['stock', 'crypto', 'gold'].includes(assetForm.value.category)
+  return !['stock', 'crypto', 'gold', 'deposit'].includes(assetForm.value.category)
 })
 
 const showTickerField = computed(() => {
@@ -640,7 +687,7 @@ const groupedLiabilities = computed(() => {
 // --- FORMATTING LOGIC ---
 const formatCurrency = (value) => {
   if (value === undefined || value === null) return '0'
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: wealthStore.netWorthSummary?.base_currency || 'VND' }).format(value)
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: wealthStore.netWorthSummary?.base_currency || 'VND' }).format(Math.round(value))
 }
 
 const formatInputNumber = (value) => {
@@ -685,9 +732,9 @@ const calculateCurrentValue = () => {
   if (assetForm.value.quantity && assetForm.value.current_price) {
     if (assetForm.value.category === 'gold') {
       const multiplier = getGoldMultiplier(goldUnit.value)
-      assetForm.value.current_value = assetForm.value.quantity * (assetForm.value.current_price * multiplier)
+      assetForm.value.current_value = Math.round(assetForm.value.quantity * (assetForm.value.current_price * multiplier))
     } else {
-      assetForm.value.current_value = assetForm.value.quantity * assetForm.value.current_price
+      assetForm.value.current_value = Math.round(assetForm.value.quantity * assetForm.value.current_price)
     }
   }
 }
@@ -696,6 +743,10 @@ const openAddAsset = () => {
   isEditingAsset.value = false
   editingAssetId.value = null
   goldUnit.value = 'Lượng'
+  depositBank.value = 'Vietcombank'
+  customDepositBank.value = ''
+  depositTerm.value = '6 tháng'
+  customDepositTerm.value = ''
   depositInterestRate.value = ''
   assetForm.value = { category: 'cash', name: '', ticker: '', quantity: null, avg_price: null, current_price: null, current_value: null }
   showAddAssetModal.value = true
@@ -706,6 +757,9 @@ const openEditAsset = (asset) => {
   editingAssetId.value = asset.id
   goldUnit.value = 'Lượng'
   assetForm.value = { ...asset }
+  if (assetForm.value.current_value) {
+    assetForm.value.current_value = Math.round(assetForm.value.current_value)
+  }
   
   if (asset.category === 'gold') {
     const parts = asset.name.split(' - ')
@@ -736,12 +790,27 @@ const openEditAsset = (asset) => {
       else { goldPurity.value = 'Khác'; customGoldPurity.value = ''; goldType.value = purityStr }
     }
   } else if (asset.category === 'deposit') {
-    const match = asset.name.match(/(.+) - ([\d.]+)%$/)
+    const match = asset.name.match(/(.+) - Kỳ hạn (.+) - Lãi ([\d.]+)%$/)
     if (match) {
-      assetForm.value.name = match[1].trim()
-      depositInterestRate.value = match[2]
+      const bank = match[1].trim()
+      const term = match[2].trim()
+      
+      const banks = ['Vietcombank', 'BIDV', 'VietinBank', 'Agribank', 'Techcombank', 'MBBank', 'VPBank', 'ACB', 'TPBank', 'Sacombank', 'VIB', 'HDBank', 'MSB', 'SHB', 'SeABank', 'OCB', 'Eximbank', 'LPBank', 'Nam A Bank']
+      if (banks.includes(bank)) depositBank.value = bank; else { depositBank.value = 'Khác'; customDepositBank.value = bank }
+      
+      const terms = ['Không kỳ hạn', '1 tháng', '3 tháng', '6 tháng', '12 tháng', '13 tháng', '18 tháng', '24 tháng']
+      if (terms.includes(term)) depositTerm.value = term; else { depositTerm.value = 'Khác'; customDepositTerm.value = term }
+      
+      depositInterestRate.value = match[3]
     } else {
-      depositInterestRate.value = ''
+      const oldMatch = asset.name.match(/(.+) - ([\d.]+)%$/)
+      if (oldMatch) {
+         depositBank.value = 'Khác'; customDepositBank.value = oldMatch[1].trim()
+         depositInterestRate.value = oldMatch[2]
+      } else {
+         depositBank.value = 'Khác'; customDepositBank.value = asset.name
+         depositInterestRate.value = ''
+      }
     }
   }
   showAddAssetModal.value = true
@@ -758,7 +827,7 @@ const submitAssetForm = async () => {
       quantity: assetForm.value.quantity ? Number(assetForm.value.quantity) : undefined,
       avg_price: assetForm.value.avg_price ? Number(assetForm.value.avg_price) : undefined,
       current_price: assetForm.value.current_price ? Number(assetForm.value.current_price) : undefined,
-      current_value: Number(assetForm.value.current_value)
+      current_value: Math.round(Number(assetForm.value.current_value))
     }
     
     if (payload.category === 'stock' || payload.category === 'crypto') {
@@ -776,8 +845,13 @@ const submitAssetForm = async () => {
     } else if (payload.category === 'fund') {
       payload.ticker = undefined
     } else if (payload.category === 'deposit') {
+      const bank = depositBank.value === 'Khác' ? customDepositBank.value : depositBank.value
+      const term = depositTerm.value === 'Khác' ? customDepositTerm.value : depositTerm.value
+      
       if (depositInterestRate.value) {
-        payload.name = `${payload.name} - ${depositInterestRate.value}%`
+        payload.name = `${bank} - Kỳ hạn ${term} - Lãi ${depositInterestRate.value}%`
+      } else {
+        payload.name = `${bank} - Kỳ hạn ${term}`
       }
       payload.ticker = undefined
       payload.quantity = undefined
