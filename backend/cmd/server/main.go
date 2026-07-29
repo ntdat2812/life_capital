@@ -108,7 +108,7 @@ func main() {
 	monthlyReviewService := service.NewMonthlyReviewService(monthlyReviewRepo, portfolioService, liabilityRepo, ipsRepo, assetRepo, dependentRepo, thesisRepo, aiProviders)
 
 	// Initialize handlers
-	healthHandler := handler.NewHealthHandler()
+	healthHandler := handler.NewHealthHandler(dbPool)
 	authHandler := handler.NewAuthHandler(authService)
 	profileHandler := handler.NewProfileHandler(profileService)
 	wealthHandler := handler.NewWealthHandler(wealthService)
