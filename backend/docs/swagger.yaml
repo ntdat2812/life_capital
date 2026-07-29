@@ -45,6 +45,11 @@ definitions:
       new_risk_tolerance:
         type: string
     type: object
+  handler.GenerateReviewRequest:
+    properties:
+      new_investment_amount:
+        type: number
+    type: object
   model.Asset:
     properties:
       avg_price:
@@ -505,6 +510,35 @@ definitions:
     - email
     - password
     type: object
+  model.MonthlyReview:
+    properties:
+      ai_overall_summary:
+        type: string
+      ai_recommendations:
+        description: AI Generated content
+      created_at:
+        type: string
+      id:
+        type: string
+      net_worth_at_review:
+        type: number
+      new_investment_amount:
+        type: number
+      portfolio_snapshot:
+        description: Snapshots (JSONB)
+      review_month:
+        description: e.g. "2023-10-01T00:00:00Z" from DB, we'll format it
+        type: string
+      status:
+        description: draft, completed
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+      user_note:
+        type: string
+    type: object
   model.NetWorthSummary:
     properties:
       base_currency:
@@ -762,7 +796,6 @@ definitions:
       user_id:
         type: string
     type: object
-host: localhost:8080
 info:
   contact: {}
   description: API server for Personal Wealth Operating System.
@@ -1444,6 +1477,92 @@ paths:
       summary: Confirm and save a life event
       tags:
       - timeline
+  /api/v1/reviews:
+    get:
+      description: Get all past monthly reviews for the user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.MonthlyReview'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get Review History
+      tags:
+      - Reviews
+    post:
+      consumes:
+      - application/json
+      description: Saves a generated monthly review
+      parameters:
+      - description: Monthly Review Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.MonthlyReview'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.MonthlyReview'
+      security:
+      - BearerAuth: []
+      summary: Save Monthly Review
+      tags:
+      - Reviews
+  /api/v1/reviews/{month}:
+    get:
+      description: Get a specific monthly review
+      parameters:
+      - description: Month (YYYY-MM-01)
+        in: path
+        name: month
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.MonthlyReview'
+      security:
+      - BearerAuth: []
+      summary: Get Review By Month
+      tags:
+      - Reviews
+  /api/v1/reviews/generate:
+    post:
+      consumes:
+      - application/json
+      description: Analyzes portfolio, watchlist, liabilities and new capital to generate
+        a recommendation
+      parameters:
+      - description: New Investment Amount
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.GenerateReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.MonthlyReview'
+      security:
+      - BearerAuth: []
+      summary: Generate Monthly Review
+      tags:
+      - Reviews
   /api/v1/theses:
     get:
       consumes:

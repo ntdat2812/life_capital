@@ -25,7 +25,6 @@ import (
 // @title Life Capital (WealthOS) API
 // @version 1.0
 // @description API server for Personal Wealth Operating System.
-// @host localhost:8080
 // @BasePath /
 // @securityDefinitions.apikey BearerAuth
 // @in header

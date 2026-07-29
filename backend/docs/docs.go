@@ -1075,6 +1075,144 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/reviews": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all past monthly reviews for the user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reviews"
+                ],
+                "summary": "Get Review History",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.MonthlyReview"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Saves a generated monthly review",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reviews"
+                ],
+                "summary": "Save Monthly Review",
+                "parameters": [
+                    {
+                        "description": "Monthly Review Data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.MonthlyReview"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.MonthlyReview"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/reviews/generate": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Analyzes portfolio, watchlist, liabilities and new capital to generate a recommendation",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reviews"
+                ],
+                "summary": "Generate Monthly Review",
+                "parameters": [
+                    {
+                        "description": "New Investment Amount",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.GenerateReviewRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.MonthlyReview"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/reviews/{month}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a specific monthly review",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reviews"
+                ],
+                "summary": "Get Review By Month",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Month (YYYY-MM-01)",
+                        "name": "month",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.MonthlyReview"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/theses": {
             "get": {
                 "security": [
@@ -1777,6 +1915,14 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.GenerateReviewRequest": {
+            "type": "object",
+            "properties": {
+                "new_investment_amount": {
+                    "type": "number"
+                }
+            }
+        },
         "model.Asset": {
             "type": "object",
             "properties": {
@@ -2456,6 +2602,49 @@ const docTemplate = `{
                 }
             }
         },
+        "model.MonthlyReview": {
+            "type": "object",
+            "properties": {
+                "ai_overall_summary": {
+                    "type": "string"
+                },
+                "ai_recommendations": {
+                    "description": "AI Generated content"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "net_worth_at_review": {
+                    "type": "number"
+                },
+                "new_investment_amount": {
+                    "type": "number"
+                },
+                "portfolio_snapshot": {
+                    "description": "Snapshots (JSONB)"
+                },
+                "review_month": {
+                    "description": "e.g. \"2023-10-01T00:00:00Z\" from DB, we'll format it",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "draft, completed",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "user_note": {
+                    "type": "string"
+                }
+            }
+        },
         "model.NetWorthSummary": {
             "type": "object",
             "properties": {
@@ -2854,7 +3043,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Life Capital (WealthOS) API",
