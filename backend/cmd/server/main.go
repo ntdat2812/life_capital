@@ -18,6 +18,8 @@ import (
 	"github.com/datnguyen/life_capital/backend/internal/ai"
 	"github.com/datnguyen/life_capital/backend/internal/handler"
 	customMiddleware "github.com/datnguyen/life_capital/backend/internal/middleware"
+	"github.com/datnguyen/life_capital/backend/internal/pricefeed"
+	"github.com/datnguyen/life_capital/backend/internal/cron"
 	"github.com/datnguyen/life_capital/backend/internal/repository"
 	"github.com/datnguyen/life_capital/backend/internal/service"
 )
@@ -107,6 +109,12 @@ func main() {
 	monthlyReviewRepo := repository.NewMonthlyReviewRepository(dbPool)
 	monthlyReviewService := service.NewMonthlyReviewService(monthlyReviewRepo, portfolioService, liabilityRepo, ipsRepo, assetRepo, dependentRepo, thesisRepo, aiProviders)
 
+	providerRegistry := pricefeed.NewRegistry(
+		pricefeed.NewDnseProvider(),
+		pricefeed.NewFmarketProvider(),
+	)
+	priceSyncService := service.NewPriceSyncService(assetRepo, providerRegistry)
+
 	// Initialize handlers
 	healthHandler := handler.NewHealthHandler(dbPool)
 	authHandler := handler.NewAuthHandler(authService)
@@ -118,9 +126,15 @@ func main() {
 	ipsHandler := handler.NewIPSHandler(ipsService)
 	portfolioHandler := handler.NewPortfolioHandler(portfolioService, aiProviders)
 	monthlyReviewHandler := handler.NewMonthlyReviewHandler(monthlyReviewService)
+	priceSyncHandler := handler.NewPriceSyncHandler(priceSyncService)
+
+	// Initialize cron scheduler
+	scheduler := cron.NewScheduler(priceSyncService, userRepo)
+	scheduler.Start()
+	defer scheduler.Stop()
 
 	// Register routes
-	registerRoutes(e, healthHandler, authHandler, profileHandler, wealthHandler, cashflowHandler, timelineHandler, notifHandler, ipsHandler, portfolioHandler, monthlyReviewHandler)
+	registerRoutes(e, healthHandler, authHandler, profileHandler, wealthHandler, cashflowHandler, timelineHandler, notifHandler, ipsHandler, portfolioHandler, monthlyReviewHandler, priceSyncHandler)
 
 	// Get PORT from environment variable (default: 8080)
 	port := os.Getenv("PORT")
@@ -137,7 +151,7 @@ func main() {
 }
 
 // registerRoutes maps all API routes to their handlers.
-func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHandler *handler.AuthHandler, profileHandler *handler.ProfileHandler, wealthHandler *handler.WealthHandler, cashflowHandler *handler.CashflowHandler, timelineHandler *handler.TimelineHandler, notifHandler *handler.NotificationHandler, ipsHandler *handler.IPSHandler, portfolioHandler *handler.PortfolioHandler, monthlyReviewHandler *handler.MonthlyReviewHandler) {
+func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHandler *handler.AuthHandler, profileHandler *handler.ProfileHandler, wealthHandler *handler.WealthHandler, cashflowHandler *handler.CashflowHandler, timelineHandler *handler.TimelineHandler, notifHandler *handler.NotificationHandler, ipsHandler *handler.IPSHandler, portfolioHandler *handler.PortfolioHandler, monthlyReviewHandler *handler.MonthlyReviewHandler, priceSyncHandler *handler.PriceSyncHandler) {
 	api := e.Group("/api/v1")
 
 	// Public routes
@@ -223,4 +237,7 @@ func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHand
 	reviews.POST("", monthlyReviewHandler.SaveReview)
 	reviews.POST("/generate", monthlyReviewHandler.GenerateReview)
 	reviews.GET("/:month", monthlyReviewHandler.GetReviewByMonth)
+
+	// Price Sync route
+	protected.POST("/price-sync", priceSyncHandler.SyncPrices)
 }

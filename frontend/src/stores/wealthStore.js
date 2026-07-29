@@ -210,6 +210,20 @@ export const useWealthStore = defineStore('wealth', {
       } finally {
         this.loading = false
       }
+    },
+
+    async syncPrices() {
+      try {
+        const response = await api.post('/price-sync')
+        if (response.data && response.data.total_updated > 0) {
+          // fetch assets again to reflect updated prices
+          await this.fetchAssets()
+          await this.fetchNetWorthSummary()
+        }
+        return response.data
+      } catch (err) {
+        throw err.response?.data?.message || 'Failed to sync prices'
+      }
     }
   }
 })

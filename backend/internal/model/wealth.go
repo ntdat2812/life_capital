@@ -46,6 +46,12 @@ type Asset struct {
 	UpdatedAt    time.Time     `json:"updated_at" db:"updated_at"`
 }
 
+type PriceUpdate struct {
+	ID           uuid.UUID
+	CurrentPrice float64
+	CurrentValue float64
+}
+
 type Liability struct {
 	ID               uuid.UUID         `json:"id" db:"id"`
 	UserID           uuid.UUID         `json:"user_id" db:"user_id"`

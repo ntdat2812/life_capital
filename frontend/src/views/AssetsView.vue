@@ -104,9 +104,16 @@
           <h2 class="text-xl font-bold text-white flex items-center">
             Tài sản của bạn
           </h2>
-          <button @click="openAddAsset" class="px-4 py-2 bg-indigo-500/20 text-indigo-400 rounded-lg hover:bg-indigo-500/30 transition-colors text-sm font-medium border border-indigo-500/30">
-            + Thêm Tài sản
-          </button>
+          <div class="flex gap-2">
+            <button @click="triggerPriceSync" :disabled="syncingPrices" class="px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 transition-colors text-sm font-medium border border-emerald-500/30 flex items-center gap-2">
+              <span v-if="syncingPrices" class="animate-spin">↻</span>
+              <span v-else>↻</span>
+              Đồng bộ giá
+            </button>
+            <button @click="openAddAsset" class="px-4 py-2 bg-indigo-500/20 text-indigo-400 rounded-lg hover:bg-indigo-500/30 transition-colors text-sm font-medium border border-indigo-500/30">
+              + Thêm
+            </button>
+          </div>
         </div>
 
         <div class="premium-card overflow-hidden flex flex-col h-[550px]">
@@ -394,6 +401,27 @@
             </div>
           </div>
 
+          <div v-if="assetForm.category === 'fund'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-1">Mã Quỹ (Ticker)</label>
+              <select v-model="fundCode" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
+                <option value="VESAF">VESAF - VinaCapital</option>
+                <option value="VEOF">VEOF - VinaCapital</option>
+                <option value="VIBF">VIBF - VinaCapital</option>
+                <option value="VLBF">VLBF - VinaCapital</option>
+                <option value="SSISCA">SSISCA - SSIAM</option>
+                <option value="VLGF">VLGF - SSIAM</option>
+                <option value="SSIPDF">SSIPDF - SSIAM</option>
+                <option value="VFMVF1">VFMVF1 - Dragon Capital</option>
+                <option value="VFMVF4">VFMVF4 - Dragon Capital</option>
+                <option value="VNDAF">VNDAF - VNDirect</option>
+                <option value="MAFEQI">MAFEQI - Manulife</option>
+                <option value="Khác">Khác...</option>
+              </select>
+              <input v-if="fundCode === 'Khác'" type="text" v-model="customFundCode" placeholder="Nhập mã quỹ..." class="mt-2 w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 uppercase" />
+            </div>
+          </div>
+
           <div v-if="isFluctuatingAsset(assetForm.category)" class="grid grid-cols-2 gap-4">
             <div v-if="showTickerField">
               <label class="block text-sm font-medium text-slate-300 mb-1">Mã (Ticker)</label>
@@ -501,6 +529,25 @@
       @confirm="executeDelete" 
       @cancel="deleteConfirm.show = false" 
     />
+
+    <!-- Sync Result Modal -->
+    <div v-if="showSyncResultModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="premium-card w-full max-w-sm p-6 relative text-center">
+        <div v-if="syncSuccess" class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+          ✓
+        </div>
+        <div v-else class="w-16 h-16 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+          ✕
+        </div>
+        
+        <h2 class="text-xl font-bold text-white mb-2">{{ syncSuccess ? 'Đồng bộ thành công!' : 'Đồng bộ thất bại' }}</h2>
+        <p class="text-slate-400 text-sm mb-6">{{ syncMessage }}</p>
+        
+        <button @click="showSyncResultModal = false" class="w-full px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors font-medium">
+          Đóng
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -508,7 +555,6 @@
 import { ref, onMounted, computed } from 'vue'
 import { getCategoryName, getCategoryIcon, getLiabilityName, getLiabilityIcon } from '../utils/assetUtils'
 import { useWealthStore } from '../stores/wealthStore'
-import { useNotificationStore } from '../stores/notificationStore'
 import CurrencyInput from '../components/common/CurrencyInput.vue'
 import ConfirmModal from '../components/common/ConfirmModal.vue'
 
@@ -539,6 +585,8 @@ const customDepositBank = ref('')
 const depositTerm = ref('6 tháng')
 const customDepositTerm = ref('')
 const depositInterestRate = ref('')
+const fundCode = ref('VESAF')
+const customFundCode = ref('')
 
 const assetForm = ref({
   category: 'cash',
@@ -558,7 +606,26 @@ const liabilityForm = ref({
   monthly_payment: null
 })
 
-// removed formattedInputs
+const syncingPrices = ref(false)
+const showSyncResultModal = ref(false)
+const syncSuccess = ref(true)
+const syncMessage = ref('')
+
+const triggerPriceSync = async () => {
+  if (syncingPrices.value) return
+  syncingPrices.value = true
+  try {
+    const res = await wealthStore.syncPrices()
+    syncSuccess.value = true
+    syncMessage.value = `Đã cập nhật thành công giá mới cho ${res.total_updated} tài sản. Thất bại: ${res.total_failed}. Bỏ qua: ${res.total_skipped}.`
+  } catch (err) {
+    syncSuccess.value = false
+    syncMessage.value = err.toString()
+  } finally {
+    syncingPrices.value = false
+    showSyncResultModal.value = true
+  }
+}
 
 onMounted(() => {
   wealthStore.fetchAll()
@@ -597,6 +664,9 @@ const showNameField = computed(() => {
 const showTickerField = computed(() => {
   return ['stock', 'crypto'].includes(assetForm.value.category)
 })
+
+// --- COMPUTED PROPERTIES FOR UI ---
+// ... (omitting irrelevant parts, let's just replace the exact submit logic)
 
 const tickerPlaceholder = computed(() => {
   if (assetForm.value.category === 'crypto') return 'BTC, ETH, USDT...'
@@ -748,6 +818,8 @@ const openAddAsset = () => {
   depositTerm.value = '6 tháng'
   customDepositTerm.value = ''
   depositInterestRate.value = ''
+  fundCode.value = 'VESAF'
+  customFundCode.value = ''
   assetForm.value = { category: 'cash', name: '', ticker: '', quantity: null, avg_price: null, current_price: null, current_value: null }
   showAddAssetModal.value = true
 }
@@ -812,6 +884,16 @@ const openEditAsset = (asset) => {
          depositInterestRate.value = ''
       }
     }
+  } else if (asset.category === 'fund') {
+    if (asset.ticker) {
+      const knownFunds = ['VESAF', 'VEOF', 'VIBF', 'VLBF', 'SSISCA', 'VLGF', 'SSIPDF', 'VFMVF1', 'VFMVF4', 'VNDAF', 'MAFEQI']
+      if (knownFunds.includes(asset.ticker)) {
+        fundCode.value = asset.ticker
+      } else {
+        fundCode.value = 'Khác'
+        customFundCode.value = asset.ticker
+      }
+    }
   }
   showAddAssetModal.value = true
 }
@@ -836,14 +918,32 @@ const submitAssetForm = async () => {
     } else if (payload.category === 'gold') {
       const purity = goldPurity.value === 'Khác' ? customGoldPurity.value : goldPurity.value
       payload.name = `${goldBrand.value} - ${goldType.value} ${purity} (${goldUnit.value})`.trim()
-      payload.ticker = undefined
+      
+      // Auto-generate ticker for gold sync
+      let typeCode = "NHAN"
+      if (goldType.value === "Vàng miếng") typeCode = "MIENG"
+      else if (goldType.value === "Vàng trang sức") typeCode = "TS"
+      
+      let brandCode = "KHAC"
+      if (goldBrand.value === "Bảo Tín Minh Châu") brandCode = "BTMC"
+      else if (goldBrand.value === "Bảo Tín Mạnh Hải") brandCode = "BTMH"
+      else if (goldBrand.value === "Phú Quý") brandCode = "PHUQUY"
+      else if (goldBrand.value === "Mi Hồng") brandCode = "MIHONG"
+      else if (goldBrand.value !== "Tư nhân" && goldBrand.value !== "Khác") brandCode = goldBrand.value.toUpperCase().replace(/\s+/g, '')
+      
+      payload.ticker = `GOLD_${brandCode}_${typeCode}`
+      if (payload.ticker.length > 20) {
+        payload.ticker = payload.ticker.substring(0, 20) // Ensure it fits the db
+      }
       
       const multiplier = getGoldMultiplier(goldUnit.value)
       
       if (payload.current_price) payload.current_price = payload.current_price * multiplier
       if (payload.avg_price) payload.avg_price = payload.avg_price * multiplier
     } else if (payload.category === 'fund') {
-      payload.ticker = undefined
+      const fc = fundCode.value === 'Khác' ? customFundCode.value : fundCode.value
+      payload.ticker = fc.toUpperCase()
+      payload.name = payload.ticker + " - Chứng chỉ quỹ"
     } else if (payload.category === 'deposit') {
       const bank = depositBank.value === 'Khác' ? customDepositBank.value : depositBank.value
       const term = depositTerm.value === 'Khác' ? customDepositTerm.value : depositTerm.value

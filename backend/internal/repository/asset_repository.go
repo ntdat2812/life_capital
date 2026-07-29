@@ -14,6 +14,8 @@ type AssetRepository interface {
 	GetAssetsByUserID(ctx context.Context, userID uuid.UUID, category string, sort string, limit int, offset int) (*model.PaginatedAssets, error)
 	UpdateAsset(ctx context.Context, asset *model.Asset) error
 	DeleteAsset(ctx context.Context, id uuid.UUID, userID uuid.UUID) error
+	GetSyncableAssets(ctx context.Context, userID uuid.UUID) ([]model.Asset, error)
+	BatchUpdatePrices(ctx context.Context, updates []model.PriceUpdate) error
 }
 
 type assetRepository struct {
@@ -148,4 +150,60 @@ func (r *assetRepository) DeleteAsset(ctx context.Context, id uuid.UUID, userID 
 	query := `DELETE FROM assets WHERE id = $1 AND user_id = $2`
 	_, err := r.db.Exec(ctx, query, id, userID)
 	return err
+}
+
+func (r *assetRepository) GetSyncableAssets(ctx context.Context, userID uuid.UUID) ([]model.Asset, error) {
+	query := `
+		SELECT id, user_id, category, name, ticker, quantity, avg_price, current_price, current_value, cost_basis, notes, is_active, created_at, updated_at
+		FROM assets
+		WHERE user_id = $1 AND is_active = true 
+		  AND ticker IS NOT NULL AND ticker != ''
+		  AND quantity IS NOT NULL AND quantity > 0
+	`
+	rows, err := r.db.Query(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var assets []model.Asset
+	for rows.Next() {
+		var a model.Asset
+		if err := rows.Scan(
+			&a.ID, &a.UserID, &a.Category, &a.Name, &a.Ticker, &a.Quantity,
+			&a.AvgPrice, &a.CurrentPrice, &a.CurrentValue, &a.CostBasis,
+			&a.Notes, &a.IsActive, &a.CreatedAt, &a.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		assets = append(assets, a)
+	}
+	return assets, nil
+}
+
+func (r *assetRepository) BatchUpdatePrices(ctx context.Context, updates []model.PriceUpdate) error {
+	if len(updates) == 0 {
+		return nil
+	}
+	
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	query := `
+		UPDATE assets 
+		SET current_price = $1, current_value = $2, updated_at = NOW()
+		WHERE id = $3
+	`
+	
+	for _, up := range updates {
+		_, err := tx.Exec(ctx, query, up.CurrentPrice, up.CurrentValue, up.ID)
+		if err != nil {
+			return err
+		}
+	}
+	
+	return tx.Commit(ctx)
 }

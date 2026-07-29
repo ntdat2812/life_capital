@@ -72,3 +72,25 @@ func (r *UserRepository) FindByID(ctx context.Context, id string) (*model.User, 
 	}
 	return user, nil
 }
+
+func (r *UserRepository) GetAll(ctx context.Context) ([]*model.User, error) {
+	query := `
+		SELECT id, email, name, base_currency, created_at, updated_at
+		FROM users
+	`
+	rows, err := r.db.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*model.User
+	for rows.Next() {
+		var user model.User
+		if err := rows.Scan(&user.ID, &user.Email, &user.Name, &user.BaseCurrency, &user.CreatedAt, &user.UpdatedAt); err != nil {
+			return nil, err
+		}
+		users = append(users, &user)
+	}
+	return users, nil
+}
