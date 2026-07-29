@@ -5,6 +5,13 @@
         <h1 class="text-3xl font-bold font-outfit text-white">Quản lý Danh mục & Theo dõi</h1>
         <p class="text-slate-400 mt-1">Danh sách tài sản sinh lời đang nắm giữ và các tài sản đưa vào tầm ngắm chờ mua.</p>
       </div>
+      <div class="flex items-center gap-3">
+        <button @click="triggerPriceSync" :disabled="syncingPrices" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700 transition-colors text-sm font-medium border border-slate-700 flex items-center gap-2" :class="{'opacity-50 cursor-not-allowed': syncingPrices}">
+          <span v-if="syncingPrices" class="animate-spin inline-block w-4 h-4 border-2 border-slate-400 border-t-slate-200 rounded-full"></span>
+          <span v-else>↻</span>
+          Đồng bộ giá
+        </button>
+      </div>
     </div>
 
     <!-- Tabs Component -->
@@ -255,6 +262,24 @@
         </form>
       </div>
     </div>
+    <!-- Sync Result Modal -->
+    <div v-if="showSyncResultModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="premium-card w-full max-w-sm p-6 relative text-center">
+        <div v-if="syncSuccess" class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+          ✓
+        </div>
+        <div v-else class="w-16 h-16 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+          ✕
+        </div>
+        
+        <h2 class="text-xl font-bold text-white mb-2">{{ syncSuccess ? 'Đồng bộ thành công!' : 'Đồng bộ thất bại' }}</h2>
+        <p class="text-slate-400 text-sm mb-6">{{ syncMessage }}</p>
+        
+        <button @click="showSyncResultModal = false" class="w-full px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors font-medium">
+          Đóng
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -262,6 +287,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { usePortfolioStore } from '../stores/portfolioStore'
 import { useIpsStore } from '../stores/ips'
+import { useWealthStore } from '../stores/wealthStore'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import { Doughnut } from 'vue-chartjs'
 import { getCategoryName, getCategoryIcon } from '../utils/assetUtils'
@@ -271,6 +297,30 @@ ChartJS.register(ArcElement, Tooltip, Legend)
 
 const portfolioStore = usePortfolioStore()
 const ipsStore = useIpsStore()
+const wealthStore = useWealthStore()
+
+const syncingPrices = ref(false)
+const showSyncResultModal = ref(false)
+const syncSuccess = ref(true)
+const syncMessage = ref('')
+
+const triggerPriceSync = async () => {
+  if (syncingPrices.value) return
+  syncingPrices.value = true
+  try {
+    const res = await wealthStore.syncPrices()
+    await portfolioStore.fetchHoldings()
+    await portfolioStore.fetchWatchlist()
+    syncSuccess.value = true
+    syncMessage.value = `Đã cập nhật thành công giá mới cho ${res.total_updated} tài sản. Thất bại: ${res.total_failed}. Bỏ qua: ${res.total_skipped}.`
+  } catch (err) {
+    syncSuccess.value = false
+    syncMessage.value = err.toString()
+  } finally {
+    syncingPrices.value = false
+    showSyncResultModal.value = true
+  }
+}
 
 const currentTab = ref('holdings')
 const tabs = computed(() => [
@@ -399,15 +449,12 @@ const totalInvestableValue = computed(() => {
 
 const getTargetAllocation = (asset) => {
   if (!ipsStore.latestIps || !ipsStore.latestIps.target_allocation) return 0
-  try {
-    let allocation = ipsStore.latestIps.target_allocation
-    if (typeof allocation === 'string') {
-      allocation = JSON.parse(allocation)
-    }
-    return allocation[asset.category] || 0
-  } catch (e) {
-    return 0
-  }
+  const targetAlloc = typeof ipsStore.latestIps.target_allocation === 'string'
+    ? JSON.parse(ipsStore.latestIps.target_allocation)
+    : ipsStore.latestIps.target_allocation
+  
+  const cat = asset.category === 'deposit' ? 'cash' : asset.category
+  return targetAlloc[cat] || 0
 }
 
 // Chart Data

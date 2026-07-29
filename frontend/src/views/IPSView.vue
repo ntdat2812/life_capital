@@ -458,7 +458,7 @@ const formatAssetName = (key) => {
     'fund': 'Chứng chỉ quỹ',
     'bond': 'Trái phiếu',
     'gold': 'Vàng',
-    'cash': 'Tiền mặt',
+    'cash': 'Tiền mặt & Tiết kiệm',
     'cash_equivalent': 'Tiền mặt / Tương đương tiền',
     'cash_equivalents': 'Tiền mặt / Tương đương tiền',
     'real_estate': 'Bất động sản',

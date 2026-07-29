@@ -122,6 +122,7 @@
 import { computed, onMounted } from 'vue'
 import { useWealthStore } from '../stores/wealthStore'
 import { useProfileStore } from '../stores/profileStore'
+import { useIpsStore } from '../stores/ips'
 import { Doughnut } from 'vue-chartjs'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 
@@ -129,12 +130,14 @@ ChartJS.register(ArcElement, Tooltip, Legend)
 
 const wealthStore = useWealthStore()
 const profileStore = useProfileStore()
+const ipsStore = useIpsStore()
 
 onMounted(async () => {
   await wealthStore.fetchAllForDashboard()
   if (!profileStore.profile) {
     await profileStore.fetchProfile()
   }
+  await ipsStore.fetchLatestIps()
 })
 
 const formatCurrency = (value) => {
@@ -177,8 +180,7 @@ const categoryColors = {
 }
 
 const categoryLabels = {
-  'cash': 'Tiền mặt',
-  'deposit': 'Tiết kiệm',
+  'cash': 'Tiền mặt & Tiết kiệm',
   'gold': 'Vàng',
   'stock': 'Cổ phiếu',
   'fund': 'Chứng chỉ quỹ',
@@ -187,7 +189,13 @@ const categoryLabels = {
 }
 
 const chartData = computed(() => {
-  const alloc = wealthStore.assetAllocation
+  const alloc = { ...wealthStore.assetAllocation }
+  
+  if (alloc['deposit']) {
+    alloc['cash'] = (alloc['cash'] || 0) + alloc['deposit']
+    delete alloc['deposit']
+  }
+
   const keys = Object.keys(alloc).filter(k => alloc[k] > 0)
   const total = keys.reduce((sum, k) => sum + alloc[k], 0)
   
@@ -195,7 +203,16 @@ const chartData = computed(() => {
     labels: keys.map(k => {
       const name = categoryLabels[k] || k
       const percent = total > 0 ? ((alloc[k] / total) * 100).toFixed(1) : 0
-      return `${name} (${percent}%)`
+      
+      let ipsTarget = 0
+      if (ipsStore.latestIps?.target_allocation) {
+        const targetAlloc = typeof ipsStore.latestIps.target_allocation === 'string' 
+          ? JSON.parse(ipsStore.latestIps.target_allocation) 
+          : ipsStore.latestIps.target_allocation
+        ipsTarget = targetAlloc[k] || 0
+      }
+      
+      return `${name} (${percent}% / IPS ${ipsTarget}%)`
     }),
     datasets: [
       {
