@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"maps"
 
 	"github.com/datnguyen/life_capital/backend/internal/model"
 	"github.com/datnguyen/life_capital/backend/internal/pricefeed"
@@ -12,10 +13,10 @@ import (
 )
 
 type SyncReport struct {
-	TotalUpdated int                      `json:"total_updated"`
-	TotalFailed  int                      `json:"total_failed"`
-	TotalSkipped int                      `json:"total_skipped"`
-	Details      []map[string]interface{} `json:"details"`
+	TotalUpdated int              `json:"total_updated"`
+	TotalFailed  int              `json:"total_failed"`
+	TotalSkipped int              `json:"total_skipped"`
+	Details      []map[string]any `json:"details"`
 }
 
 type PriceSyncService interface {
@@ -66,9 +67,8 @@ func (s *priceSyncService) SyncByUser(ctx context.Context, userID uuid.UUID) (*S
 	resultsCh := make(chan map[string]pricefeed.PriceResult, len(categoryTickers))
 
 	for cat, tickers := range categoryTickers {
-		cat := cat
 		tickers := uniqueStrings(tickers)
-		
+
 		provider, exists := s.registry.GetProvider(cat)
 		if !exists {
 			// No provider for this category, skip
@@ -81,7 +81,7 @@ func (s *priceSyncService) SyncByUser(ctx context.Context, userID uuid.UUID) (*S
 			if err != nil {
 				// We don't fail the whole sync if one provider fails, just log and return nil
 				fmt.Printf("Provider %s failed: %v\n", provider.Name(), err)
-				return nil 
+				return nil
 			}
 			resultsCh <- res
 			return nil
@@ -95,9 +95,7 @@ func (s *priceSyncService) SyncByUser(ctx context.Context, userID uuid.UUID) (*S
 
 	// Merge results
 	for resMap := range resultsCh {
-		for ticker, res := range resMap {
-			priceResults[ticker] = res
-		}
+		maps.Copy(priceResults, resMap)
 	}
 
 	// 4. Prepare updates
@@ -119,7 +117,7 @@ func (s *priceSyncService) SyncByUser(ctx context.Context, userID uuid.UUID) (*S
 			})
 
 			report.TotalUpdated++
-			report.Details = append(report.Details, map[string]interface{}{
+			report.Details = append(report.Details, map[string]any{
 				"id":     a.ID,
 				"name":   a.Name,
 				"ticker": ticker,
