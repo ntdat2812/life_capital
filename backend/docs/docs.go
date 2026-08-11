@@ -760,6 +760,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/price-sync": {
+            "post": {
+                "description": "Fetch current prices for assets and update them in the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PriceSync"
+                ],
+                "summary": "Sync asset prices",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.SyncReport"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/profile/me": {
             "get": {
                 "security": [
@@ -1516,6 +1557,76 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/wealth/alerts/{alert_id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "portfolio"
+                ],
+                "summary": "Update an asset alert",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Alert ID",
+                        "name": "alert_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Alert Data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.UpdateAlertRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.AssetAlert"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "portfolio"
+                ],
+                "summary": "Delete an asset alert",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Alert ID",
+                        "name": "alert_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/api/v1/wealth/assets": {
             "get": {
                 "security": [
@@ -1591,6 +1702,126 @@ const docTemplate = `{
                         "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/model.Asset"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/wealth/assets/gold/bulk-update-price": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Wealth"
+                ],
+                "summary": "Bulk update gold prices",
+                "parameters": [
+                    {
+                        "description": "Update gold prices info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.BulkUpdateGoldRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/wealth/assets/{asset_id}/alerts": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "portfolio"
+                ],
+                "summary": "Get asset alerts",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Asset ID",
+                        "name": "asset_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.AssetAlert"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "portfolio"
+                ],
+                "summary": "Create an asset alert",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Asset ID",
+                        "name": "asset_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Alert Data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.CreateAlertRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.AssetAlert"
                         }
                     }
                 }
@@ -1970,6 +2201,42 @@ const docTemplate = `{
                 }
             }
         },
+        "model.AssetAlert": {
+            "type": "object",
+            "properties": {
+                "alert_type": {
+                    "description": "'take_profit', 'stop_loss', 'stop_accumulating', 'custom'",
+                    "type": "string"
+                },
+                "asset_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "is_triggered": {
+                    "type": "boolean"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "target_value": {
+                    "type": "number"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "model.AssetCategory": {
             "type": "string",
             "enum": [
@@ -1999,6 +2266,25 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/model.User"
+                }
+            }
+        },
+        "model.BulkUpdateGoldRequest": {
+            "type": "object",
+            "required": [
+                "asset_ids",
+                "new_price"
+            ],
+            "properties": {
+                "asset_ids": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "new_price": {
+                    "type": "number"
                 }
             }
         },
@@ -2081,6 +2367,24 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "model.CreateAlertRequest": {
+            "type": "object",
+            "required": [
+                "alert_type",
+                "target_value"
+            ],
+            "properties": {
+                "alert_type": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "target_value": {
+                    "type": "number"
                 }
             }
         },
@@ -2791,6 +3095,30 @@ const docTemplate = `{
                 }
             }
         },
+        "model.UpdateAlertRequest": {
+            "type": "object",
+            "required": [
+                "alert_type",
+                "target_value"
+            ],
+            "properties": {
+                "alert_type": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "is_triggered": {
+                    "type": "boolean"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "target_value": {
+                    "type": "number"
+                }
+            }
+        },
         "model.UpdateAssetRequest": {
             "type": "object",
             "required": [
@@ -3026,6 +3354,27 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "string"
+                }
+            }
+        },
+        "service.SyncReport": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "total_failed": {
+                    "type": "integer"
+                },
+                "total_skipped": {
+                    "type": "integer"
+                },
+                "total_updated": {
+                    "type": "integer"
                 }
             }
         }

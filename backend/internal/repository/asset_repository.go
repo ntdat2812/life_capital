@@ -16,6 +16,7 @@ type AssetRepository interface {
 	DeleteAsset(ctx context.Context, id uuid.UUID, userID uuid.UUID) error
 	GetSyncableAssets(ctx context.Context, userID uuid.UUID) ([]model.Asset, error)
 	BatchUpdatePrices(ctx context.Context, updates []model.PriceUpdate) error
+	BulkUpdateGoldPrice(ctx context.Context, userID uuid.UUID, assetIDs []uuid.UUID, newPrice float64) error
 }
 
 type assetRepository struct {
@@ -206,4 +207,16 @@ func (r *assetRepository) BatchUpdatePrices(ctx context.Context, updates []model
 	}
 	
 	return tx.Commit(ctx)
+}
+
+func (r *assetRepository) BulkUpdateGoldPrice(ctx context.Context, userID uuid.UUID, assetIDs []uuid.UUID, newPrice float64) error {
+	query := `
+		UPDATE assets
+		SET current_price = $1,
+			current_value = quantity * $1,
+			updated_at = NOW()
+		WHERE user_id = $2 AND id = ANY($3) AND category = 'gold'
+	`
+	_, err := r.db.Exec(ctx, query, newPrice, userID, assetIDs)
+	return err
 }

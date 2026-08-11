@@ -105,7 +105,7 @@
                 <th class="p-4 text-sm font-semibold text-slate-400 text-right cursor-pointer hover:text-white transition-colors select-none group/th" @click="setSort('current_value')">
                   Tỷ trọng % <span class="text-indigo-400 ml-1">{{ sortCol === 'current_value' ? (sortDir === 'asc' ? '↑' : '↓') : '' }}</span>
                 </th>
-                <th class="p-4 text-sm font-semibold text-slate-400 text-center">Luận điểm (Thesis)</th>
+                <th class="p-4 text-sm font-semibold text-slate-400 text-center">Công cụ</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-800/50">
@@ -140,10 +140,15 @@
                   </div>
                 </td>
                 <td class="p-4 text-center">
-                  <router-link v-if="asset.ticker || asset.category !== 'cash'" :to="`/thesis/${asset.ticker || encodeURIComponent(asset.name)}`" class="inline-flex items-center justify-center p-1.5 bg-slate-800 hover:bg-indigo-600/20 text-slate-400 hover:text-indigo-400 rounded-lg transition-colors group" title="Xem Luận điểm đầu tư">
-                    <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                  </router-link>
-                  <span v-else class="text-slate-600">-</span>
+                  <div class="flex items-center justify-center gap-2">
+                    <button v-if="asset.ticker || asset.category !== 'cash'" @click="openAlertModal(asset)" class="inline-flex items-center justify-center p-1.5 bg-slate-800 hover:bg-amber-500/20 text-slate-400 hover:text-amber-400 rounded-lg transition-colors group" title="Cài đặt cảnh báo / Mục tiêu">
+                      <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                    </button>
+                    <router-link v-if="asset.ticker || asset.category !== 'cash'" :to="`/thesis/${asset.ticker || encodeURIComponent(asset.name)}`" class="inline-flex items-center justify-center p-1.5 bg-slate-800 hover:bg-indigo-600/20 text-slate-400 hover:text-indigo-400 rounded-lg transition-colors group" title="Xem Luận điểm đầu tư">
+                      <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    </router-link>
+                    <span v-else class="text-slate-600">-</span>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -280,6 +285,12 @@
         </button>
       </div>
     </div>
+    <!-- Modals -->
+    <AssetAlertModal 
+      :show="showAlertModal" 
+      :asset="selectedAssetForAlert" 
+      @close="showAlertModal = false" 
+    />
   </div>
 </template>
 
@@ -292,6 +303,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import { Doughnut } from 'vue-chartjs'
 import { getCategoryName, getCategoryIcon } from '../utils/assetUtils'
 import CurrencyInput from '../components/common/CurrencyInput.vue'
+import AssetAlertModal from '../components/AssetAlertModal.vue'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
@@ -303,6 +315,10 @@ const syncingPrices = ref(false)
 const showSyncResultModal = ref(false)
 const syncSuccess = ref(true)
 const syncMessage = ref('')
+
+// Alerts modal state
+const showAlertModal = ref(false)
+const selectedAssetForAlert = ref(null)
 
 const triggerPriceSync = async () => {
   if (syncingPrices.value) return
@@ -541,5 +557,11 @@ const confirmDeleteWatchlist = async (id, ticker) => {
   if (confirm(`Bạn có chắc muốn xóa mã ${ticker} khỏi danh sách theo dõi?`)) {
     await portfolioStore.deleteWatchlist(id)
   }
+}
+
+// Open alert modal
+const openAlertModal = (asset) => {
+  selectedAssetForAlert.value = asset
+  showAlertModal.value = true
 }
 </script>

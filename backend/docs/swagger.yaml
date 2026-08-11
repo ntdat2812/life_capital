@@ -81,6 +81,30 @@ definitions:
       user_id:
         type: string
     type: object
+  model.AssetAlert:
+    properties:
+      alert_type:
+        description: '''take_profit'', ''stop_loss'', ''stop_accumulating'', ''custom'''
+        type: string
+      asset_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      is_triggered:
+        type: boolean
+      notes:
+        type: string
+      target_value:
+        type: number
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
   model.AssetCategory:
     enum:
     - cash
@@ -105,6 +129,19 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/model.User'
+    type: object
+  model.BulkUpdateGoldRequest:
+    properties:
+      asset_ids:
+        items:
+          type: string
+        minItems: 1
+        type: array
+      new_price:
+        type: number
+    required:
+    - asset_ids
+    - new_price
     type: object
   model.ChatMessage:
     properties:
@@ -159,6 +196,18 @@ definitions:
         type: string
       title:
         type: string
+    type: object
+  model.CreateAlertRequest:
+    properties:
+      alert_type:
+        type: string
+      notes:
+        type: string
+      target_value:
+        type: number
+    required:
+    - alert_type
+    - target_value
     type: object
   model.CreateAssetRequest:
     properties:
@@ -636,6 +685,22 @@ definitions:
     - company_name
     - ticker
     type: object
+  model.UpdateAlertRequest:
+    properties:
+      alert_type:
+        type: string
+      is_active:
+        type: boolean
+      is_triggered:
+        type: boolean
+      notes:
+        type: string
+      target_value:
+        type: number
+    required:
+    - alert_type
+    - target_value
+    type: object
   model.UpdateAssetRequest:
     properties:
       avg_price:
@@ -795,6 +860,20 @@ definitions:
         type: string
       user_id:
         type: string
+    type: object
+  service.SyncReport:
+    properties:
+      details:
+        items:
+          additionalProperties: true
+          type: object
+        type: array
+      total_failed:
+        type: integer
+      total_skipped:
+        type: integer
+      total_updated:
+        type: integer
     type: object
 info:
   contact: {}
@@ -1271,6 +1350,33 @@ paths:
       summary: Get user's investable assets
       tags:
       - portfolio
+  /api/v1/price-sync:
+    post:
+      consumes:
+      - application/json
+      description: Fetch current prices for assets and update them in the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.SyncReport'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Sync asset prices
+      tags:
+      - PriceSync
   /api/v1/profile/me:
     get:
       consumes:
@@ -1747,6 +1853,49 @@ paths:
       summary: Delete a watchlist item
       tags:
       - watchlist
+  /api/v1/wealth/alerts/{alert_id}:
+    delete:
+      parameters:
+      - description: Alert ID
+        in: path
+        name: alert_id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete an asset alert
+      tags:
+      - portfolio
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Alert ID
+        in: path
+        name: alert_id
+        required: true
+        type: string
+      - description: Alert Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateAlertRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.AssetAlert'
+      security:
+      - BearerAuth: []
+      summary: Update an asset alert
+      tags:
+      - portfolio
   /api/v1/wealth/assets:
     get:
       parameters:
@@ -1796,6 +1945,55 @@ paths:
       summary: Create a new asset
       tags:
       - Wealth
+  /api/v1/wealth/assets/{asset_id}/alerts:
+    get:
+      parameters:
+      - description: Asset ID
+        in: path
+        name: asset_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.AssetAlert'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get asset alerts
+      tags:
+      - portfolio
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Asset ID
+        in: path
+        name: asset_id
+        required: true
+        type: string
+      - description: Alert Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateAlertRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.AssetAlert'
+      security:
+      - BearerAuth: []
+      summary: Create an asset alert
+      tags:
+      - portfolio
   /api/v1/wealth/assets/{id}:
     delete:
       parameters:
@@ -1837,6 +2035,31 @@ paths:
       security:
       - Bearer: []
       summary: Update an asset
+      tags:
+      - Wealth
+  /api/v1/wealth/assets/gold/bulk-update-price:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Update gold prices info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.BulkUpdateGoldRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Bulk update gold prices
       tags:
       - Wealth
   /api/v1/wealth/liabilities:

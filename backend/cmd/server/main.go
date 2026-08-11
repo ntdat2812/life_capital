@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
+	"github.com/go-playground/validator/v10"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
@@ -51,6 +52,7 @@ func main() {
 
 	// Initialize Echo instance
 	e := echo.New()
+	e.Validator = &CustomValidator{validator: validator.New()}
 
 	// Default Middlewares
 	e.Use(middleware.Logger())
@@ -76,6 +78,7 @@ func main() {
 	ipsRepo := repository.NewInvestmentPolicyRepository(dbPool)
 	watchlistRepo := repository.NewWatchlistRepository(dbPool)
 	thesisRepo := repository.NewThesisRepository(dbPool)
+	alertRepo := repository.NewAlertRepository(dbPool)
 	txManager := repository.NewTxManager(dbPool)
 
 	// Initialize AI Provider
@@ -104,7 +107,7 @@ func main() {
 	notifService := service.NewNotificationService(notifRepo)
 	ipsService := service.NewIPSService(ipsRepo, investorProfileRepo, assetRepo, incomeRepo, dependentRepo, notifService, aiProviders)
 	timelineService := service.NewTimelineService(aiProviders, investorProfileRepo, incomeRepo, dependentRepo, lifeEventRepo, txManager, ipsService)
-	portfolioService := service.NewPortfolioService(assetRepo, thesisRepo, watchlistRepo, txManager)
+	portfolioService := service.NewPortfolioService(assetRepo, thesisRepo, watchlistRepo, alertRepo, txManager)
 	
 	monthlyReviewRepo := repository.NewMonthlyReviewRepository(dbPool)
 	monthlyReviewService := service.NewMonthlyReviewService(monthlyReviewRepo, portfolioService, liabilityRepo, ipsRepo, assetRepo, dependentRepo, thesisRepo, aiProviders)
@@ -197,6 +200,13 @@ func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHand
 	wealthGroup.GET("/assets", wealthHandler.GetAssets)
 	wealthGroup.PUT("/assets/:id", wealthHandler.UpdateAsset)
 	wealthGroup.DELETE("/assets/:id", wealthHandler.DeleteAsset)
+	wealthGroup.PATCH("/assets/gold/bulk-update-price", wealthHandler.BulkUpdateGoldPrice)
+
+	// Asset Alerts (handled by PortfolioHandler as it's portfolio related)
+	wealthGroup.POST("/assets/:asset_id/alerts", portfolioHandler.CreateAlert)
+	wealthGroup.GET("/assets/:asset_id/alerts", portfolioHandler.GetAlerts)
+	wealthGroup.PUT("/alerts/:alert_id", portfolioHandler.UpdateAlert)
+	wealthGroup.DELETE("/alerts/:alert_id", portfolioHandler.DeleteAlert)
 
 	wealthGroup.POST("/liabilities", wealthHandler.CreateLiability)
 	wealthGroup.GET("/liabilities", wealthHandler.GetLiabilities)
@@ -240,4 +250,20 @@ func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHand
 
 	// Price Sync route
 	protected.POST("/price-sync", priceSyncHandler.SyncPrices)
+
+	// Start server
+	if err := e.Start(":8080"); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
+	}
+}
+
+type CustomValidator struct {
+	validator *validator.Validate
+}
+
+func (cv *CustomValidator) Validate(i interface{}) error {
+	if err := cv.validator.Struct(i); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return nil
 }

@@ -134,3 +134,13 @@ type PaginatedLiabilities struct {
 	Limit      int         `json:"limit"`
 	TotalPages int         `json:"total_pages"`
 }
+
+type GoldPriceUpdate struct {
+	AssetID      uuid.UUID `json:"asset_id" validate:"required"`
+	CurrentPrice float64   `json:"current_price" validate:"required,gt=0"`
+	CurrentValue float64   `json:"current_value" validate:"required,gt=0"`
+}
+
+type BulkUpdateGoldRequest struct {
+	Updates []GoldPriceUpdate `json:"updates" validate:"required,min=1,dive"`
+}

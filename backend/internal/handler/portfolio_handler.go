@@ -68,6 +68,141 @@ func (h *PortfolioHandler) GetWatchlist(c echo.Context) error {
 	return c.JSON(http.StatusOK, items)
 }
 
+// CreateAlert
+// @Summary Create an asset alert
+// @Tags portfolio
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param asset_id path string true "Asset ID"
+// @Param request body model.CreateAlertRequest true "Alert Data"
+// @Success 201 {object} model.AssetAlert
+// @Router /api/v1/wealth/assets/{asset_id}/alerts [post]
+func (h *PortfolioHandler) CreateAlert(c echo.Context) error {
+	userIDStr := c.Get("user_id").(string)
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "invalid user token")
+	}
+
+	assetIDStr := c.Param("asset_id")
+	assetID, err := uuid.Parse(assetIDStr)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid asset ID")
+	}
+
+	req := new(model.CreateAlertRequest)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	alert, err := h.portfolioService.CreateAlert(c.Request().Context(), userID, req, assetID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusCreated, alert)
+}
+
+// GetAlerts
+// @Summary Get asset alerts
+// @Tags portfolio
+// @Produce json
+// @Security BearerAuth
+// @Param asset_id path string true "Asset ID"
+// @Success 200 {array} model.AssetAlert
+// @Router /api/v1/wealth/assets/{asset_id}/alerts [get]
+func (h *PortfolioHandler) GetAlerts(c echo.Context) error {
+	userIDStr := c.Get("user_id").(string)
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "invalid user token")
+	}
+
+	assetIDStr := c.Param("asset_id")
+	assetID, err := uuid.Parse(assetIDStr)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid asset ID")
+	}
+
+	alerts, err := h.portfolioService.GetAlertsByAsset(c.Request().Context(), userID, assetID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, alerts)
+}
+
+// UpdateAlert
+// @Summary Update an asset alert
+// @Tags portfolio
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param alert_id path string true "Alert ID"
+// @Param request body model.UpdateAlertRequest true "Alert Data"
+// @Success 200 {object} model.AssetAlert
+// @Router /api/v1/wealth/alerts/{alert_id} [put]
+func (h *PortfolioHandler) UpdateAlert(c echo.Context) error {
+	userIDStr := c.Get("user_id").(string)
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "invalid user token")
+	}
+
+	alertIDStr := c.Param("alert_id")
+	alertID, err := uuid.Parse(alertIDStr)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid alert ID")
+	}
+
+	req := new(model.UpdateAlertRequest)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	alert, err := h.portfolioService.UpdateAlert(c.Request().Context(), userID, alertID, req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, alert)
+}
+
+// DeleteAlert
+// @Summary Delete an asset alert
+// @Tags portfolio
+// @Security BearerAuth
+// @Param alert_id path string true "Alert ID"
+// @Success 204
+// @Router /api/v1/wealth/alerts/{alert_id} [delete]
+func (h *PortfolioHandler) DeleteAlert(c echo.Context) error {
+	userIDStr := c.Get("user_id").(string)
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "invalid user token")
+	}
+
+	alertIDStr := c.Param("alert_id")
+	alertID, err := uuid.Parse(alertIDStr)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid alert ID")
+	}
+
+	err = h.portfolioService.DeleteAlert(c.Request().Context(), userID, alertID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}
+
 // CreateWatchlistItem godoc
 // @Summary Create a watchlist item
 // @Tags watchlist

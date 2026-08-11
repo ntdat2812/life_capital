@@ -162,6 +162,37 @@ func (h *WealthHandler) DeleteAsset(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
+// BulkUpdateGoldPrice
+// @Summary Bulk update gold prices
+// @Tags Wealth
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param request body model.BulkUpdateGoldRequest true "Update gold prices info"
+// @Success 200 {object} map[string]string
+// @Router /api/v1/wealth/assets/gold/bulk-update-price [patch]
+func (h *WealthHandler) BulkUpdateGoldPrice(c echo.Context) error {
+	userIDStr := c.Get("user_id").(string)
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "invalid user token")
+	}
+
+	req := new(model.BulkUpdateGoldRequest)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := h.wealthService.BulkUpdateGoldPrice(c.Request().Context(), userID, req); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "Gold prices updated successfully"})
+}
+
 // CreateLiability
 // @Summary Create a new liability
 // @Tags Wealth

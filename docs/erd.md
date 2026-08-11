@@ -25,6 +25,7 @@ erDiagram
     users ||--o{ liabilities : owes
     users ||--o{ ai_conversations : chats
     liabilities ||--o{ liability_snapshots : logs
+    assets ||--o{ asset_alerts : has
 
     life_events ||--o| investor_profiles : triggers
     life_events ||--o| investment_policies : triggers
@@ -101,6 +102,16 @@ erDiagram
         string ticker
         decimal quantity
         decimal current_value
+    }
+
+    asset_alerts {
+        uuid id PK
+        uuid user_id FK
+        uuid asset_id FK
+        string alert_type
+        decimal target_value
+        boolean is_active
+        boolean is_triggered
     }
 
     liabilities {
@@ -393,6 +404,19 @@ CREATE TABLE asset_snapshots (
     quantity        DECIMAL(18,6),
     price           DECIMAL(18,2),
     created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE asset_alerts (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    asset_id        UUID NOT NULL REFERENCES assets(id) ON DELETE CASCADE,
+    alert_type      VARCHAR(50) NOT NULL,
+    target_value    DECIMAL(18,2) NOT NULL,
+    is_active       BOOLEAN DEFAULT TRUE,
+    is_triggered    BOOLEAN DEFAULT FALSE,
+    notes           TEXT,
+    created_at      TIMESTAMPTZ DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =============================================

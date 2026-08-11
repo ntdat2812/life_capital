@@ -25,12 +25,19 @@ type PortfolioService interface {
 	GetWatchlistByUser(ctx context.Context, userID uuid.UUID) ([]*model.WatchlistItem, error)
 	UpdateWatchlistItem(ctx context.Context, item *model.WatchlistItem) error
 	DeleteWatchlistItem(ctx context.Context, id uuid.UUID) error
+
+	// Alerts
+	CreateAlert(ctx context.Context, userID uuid.UUID, req *model.CreateAlertRequest, assetID uuid.UUID) (*model.AssetAlert, error)
+	GetAlertsByAsset(ctx context.Context, userID uuid.UUID, assetID uuid.UUID) ([]model.AssetAlert, error)
+	UpdateAlert(ctx context.Context, userID uuid.UUID, alertID uuid.UUID, req *model.UpdateAlertRequest) (*model.AssetAlert, error)
+	DeleteAlert(ctx context.Context, userID uuid.UUID, alertID uuid.UUID) error
 }
 
 type portfolioService struct {
 	assetRepo     repository.AssetRepository
 	thesisRepo    repository.ThesisRepository
 	watchlistRepo repository.WatchlistRepository
+	alertRepo     repository.AlertRepository
 	txManager     *repository.TxManager
 }
 
@@ -38,12 +45,14 @@ func NewPortfolioService(
 	assetRepo repository.AssetRepository,
 	thesisRepo repository.ThesisRepository,
 	watchlistRepo repository.WatchlistRepository,
+	alertRepo repository.AlertRepository,
 	txManager *repository.TxManager,
 ) PortfolioService {
 	return &portfolioService{
 		assetRepo:     assetRepo,
 		thesisRepo:    thesisRepo,
 		watchlistRepo: watchlistRepo,
+		alertRepo:     alertRepo,
 		txManager:     txManager,
 	}
 }
@@ -99,3 +108,46 @@ func (s *portfolioService) UpdateWatchlistItem(ctx context.Context, item *model.
 func (s *portfolioService) DeleteWatchlistItem(ctx context.Context, id uuid.UUID) error {
 	return s.watchlistRepo.Delete(ctx, id)
 }
+
+func (s *portfolioService) CreateAlert(ctx context.Context, userID uuid.UUID, req *model.CreateAlertRequest, assetID uuid.UUID) (*model.AssetAlert, error) {
+	alert := &model.AssetAlert{
+		UserID:      userID,
+		AssetID:     assetID,
+		AlertType:   req.AlertType,
+		TargetValue: req.TargetValue,
+		IsActive:    true,
+		IsTriggered: false,
+		Notes:       req.Notes,
+	}
+	err := s.alertRepo.CreateAlert(ctx, alert)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create alert: %w", err)
+	}
+	return alert, nil
+}
+
+func (s *portfolioService) GetAlertsByAsset(ctx context.Context, userID uuid.UUID, assetID uuid.UUID) ([]model.AssetAlert, error) {
+	return s.alertRepo.GetAlertsByAssetID(ctx, userID, assetID)
+}
+
+func (s *portfolioService) UpdateAlert(ctx context.Context, userID uuid.UUID, alertID uuid.UUID, req *model.UpdateAlertRequest) (*model.AssetAlert, error) {
+	alert := &model.AssetAlert{
+		ID:          alertID,
+		UserID:      userID,
+		AlertType:   req.AlertType,
+		TargetValue: req.TargetValue,
+		IsActive:    req.IsActive,
+		IsTriggered: req.IsTriggered,
+		Notes:       req.Notes,
+	}
+	err := s.alertRepo.UpdateAlert(ctx, alert)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update alert: %w", err)
+	}
+	return alert, nil
+}
+
+func (s *portfolioService) DeleteAlert(ctx context.Context, userID uuid.UUID, alertID uuid.UUID) error {
+	return s.alertRepo.DeleteAlert(ctx, alertID, userID)
+}
+
