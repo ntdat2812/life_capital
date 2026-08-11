@@ -137,6 +137,11 @@
                     <p class="text-amber-400 font-bold text-sm">{{ formatGoldVolume(group.totalGoldVolume) }}</p>
                     <p class="text-xs text-slate-400">Khối lượng</p>
                   </div>
+                  <div v-if="group.category === 'gold'" class="mr-4 pr-4 border-r border-slate-700 hidden sm:block">
+                    <button @click.stop="openBulkUpdateGold(group.items)" class="text-xs px-2 py-1 bg-amber-500/20 text-amber-500 rounded hover:bg-amber-500/30 transition-colors border border-amber-500/30">
+                      Cập nhật giá
+                    </button>
+                  </div>
                   <div>
                     <p class="text-emerald-400 font-bold">{{ formatCurrency(group.total_value) }}</p>
                     <p class="text-xs text-slate-400">Chiếm {{ group.percentage }}%</p>
@@ -530,6 +535,14 @@
       @cancel="deleteConfirm.show = false" 
     />
 
+    <!-- Modals -->
+    <BulkUpdateGoldModal 
+      :show="showBulkUpdateGoldModal" 
+      :gold-assets="goldAssetsToUpdate" 
+      @close="showBulkUpdateGoldModal = false" 
+      @updated="handleBulkUpdateGoldSuccess" 
+    />
+
     <!-- Sync Result Modal -->
     <div v-if="showSyncResultModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div class="premium-card w-full max-w-sm p-6 relative text-center">
@@ -555,6 +568,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { getCategoryName, getCategoryIcon, getLiabilityName, getLiabilityIcon } from '../utils/assetUtils'
 import { useWealthStore } from '../stores/wealthStore'
+import { getGoldMultiplier, extractGoldUnit } from '../utils/goldCalculations'
+import BulkUpdateGoldModal from '../components/BulkUpdateGoldModal.vue'
 import CurrencyInput from '../components/common/CurrencyInput.vue'
 import ConfirmModal from '../components/common/ConfirmModal.vue'
 
@@ -610,6 +625,9 @@ const syncingPrices = ref(false)
 const showSyncResultModal = ref(false)
 const syncSuccess = ref(true)
 const syncMessage = ref('')
+
+const showBulkUpdateGoldModal = ref(false)
+const goldAssetsToUpdate = ref([])
 
 const triggerPriceSync = async () => {
   if (syncingPrices.value) return
@@ -701,8 +719,7 @@ const groupedAssets = computed(() => {
     groups[asset.category].total_value += asset.current_value
 
     if (asset.category === 'gold') {
-      const match = asset.name?.match(/\((.+?)\)$/);
-      const unit = match ? match[1] : 'Lượng';
+      const unit = extractGoldUnit(asset.name);
       groups[asset.category].totalGoldVolume += (asset.quantity || 0) * getGoldMultiplier(unit);
     }
   })
@@ -755,6 +772,13 @@ const groupedLiabilities = computed(() => {
 })
 
 // --- FORMATTING LOGIC ---
+const getPriceClass = (current, avg) => {
+  if (!avg || avg === 0) return 'text-slate-300'
+  if (current > avg) return 'text-emerald-400'
+  if (current < avg) return 'text-red-400'
+  return 'text-slate-300'
+}
+
 const formatCurrency = (value) => {
   if (value === undefined || value === null) return '0'
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: wealthStore.netWorthSummary?.base_currency || 'VND' }).format(Math.round(value))
@@ -768,16 +792,6 @@ const formatInputNumber = (value) => {
 // --- FORM LOGIC ---
 const isFluctuatingAsset = (category) => {
   return ['stock', 'fund', 'crypto', 'gold'].includes(category)
-}
-
-const getGoldMultiplier = (unit) => {
-  if (unit === 'Loại 1 Lượng' || unit === 'Lượng') return 1;
-  if (unit === 'Loại 5 Chỉ') return 0.5;
-  if (unit === 'Loại 2 Chỉ') return 0.2;
-  if (unit === 'Loại 1 Chỉ' || unit === 'Chỉ') return 0.1;
-  if (unit === 'Loại 0.5 Chỉ') return 0.05;
-  if (unit === 'Phân') return 0.01;
-  return 1;
 }
 
 const formatGoldVolume = (volumeInLuong) => {
@@ -898,7 +912,16 @@ const openEditAsset = (asset) => {
   showAddAssetModal.value = true
 }
 
-// removed applyQuickGoldWeight
+// Bulk Update Gold
+const openBulkUpdateGold = (assets) => {
+  goldAssetsToUpdate.value = assets
+  showBulkUpdateGoldModal.value = true
+}
+
+const handleBulkUpdateGoldSuccess = () => {
+  showBulkUpdateGoldModal.value = false
+  wealthStore.fetchAssets()
+}
 
 const submitAssetForm = async () => {
   submitting.value = true
