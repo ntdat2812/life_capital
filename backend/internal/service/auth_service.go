@@ -163,3 +163,28 @@ func (a *GoogleAuthenticator) Authenticate(ctx context.Context, payload interfac
 
 	return &AuthenticateResult{User: user}, nil
 }
+
+func (s *AuthService) ChangePassword(ctx context.Context, userID string, oldPassword string, newPassword string) error {
+	user, err := s.repo.FindByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return fmt.Errorf("user not found")
+	}
+
+	if user.PasswordHash == nil {
+		return fmt.Errorf("user does not have a password set")
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(*user.PasswordHash), []byte(oldPassword))
+	if err != nil {
+		return fmt.Errorf("incorrect old password")
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("failed to hash new password: %w", err)
+	}
+
+	return s.repo.UpdatePassword(ctx, userID, string(hash))
+}

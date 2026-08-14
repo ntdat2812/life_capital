@@ -28,6 +28,7 @@ type monthlyReviewService struct {
 	assetRepo         repository.AssetRepository
 	dependentRepo     *repository.DependentRepository
 	thesisRepo        repository.ThesisRepository
+	profileRepo       *repository.InvestorProfileRepository
 	aiProviders       []ai.AIProvider
 }
 
@@ -39,6 +40,7 @@ func NewMonthlyReviewService(
 	assetRepo repository.AssetRepository,
 	dependentRepo *repository.DependentRepository,
 	thesisRepo repository.ThesisRepository,
+	profileRepo *repository.InvestorProfileRepository,
 	aiProviders []ai.AIProvider,
 ) MonthlyReviewService {
 	return &monthlyReviewService{
@@ -49,6 +51,7 @@ func NewMonthlyReviewService(
 		assetRepo:         assetRepo,
 		dependentRepo:     dependentRepo,
 		thesisRepo:        thesisRepo,
+		profileRepo:       profileRepo,
 		aiProviders:       aiProviders,
 	}
 }
@@ -70,6 +73,17 @@ func (s *monthlyReviewService) GenerateReview(ctx context.Context, userID uuid.U
 	var theses []*model.InvestmentThesis
 
 	g, gCtx := errgroup.WithContext(ctx)
+
+	// 0. Get Investor Profile
+	var profile *model.InvestorProfile
+	g.Go(func() error {
+		var err error
+		profile, err = s.profileRepo.GetActiveProfileByUserID(gCtx, userID.String())
+		if err != nil {
+			return fmt.Errorf("failed to get investor profile: %v", err)
+		}
+		return nil
+	})
 
 	// 1. Get IPS
 	g.Go(func() error {
@@ -151,6 +165,7 @@ func (s *monthlyReviewService) GenerateReview(ctx context.Context, userID uuid.U
 	netWorth := portfolioValue - totalDebt // Simplified net worth for review context
 
 	// Prepare JSON strings for AI Context
+	profileJSON, _ := json.MarshalIndent(profile, "", "  ")
 	ipsJSON, _ := json.MarshalIndent(ips.TargetAllocation, "", "  ")
 
 	// Simplify assets for prompt to save tokens
@@ -251,6 +266,7 @@ func (s *monthlyReviewService) GenerateReview(ctx context.Context, userID uuid.U
 
 	// Build template replacements for the prompt
 	reviewReplacements := map[string]string{
+		"{{.PROFILE_JSON}}":      string(profileJSON),
 		"{{.IPS_JSON}}":          string(ipsJSON),
 		"{{.HOLDINGS_JSON}}":     string(assetsJSON),
 		"{{.WATCHLIST_JSON}}":    string(watchlistJSON),
@@ -286,6 +302,7 @@ func (s *monthlyReviewService) GenerateReview(ctx context.Context, userID uuid.U
 		NewInvestmentAmount: newInvestmentAmount,
 		PortfolioSnapshot:   simpAssets, // Saving simplified snapshot
 		NetWorthAtReview:    netWorth,
+		AIHealthAssessment:  &aiResp.AIHealthAssessment,
 		AIRecommendations:   aiResp.AIRecommendations,
 		AIOverallSummary:    aiResp.AIOverallSummary,
 	}

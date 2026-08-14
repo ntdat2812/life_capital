@@ -42,6 +42,11 @@
                           activeTab === 'dependents' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-white hover:bg-white/5']">
             Người Phụ Thuộc
           </button>
+          <button @click="activeTab = 'settings'" 
+                  :class="['px-6 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap', 
+                          activeTab === 'settings' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-white hover:bg-white/5']">
+            Cài Đặt
+          </button>
         </div>
 
         <!-- Tab Content: Overview -->
@@ -144,6 +149,51 @@
           <DependentsList />
         </div>
 
+        <!-- Tab Content: Settings -->
+        <div v-else-if="activeTab === 'settings'" class="max-w-xl mx-auto space-y-6">
+          <div class="premium-card p-8 rounded-2xl">
+            <h3 class="text-xl font-bold text-white mb-6">Đổi mật khẩu</h3>
+            <form @submit.prevent="handleChangePassword" class="space-y-4">
+              <div v-if="passwordError" class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+                {{ passwordError }}
+              </div>
+              <div v-if="passwordSuccess" class="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-sm">
+                Đổi mật khẩu thành công!
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Mật khẩu hiện tại</label>
+                <input type="password" v-model="passwordForm.oldPassword" required
+                  class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Mật khẩu mới</label>
+                <input type="password" v-model="passwordForm.newPassword" required minlength="6"
+                  class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors">
+                <p class="text-xs text-slate-500 mt-1">Ít nhất 6 ký tự</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Xác nhận mật khẩu mới</label>
+                <input type="password" v-model="passwordForm.confirmPassword" required
+                  class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors">
+              </div>
+
+              <div class="pt-4">
+                <button type="submit" :disabled="isSubmittingPassword"
+                  class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors flex justify-center items-center">
+                  <svg v-if="isSubmittingPassword" class="animate-spin h-5 w-5 mr-2 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Đổi mật khẩu
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
       </div>
 
       <div v-else class="premium-card p-12 flex flex-col items-center justify-center text-center">
@@ -180,6 +230,7 @@ import { useAuthStore } from '../stores/authStore';
 import IncomeStreamsList from '../components/profile/IncomeStreamsList.vue';
 import DependentsList from '../components/profile/DependentsList.vue';
 import ProfileEditModal from '../components/profile/ProfileEditModal.vue';
+import api from '../lib/api';
 
 const router = useRouter();
 const profileStore = useProfileStore();
@@ -208,7 +259,48 @@ const handleProfileSaved = () => {
 };
 
 const reTakeOnboarding = () => {
-  router.push('/onboarding/interview');
+  if (confirm('Bạn có chắc chắn muốn làm lại khảo sát từ đầu? Các dữ liệu Hồ Sơ rủi ro hiện tại sẽ bị ghi đè.')) {
+    router.push('/onboarding/interview');
+  }
+};
+
+// Change Password logic
+const passwordForm = ref({
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+});
+const passwordError = ref('');
+const passwordSuccess = ref(false);
+const isSubmittingPassword = ref(false);
+
+const handleChangePassword = async () => {
+  passwordError.value = '';
+  passwordSuccess.value = false;
+
+  if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
+    passwordError.value = 'Mật khẩu xác nhận không khớp.';
+    return;
+  }
+
+  isSubmittingPassword.value = true;
+  try {
+    await api.put('/auth/change-password', {
+      old_password: passwordForm.value.oldPassword,
+      new_password: passwordForm.value.newPassword
+    });
+    
+    passwordSuccess.value = true;
+    passwordForm.value = { oldPassword: '', newPassword: '', confirmPassword: '' };
+    
+    setTimeout(() => {
+      passwordSuccess.value = false;
+    }, 3000);
+  } catch (err) {
+    passwordError.value = err.response?.data?.message || err.message || 'Có lỗi xảy ra khi đổi mật khẩu.';
+  } finally {
+    isSubmittingPassword.value = false;
+  }
 };
 
 const formatDate = (dateString) => {

@@ -46,6 +46,16 @@
 
     <!-- Step 3: Result -->
     <div v-else-if="step === 3 && reviewStore.currentReview" class="space-y-6 animate-fade-in-up">
+      <!-- Health Assessment Card -->
+      <div v-if="reviewStore.currentReview.ai_health_assessment" class="premium-card p-8 border-l-4 border-emerald-500">
+        <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <span class="text-emerald-400">🩺</span> Đánh Giá Sức Khỏe Tài Chính
+        </h2>
+        <div class="prose prose-invert max-w-none text-slate-300">
+          <p class="whitespace-pre-wrap leading-relaxed text-lg">{{ reviewStore.currentReview.ai_health_assessment }}</p>
+        </div>
+      </div>
+
       <!-- Summary Card -->
       <div class="premium-card p-8">
         <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">

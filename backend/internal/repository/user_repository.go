@@ -55,6 +55,16 @@ func (r *UserRepository) UpdateGoogleID(ctx context.Context, userID string, goog
 	return err
 }
 
+func (r *UserRepository) UpdatePassword(ctx context.Context, userID string, passwordHash string) error {
+	query := `
+		UPDATE users
+		SET password_hash = $1, updated_at = NOW()
+		WHERE id = $2
+	`
+	_, err := r.db.Exec(ctx, query, passwordHash, userID)
+	return err
+}
+
 func (r *UserRepository) FindByID(ctx context.Context, id string) (*model.User, error) {
 	query := `
 		SELECT id, email, name, password_hash, auth_provider, google_id, base_currency, created_at, updated_at

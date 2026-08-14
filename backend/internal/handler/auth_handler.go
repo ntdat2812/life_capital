@@ -138,3 +138,41 @@ func (h *AuthHandler) Me(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, user)
 }
+
+// ChangePassword godoc
+// @Summary      Change Password
+// @Description  Change user password.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request body model.ChangePasswordRequest true "Change Password Request"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Failure      401  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /api/v1/auth/change-password [put]
+func (h *AuthHandler) ChangePassword(c echo.Context) error {
+	userID := c.Get("user_id").(string)
+	
+	req := new(model.ChangePasswordRequest)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request payload")
+	}
+
+	if err := c.Validate(req); err != nil {
+		return err
+	}
+
+	err := h.authService.ChangePassword(c.Request().Context(), userID, req.OldPassword, req.NewPassword)
+	if err != nil {
+		if err.Error() == "incorrect old password" {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": "Password changed successfully",
+	})
+}

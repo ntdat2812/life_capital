@@ -20,8 +20,9 @@ type MonthlyReview struct {
 	NetWorthAtReview  float64     `json:"net_worth_at_review" db:"net_worth_at_review"`
 	
 	// AI Generated content
-	AIRecommendations interface{} `json:"ai_recommendations" db:"ai_recommendations"`
-	AIOverallSummary  string      `json:"ai_overall_summary" db:"ai_overall_summary"`
+	AIHealthAssessment  *string     `json:"ai_health_assessment" db:"ai_health_assessment"`
+	AIRecommendations   interface{} `json:"ai_recommendations" db:"ai_recommendations"`
+	AIOverallSummary    string      `json:"ai_overall_summary" db:"ai_overall_summary"`
 	
 	UserNote          *string     `json:"user_note" db:"user_note"`
 	
@@ -39,6 +40,7 @@ type MonthlyReviewRecommendation struct {
 
 // MonthlyReviewRecommendationResponse represents the AI response structure
 type MonthlyReviewRecommendationResponse struct {
-	AIOverallSummary  string                        `json:"ai_overall_summary"`
-	AIRecommendations []MonthlyReviewRecommendation `json:"ai_recommendations"`
+	AIHealthAssessment string                        `json:"ai_health_assessment"`
+	AIOverallSummary   string                        `json:"ai_overall_summary"`
+	AIRecommendations  []MonthlyReviewRecommendation `json:"ai_recommendations"`
 }

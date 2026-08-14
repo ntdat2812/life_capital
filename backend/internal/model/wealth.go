@@ -71,6 +71,7 @@ type NetWorthSummary struct {
 	TotalAssets      float64 `json:"total_assets"`
 	TotalLiabilities float64 `json:"total_liabilities"`
 	NetWorth         float64 `json:"net_worth"`
+	PreviousNetWorth float64 `json:"previous_net_worth"`
 	BaseCurrency     string  `json:"base_currency"`
 }
 

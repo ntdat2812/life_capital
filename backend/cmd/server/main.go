@@ -80,6 +80,7 @@ func main() {
 	thesisRepo := repository.NewThesisRepository(dbPool)
 	alertRepo := repository.NewAlertRepository(dbPool)
 	txManager := repository.NewTxManager(dbPool)
+	monthlyReviewRepo := repository.NewMonthlyReviewRepository(dbPool)
 
 	// Initialize AI Provider
 	geminiProvider, err := ai.NewGeminiProvider()
@@ -101,7 +102,7 @@ func main() {
 	googleClientID := os.Getenv("GOOGLE_CLIENT_ID")
 	authService := service.NewAuthService(userRepo, jwtSecret, googleClientID)
 	profileService := service.NewInvestorProfileService(investorProfileRepo, incomeRepo, aiProviders...)
-	wealthService := service.NewWealthService(assetRepo, liabilityRepo, userRepo)
+	wealthService := service.NewWealthService(assetRepo, liabilityRepo, userRepo, monthlyReviewRepo)
 	cashflowService := service.NewCashflowService(incomeRepo, dependentRepo)
 	
 	notifService := service.NewNotificationService(notifRepo)
@@ -109,8 +110,7 @@ func main() {
 	timelineService := service.NewTimelineService(aiProviders, investorProfileRepo, incomeRepo, dependentRepo, lifeEventRepo, txManager, ipsService)
 	portfolioService := service.NewPortfolioService(assetRepo, thesisRepo, watchlistRepo, alertRepo, txManager)
 	
-	monthlyReviewRepo := repository.NewMonthlyReviewRepository(dbPool)
-	monthlyReviewService := service.NewMonthlyReviewService(monthlyReviewRepo, portfolioService, liabilityRepo, ipsRepo, assetRepo, dependentRepo, thesisRepo, aiProviders)
+	monthlyReviewService := service.NewMonthlyReviewService(monthlyReviewRepo, portfolioService, liabilityRepo, ipsRepo, assetRepo, dependentRepo, thesisRepo, investorProfileRepo, aiProviders)
 
 	providerRegistry := pricefeed.NewRegistry(
 		pricefeed.NewDnseProvider(),
@@ -169,6 +169,7 @@ func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHand
 	protected := api.Group("")
 	protected.Use(customMiddleware.JWTMiddleware(os.Getenv("JWT_SECRET")))
 	protected.GET("/auth/me", authHandler.Me)
+	protected.PUT("/auth/change-password", authHandler.ChangePassword)
 
 	// Profile routes
 	profile := protected.Group("/profile")

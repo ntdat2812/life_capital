@@ -5,6 +5,9 @@ Nhiệm vụ: Phân tích tài chính hàng tháng và đưa ra khuyến nghị 
 ---
 DỮ LIỆU KHÁCH HÀNG:
 
+[HỒ SƠ ĐẦU TƯ CÁ NHÂN - Tuổi, mục tiêu FI, mức độ chịu rủi ro, chi tiêu]
+{{.PROFILE_JSON}}
+
 [MỤC TIÊU ĐẦU TƯ (IPS)]
 {{.IPS_JSON}}
 
@@ -55,7 +58,8 @@ D) ĐỊNH DẠNG ĐẦU RA (JSON):
 Trả về ĐÚNG JSON sau, KHÔNG kèm markdown code block:
 
 {
-  "ai_overall_summary": "Phân tích dài 600-1000 chữ tiếng Việt. BẮT BUỘC bao gồm: 1) Nhận định vĩ mô VN hiện tại. 2) Đánh giá CỤ THỂ từng mã/tài sản trong danh mục (kết quả kinh doanh, tin tức, biến động giá, so sánh với thesis). 3) Nhận xét lợi nhuận/thua lỗ hiện tại của danh mục. 4) Hướng hành động.",
+  "ai_health_assessment": "Đánh giá chi tiết (200-400 chữ) về sức khỏe tài chính: Tiến độ FI, phân bổ tỷ trọng tổng quan (Cổ phiếu/Vàng/Tiền/Quỹ) so với IPS. Đánh giá quỹ dự phòng khẩn cấp và rủi ro đòn bẩy. KHÔNG đi sâu vào từng mã tài sản cụ thể ở đây.",
+  "ai_overall_summary": "Phân tích chi tiết (600-1000 chữ) bao gồm: 1) Nhận định vĩ mô VN hiện tại. 2) Đánh giá chi tiết TỪNG TÀI SẢN đang nắm giữ (kết quả kinh doanh, tin tức, so sánh với thesis). LƯU Ý: KHÔNG lặp lại phần đánh giá tỷ trọng tổng quan nữa vì đã có ở Sức khỏe Tài chính. 3) Hướng giải ngân vốn mới.",
   "ai_recommendations": [
     {
       "ticker": "HPG",

@@ -27,13 +27,15 @@ type wealthService struct {
 	assetRepo     repository.AssetRepository
 	liabilityRepo repository.LiabilityRepository
 	userRepo      *repository.UserRepository
+	monthlyReviewRepo repository.MonthlyReviewRepository
 }
 
-func NewWealthService(assetRepo repository.AssetRepository, liabilityRepo repository.LiabilityRepository, userRepo *repository.UserRepository) WealthService {
+func NewWealthService(assetRepo repository.AssetRepository, liabilityRepo repository.LiabilityRepository, userRepo *repository.UserRepository, monthlyReviewRepo repository.MonthlyReviewRepository) WealthService {
 	return &wealthService{
 		assetRepo:     assetRepo,
 		liabilityRepo: liabilityRepo,
 		userRepo:      userRepo,
+		monthlyReviewRepo: monthlyReviewRepo,
 	}
 }
 
@@ -186,15 +188,19 @@ func (s *wealthService) GetNetWorthSummary(ctx context.Context, userID uuid.UUID
 		totalLiabilities += l.RemainingBalance
 	}
 
-	baseCurrency := "VND"
-	if user != nil && user.BaseCurrency != "" {
-		baseCurrency = user.BaseCurrency
+	netWorth := totalAssets - totalLiabilities
+
+	var prevNetWorth float64
+	latestReview, _ := s.monthlyReviewRepo.GetLatestReview(ctx, userID)
+	if latestReview != nil {
+		prevNetWorth = latestReview.NetWorthAtReview
 	}
 
 	return &model.NetWorthSummary{
 		TotalAssets:      totalAssets,
 		TotalLiabilities: totalLiabilities,
-		NetWorth:         totalAssets - totalLiabilities,
-		BaseCurrency:     baseCurrency,
+		NetWorth:         netWorth,
+		PreviousNetWorth: prevNetWorth,
+		BaseCurrency:     user.BaseCurrency,
 	}, nil
 }
