@@ -9,9 +9,15 @@
       </div>
       
       <div class="p-6 overflow-y-auto custom-scrollbar flex-1">
-        <!-- List existing alerts -->
-        <div v-if="alerts.length > 0" class="mb-6 space-y-3">
-          <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Cảnh báo hiện tại</h3>
+        <!-- Loading state -->
+        <div v-if="loading" class="flex justify-center py-8">
+          <div class="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+
+        <div v-else>
+          <!-- List existing alerts -->
+          <div v-if="alerts.length > 0" class="mb-6 space-y-3">
+            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Cảnh báo hiện tại</h3>
           <div v-for="alert in alerts" :key="alert.id" class="p-4 rounded-xl bg-slate-900/50 border border-slate-700 flex justify-between items-center group">
             <div>
               <div class="flex items-center gap-2 mb-1">
@@ -35,10 +41,11 @@
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
             </button>
           </div>
+          </div>
         </div>
 
         <!-- Add new alert form -->
-        <div>
+        <div class="mt-6">
           <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Thêm cảnh báo mới</h3>
           <div class="space-y-4 bg-slate-900/30 p-4 rounded-xl border border-slate-700/50">
             <div>
@@ -94,6 +101,7 @@ const emit = defineEmits(['close'])
 
 const alerts = ref([])
 const isSubmitting = ref(false)
+const loading = ref(false)
 
 const form = ref({
   alert_type: 'take_profit',
@@ -104,6 +112,8 @@ const displayTargetValue = ref('')
 
 watch(() => props.show, (val) => {
   if (val && props.asset) {
+    alerts.value = [] // clear old alerts immediately
+    loading.value = true
     fetchAlerts()
     resetForm()
   }
@@ -149,6 +159,8 @@ const fetchAlerts = async () => {
     alerts.value = res.data || []
   } catch (error) {
     console.error('Failed to fetch alerts:', error)
+  } finally {
+    loading.value = false
   }
 }
 

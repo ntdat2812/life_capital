@@ -131,13 +131,18 @@ func main() {
 	monthlyReviewHandler := handler.NewMonthlyReviewHandler(monthlyReviewService)
 	priceSyncHandler := handler.NewPriceSyncHandler(priceSyncService)
 
+	// Goal domain
+	goalRepo := repository.NewFinancialGoalRepository(dbPool)
+	goalService := service.NewFinancialGoalService(goalRepo, assetRepo)
+	goalHandler := handler.NewFinancialGoalHandler(goalService)
+
 	// Initialize cron scheduler
 	scheduler := cron.NewScheduler(priceSyncService, userRepo)
 	scheduler.Start()
 	defer scheduler.Stop()
 
 	// Register routes
-	registerRoutes(e, healthHandler, authHandler, profileHandler, wealthHandler, cashflowHandler, timelineHandler, notifHandler, ipsHandler, portfolioHandler, monthlyReviewHandler, priceSyncHandler)
+	registerRoutes(e, healthHandler, authHandler, profileHandler, wealthHandler, cashflowHandler, timelineHandler, notifHandler, ipsHandler, portfolioHandler, monthlyReviewHandler, priceSyncHandler, goalHandler)
 
 	// Get PORT from environment variable (default: 8080)
 	port := os.Getenv("PORT")
@@ -154,7 +159,7 @@ func main() {
 }
 
 // registerRoutes maps all API routes to their handlers.
-func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHandler *handler.AuthHandler, profileHandler *handler.ProfileHandler, wealthHandler *handler.WealthHandler, cashflowHandler *handler.CashflowHandler, timelineHandler *handler.TimelineHandler, notifHandler *handler.NotificationHandler, ipsHandler *handler.IPSHandler, portfolioHandler *handler.PortfolioHandler, monthlyReviewHandler *handler.MonthlyReviewHandler, priceSyncHandler *handler.PriceSyncHandler) {
+func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHandler *handler.AuthHandler, profileHandler *handler.ProfileHandler, wealthHandler *handler.WealthHandler, cashflowHandler *handler.CashflowHandler, timelineHandler *handler.TimelineHandler, notifHandler *handler.NotificationHandler, ipsHandler *handler.IPSHandler, portfolioHandler *handler.PortfolioHandler, monthlyReviewHandler *handler.MonthlyReviewHandler, priceSyncHandler *handler.PriceSyncHandler, goalHandler *handler.FinancialGoalHandler) {
 	api := e.Group("/api/v1")
 
 	// Public routes
@@ -248,6 +253,14 @@ func registerRoutes(e *echo.Echo, healthHandler *handler.HealthHandler, authHand
 	reviews.POST("", monthlyReviewHandler.SaveReview)
 	reviews.POST("/generate", monthlyReviewHandler.GenerateReview)
 	reviews.GET("/:month", monthlyReviewHandler.GetReviewByMonth)
+
+	goals := protected.Group("/goals")
+	goals.POST("", goalHandler.CreateGoal)
+	goals.GET("", goalHandler.ListGoals)
+	goals.PUT("/:id", goalHandler.UpdateGoal)
+	goals.DELETE("/:id", goalHandler.DeleteGoal)
+	goals.POST("/:id/allocations", goalHandler.LinkAsset)
+	goals.DELETE("/:id/allocations/:asset_id", goalHandler.UnlinkAsset)
 
 	// Price Sync route
 	protected.POST("/price-sync", priceSyncHandler.SyncPrices)

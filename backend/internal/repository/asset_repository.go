@@ -11,6 +11,7 @@ import (
 
 type AssetRepository interface {
 	CreateAsset(ctx context.Context, asset *model.Asset) error
+	GetAssetByID(ctx context.Context, id uuid.UUID, userID uuid.UUID) (*model.Asset, error)
 	GetAssetsByUserID(ctx context.Context, userID uuid.UUID, category string, sort string, limit int, offset int) (*model.PaginatedAssets, error)
 	UpdateAsset(ctx context.Context, asset *model.Asset) error
 	DeleteAsset(ctx context.Context, id uuid.UUID, userID uuid.UUID) error
@@ -47,6 +48,27 @@ func (r *assetRepository) CreateAsset(ctx context.Context, asset *model.Asset) e
 	).Scan(&asset.ID)
 
 	return err
+}
+
+func (r *assetRepository) GetAssetByID(ctx context.Context, id uuid.UUID, userID uuid.UUID) (*model.Asset, error) {
+	query := `
+		SELECT id, user_id, category, name, ticker, quantity, avg_price, current_price, current_value, 
+		       cost_basis, notes, is_active, created_at, updated_at
+		FROM assets 
+		WHERE id = $1 AND user_id = $2 AND is_active = true
+	`
+
+	var a model.Asset
+	err := r.db.QueryRow(ctx, query, id, userID).Scan(
+		&a.ID, &a.UserID, &a.Category, &a.Name, &a.Ticker, &a.Quantity, &a.AvgPrice, &a.CurrentPrice, &a.CurrentValue,
+		&a.CostBasis, &a.Notes, &a.IsActive, &a.CreatedAt, &a.UpdatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &a, nil
 }
 
 func (r *assetRepository) GetAssetsByUserID(ctx context.Context, userID uuid.UUID, category string, sort string, limit int, offset int) (*model.PaginatedAssets, error) {
