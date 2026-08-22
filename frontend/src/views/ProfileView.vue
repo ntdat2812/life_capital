@@ -217,6 +217,15 @@
         @saved="handleProfileSaved" 
       />
 
+      <!-- Confirm Retake Modal -->
+      <ConfirmModal 
+        :show="showRetakeConfirm"
+        title="Làm lại khảo sát"
+        message="Bạn có chắc chắn muốn làm lại khảo sát từ đầu? Các dữ liệu Hồ Sơ rủi ro hiện tại sẽ bị ghi đè."
+        @confirm="proceedRetakeOnboarding"
+        @cancel="showRetakeConfirm = false"
+      />
+
     </div>
   </div>
 </template>
@@ -230,6 +239,7 @@ import { useAuthStore } from '../stores/authStore';
 import IncomeStreamsList from '../components/profile/IncomeStreamsList.vue';
 import DependentsList from '../components/profile/DependentsList.vue';
 import ProfileEditModal from '../components/profile/ProfileEditModal.vue';
+import ConfirmModal from '../components/common/ConfirmModal.vue';
 import api from '../lib/api';
 
 const router = useRouter();
@@ -238,6 +248,7 @@ const authStore = useAuthStore();
 
 const activeTab = ref('overview');
 const showEditModal = ref(false);
+const showRetakeConfirm = ref(false);
 
 const profile = computed(() => profileStore.profile);
 const loading = computed(() => profileStore.loading);
@@ -259,9 +270,16 @@ const handleProfileSaved = () => {
 };
 
 const reTakeOnboarding = () => {
-  if (confirm('Bạn có chắc chắn muốn làm lại khảo sát từ đầu? Các dữ liệu Hồ Sơ rủi ro hiện tại sẽ bị ghi đè.')) {
+  if (profileStore.profile) {
+    showRetakeConfirm.value = true;
+  } else {
     router.push('/onboarding/interview');
   }
+};
+
+const proceedRetakeOnboarding = () => {
+  showRetakeConfirm.value = false;
+  router.push('/onboarding/interview');
 };
 
 // Change Password logic
