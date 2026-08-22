@@ -129,6 +129,13 @@
         </div>
       </div>
     </div>
+    
+    <!-- FI Simulator Full Width -->
+    <FISimulator 
+      :currentNetWorth="wealthStore.netWorthSummary?.net_worth || 0"
+      :fiTarget="fiTarget"
+      :defaultMonthlySavings="defaultMonthlySavings"
+    />
   </div>
 </template>
 
@@ -139,6 +146,7 @@ import { useProfileStore } from '../stores/profileStore'
 import { useIpsStore } from '../stores/ips'
 import { Doughnut } from 'vue-chartjs'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
+import FISimulator from '../components/dashboard/FISimulator.vue'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
@@ -151,7 +159,11 @@ onMounted(async () => {
   if (!profileStore.profile) {
     await profileStore.fetchProfile()
   }
-  await ipsStore.fetchLatestIps()
+  await Promise.all([
+    profileStore.fetchIncomes(),
+    profileStore.fetchDependents(),
+    ipsStore.fetchLatestIps()
+  ])
 })
 
 const formatCurrency = (value) => {
@@ -180,6 +192,13 @@ const fiProgressPercent = computed(() => {
   const nw = wealthStore.netWorthSummary.net_worth
   if (nw <= 0) return 0
   return ((nw / fiTarget.value) * 100).toFixed(1)
+})
+
+const defaultMonthlySavings = computed(() => {
+  if (!profileStore.profile) return 0
+  const income = profileStore.totalIncome || 0
+  const expense = (profileStore.essentialExpense || 0) + (profileStore.dependentsExpense || 0)
+  return Math.max(0, income - expense)
 })
 
 // --- CHART LOGIC ---
