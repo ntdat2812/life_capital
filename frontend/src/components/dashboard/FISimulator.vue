@@ -30,6 +30,13 @@
                 <span>0%</span>
                 <span>30%</span>
               </div>
+              
+              <!-- Tính toán sinh lời hiện tại -->
+              <div v-if="currentNetWorth > 0" class="mt-3 text-xs text-slate-400 bg-indigo-900/20 p-2.5 rounded-lg border border-indigo-500/20">
+                <span class="block mb-1">💰 Sinh lời trên tổng tài sản hiện tại:</span>
+                <span class="text-indigo-300 font-bold text-sm">{{ formatCurrency((currentNetWorth * (expectedReturn / 100)) / 12) }}/tháng</span>
+                <span class="text-slate-500 ml-1">({{ formatCurrency(currentNetWorth * (expectedReturn / 100)) }}/năm)</span>
+              </div>
             </div>
 
             <!-- Dòng tiền tiết kiệm hàng tháng -->
@@ -39,7 +46,7 @@
                 <div class="ml-2 relative group cursor-help">
                   <svg class="w-4 h-4 text-slate-400 hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                   <div class="absolute left-0 w-64 p-3 bg-slate-800 text-xs text-slate-300 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 top-full mt-2 border border-slate-700 pointer-events-none">
-                    <p>💡 Con số này được gợi ý dựa trên dòng tiền của bạn (hoặc mặc định 10 triệu nếu chưa khai báo). Bạn có thể tùy chỉnh để xem các kịch bản khác nhau nhé!</p>
+                    <p>💡 Con số mặc định được đặt ở mức 10 triệu để làm ví dụ. Bạn có thể tự do nhập số tiền tiết kiệm thực tế hàng tháng của mình vào ô này để xem biểu đồ thay đổi ra sao nhé!</p>
                   </div>
                 </div>
               </div>
