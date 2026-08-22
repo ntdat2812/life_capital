@@ -71,22 +71,11 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-slate-300 mb-1">Loại</label>
-              <select v-model="form.type" class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
-                <option value="salary">Tiền lương</option>
-                <option value="business">Kinh doanh</option>
-                <option value="rental">Cho thuê nhà</option>
-                <option value="dividend">Cổ tức</option>
-                <option value="interest">Lãi tiết kiệm</option>
-                <option value="other">Khác</option>
-              </select>
+              <CustomSelect v-model="form.type" :options="incomeTypeOptions" />
             </div>
             <div>
               <label class="block text-sm font-medium text-slate-300 mb-1">Tần suất</label>
-              <select v-model="form.frequency" class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
-                <option value="monthly">Hàng tháng</option>
-                <option value="yearly">Hàng năm</option>
-                <option value="one_time">Một lần</option>
-              </select>
+              <CustomSelect v-model="form.frequency" :options="frequencyOptions" />
             </div>
           </div>
           <div>
@@ -131,6 +120,22 @@ import { ref, computed } from 'vue'
 import { useProfileStore } from '../../stores/profileStore'
 import CurrencyInput from '../common/CurrencyInput.vue'
 import ConfirmModal from '../common/ConfirmModal.vue'
+import CustomSelect from '../common/CustomSelect.vue'
+
+const incomeTypeOptions = [
+  { label: 'Tiền lương', value: 'salary' },
+  { label: 'Kinh doanh', value: 'business' },
+  { label: 'Cho thuê nhà', value: 'rental' },
+  { label: 'Cổ tức', value: 'dividend' },
+  { label: 'Lãi tiết kiệm', value: 'interest' },
+  { label: 'Khác', value: 'other' }
+]
+
+const frequencyOptions = [
+  { label: 'Hàng tháng', value: 'monthly' },
+  { label: 'Hàng năm', value: 'yearly' },
+  { label: 'Một lần', value: 'one_time' }
+]
 
 const profileStore = useProfileStore()
 

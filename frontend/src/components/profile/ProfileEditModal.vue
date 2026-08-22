@@ -16,21 +16,13 @@
 
         <div>
           <label class="block text-sm font-medium text-slate-300 mb-1">Tình trạng hôn nhân</label>
-          <select v-model="form.marital_status" class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
-            <option value="Độc thân">Độc thân</option>
-            <option value="Đã kết hôn">Đã kết hôn</option>
-            <option value="Ly hôn">Ly hôn</option>
-          </select>
+          <CustomSelect v-model="form.marital_status" :options="maritalStatusOptions" />
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-slate-300 mb-1">Khẩu vị rủi ro</label>
-            <select v-model="form.risk_tolerance" class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
-              <option value="Thấp">Thấp</option>
-              <option value="Trung bình">Trung bình</option>
-              <option value="Cao">Cao</option>
-            </select>
+            <CustomSelect v-model="form.risk_tolerance" :options="riskToleranceOptions" />
           </div>
           <div>
             <label class="block text-sm font-medium text-slate-300 mb-1">Điểm rủi ro (1-100)</label>
@@ -72,6 +64,19 @@ import { ref, watch } from 'vue'
 import { useProfileStore } from '../../stores/profileStore'
 import CurrencyInput from '../common/CurrencyInput.vue'
 import DateInput from '../common/DateInput.vue'
+import CustomSelect from '../common/CustomSelect.vue'
+
+const maritalStatusOptions = [
+  { label: 'Độc thân', value: 'Độc thân' },
+  { label: 'Đã kết hôn', value: 'Đã kết hôn' },
+  { label: 'Ly hôn', value: 'Ly hôn' }
+]
+
+const riskToleranceOptions = [
+  { label: 'Thấp', value: 'Thấp' },
+  { label: 'Trung bình', value: 'Trung bình' },
+  { label: 'Cao', value: 'Cao' }
+]
 
 const props = defineProps({
   show: Boolean,

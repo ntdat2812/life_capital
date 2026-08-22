@@ -62,12 +62,7 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-slate-300 mb-1">Mối quan hệ</label>
-            <select v-model="form.relationship" class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
-              <option value="Con cái">Con cái</option>
-              <option value="Bố mẹ">Bố mẹ</option>
-              <option value="Vợ/Chồng">Vợ/Chồng</option>
-              <option value="Khác">Khác</option>
-            </select>
+            <CustomSelect v-model="form.relationship" :options="relationshipOptions" />
           </div>
           <div>
             <label class="block text-sm font-medium text-slate-300 mb-1">Ngày sinh (tùy chọn)</label>
@@ -112,6 +107,14 @@ import { useProfileStore } from '../../stores/profileStore'
 import CurrencyInput from '../common/CurrencyInput.vue'
 import DateInput from '../common/DateInput.vue'
 import ConfirmModal from '../common/ConfirmModal.vue'
+import CustomSelect from '../common/CustomSelect.vue'
+
+const relationshipOptions = [
+  { label: 'Con cái', value: 'Con cái' },
+  { label: 'Bố mẹ', value: 'Bố mẹ' },
+  { label: 'Vợ/Chồng', value: 'Vợ/Chồng' },
+  { label: 'Khác', value: 'Khác' }
+]
 
 const profileStore = useProfileStore()
 

@@ -49,48 +49,21 @@
       <div class="flex flex-wrap items-center gap-4 w-full sm:w-auto">
         <div class="flex items-center gap-3">
           <label class="text-sm font-medium text-slate-300 whitespace-nowrap">Lọc Tài Sản:</label>
-          <select v-model="wealthStore.assetCategoryFilter" @change="applyAssetFilter" class="bg-slate-900/80 border border-slate-600 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-indigo-500">
-            <option value="">Tất cả các loại</option>
-            <option value="cash">Tiền mặt</option>
-            <option value="deposit">Tiền gửi ngân hàng</option>
-            <option value="gold">Vàng</option>
-            <option value="stock">Cổ phiếu</option>
-            <option value="fund">Chứng chỉ quỹ</option>
-            <option value="crypto">Tiền điện tử</option>
-            <option value="real_estate">Bất động sản</option>
-          </select>
+          <CustomSelect v-model="wealthStore.assetCategoryFilter" :options="assetCategoryFilterOptions" @update:modelValue="applyAssetFilter" class="w-[180px]" />
         </div>
         <div class="flex items-center gap-3">
           <label class="text-sm font-medium text-slate-300 whitespace-nowrap">Sắp xếp:</label>
-          <select v-model="wealthStore.assetSort" @change="applyAssetFilter" class="bg-slate-900/80 border border-slate-600 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-indigo-500">
-            <option value="value_desc">Giá trị giảm dần</option>
-            <option value="value_asc">Giá trị tăng dần</option>
-            <option value="name_asc">Tên (A-Z)</option>
-            <option value="name_desc">Tên (Z-A)</option>
-          </select>
+          <CustomSelect v-model="wealthStore.assetSort" :options="assetSortOptions" @update:modelValue="applyAssetFilter" class="w-[180px]" />
         </div>
       </div>
       <div class="flex flex-wrap items-center gap-4 w-full sm:w-auto">
         <div class="flex items-center gap-3">
           <label class="text-sm font-medium text-slate-300 whitespace-nowrap">Lọc Nợ:</label>
-          <select v-model="wealthStore.liabilityCategoryFilter" @change="applyLiabilityFilter" class="bg-slate-900/80 border border-slate-600 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-indigo-500">
-            <option value="">Tất cả các loại</option>
-            <option value="mortgage">Vay mua nhà</option>
-            <option value="auto_loan">Vay mua xe</option>
-            <option value="student_loan">Vay học tập</option>
-            <option value="credit_card">Thẻ tín dụng</option>
-            <option value="personal_loan">Vay tín chấp</option>
-            <option value="other">Khác</option>
-          </select>
+          <CustomSelect v-model="wealthStore.liabilityCategoryFilter" :options="liabilityCategoryFilterOptions" @update:modelValue="applyLiabilityFilter" class="w-[180px]" />
         </div>
         <div class="flex items-center gap-3">
           <label class="text-sm font-medium text-slate-300 whitespace-nowrap">Sắp xếp:</label>
-          <select v-model="wealthStore.liabilitySort" @change="applyLiabilityFilter" class="bg-slate-900/80 border border-slate-600 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-indigo-500">
-            <option value="value_desc">Dư nợ giảm dần</option>
-            <option value="value_asc">Dư nợ tăng dần</option>
-            <option value="name_asc">Tên (A-Z)</option>
-            <option value="name_desc">Tên (Z-A)</option>
-          </select>
+          <CustomSelect v-model="wealthStore.liabilitySort" :options="liabilitySortOptions" @update:modelValue="applyLiabilityFilter" class="w-[180px]" />
         </div>
       </div>
     </div>
@@ -127,31 +100,45 @@
             <!-- Group by Category -->
             <div v-for="group in groupedAssets" :key="group.category" class="group-container">
               <!-- Header của nhóm -->
-              <div class="bg-slate-800/60 px-4 py-3 flex justify-between items-center sticky top-0 z-10 cursor-pointer hover:bg-slate-700/60 transition-colors" @click="openGroupDetail(group, 'asset')">
+              <div class="bg-slate-800/60 px-4 py-3 flex justify-between items-center sticky top-0 z-10 cursor-pointer hover:bg-slate-700/60 transition-colors" @click="toggleAssetGroup(group.category)">
                 <div class="flex items-center gap-3">
+                  <svg class="w-4 h-4 text-slate-500 transition-transform duration-200" :class="{ '-rotate-90': !expandedAssetGroups[group.category] }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                   <span class="text-xl">{{ getCategoryIcon(group.category) }}</span>
                   <h3 class="text-white font-semibold">{{ group.categoryName }}</h3>
                 </div>
                 <div class="text-right flex items-center gap-3">
                   <div v-if="group.category === 'gold'" class="mr-4 text-right pr-4 border-r border-slate-700 hidden sm:block">
-                    <p class="text-amber-400 font-bold text-sm">{{ formatGoldVolume(group.totalGoldVolume) }}</p>
-                    <p class="text-xs text-slate-400">Khối lượng</p>
+                    <div class="px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded-md">
+                      <span class="text-amber-400 font-medium text-xs whitespace-nowrap">{{ formatGoldVolume(group.totalGoldVolume) }}</span>
+                    </div>
                   </div>
-                  <div v-if="group.category === 'gold'" class="mr-4 pr-4 border-r border-slate-700 hidden sm:block">
-                    <button @click.stop="openBulkUpdateGold(group.items)" class="text-xs px-2 py-1 bg-amber-500/20 text-amber-500 rounded hover:bg-amber-500/30 transition-colors border border-amber-500/30">
-                      Cập nhật giá
-                    </button>
+                  <div class="text-right flex-1 sm:flex-none">
+                    <p class="text-emerald-400 font-bold leading-tight">{{ formatCurrency(group.total_value) }}</p>
+                    <p class="text-[11px] text-slate-400">Chiếm {{ group.percentage }}%</p>
                   </div>
-                  <div>
-                    <p class="text-emerald-400 font-bold">{{ formatCurrency(group.total_value) }}</p>
-                    <p class="text-xs text-slate-400">Chiếm {{ group.percentage }}%</p>
+                  <div class="ml-2 pl-2 border-l border-slate-700 flex items-center justify-end gap-1 w-[72px]">
+                    <div v-if="group.category === 'gold'" class="relative group/tooltip">
+                      <button @click.stop="openBulkUpdateGold(group.items)" class="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-amber-500/10 rounded transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                      </button>
+                      <div class="absolute top-full right-0 mt-2 hidden group-hover/tooltip:block whitespace-nowrap bg-slate-900 text-xs text-slate-200 px-2.5 py-1.5 rounded-lg border border-slate-700 shadow-xl z-50">
+                        Cập nhật giá vàng
+                      </div>
+                    </div>
+                    <div class="relative group/tooltip">
+                      <button @click.stop="openGroupDetail(group, 'asset')" class="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                      </button>
+                      <div class="absolute top-full right-0 mt-2 hidden group-hover/tooltip:block whitespace-nowrap bg-slate-900 text-xs text-slate-200 px-2.5 py-1.5 rounded-lg border border-slate-700 shadow-xl z-50">
+                        Xem biểu đồ cơ cấu
+                      </div>
+                    </div>
                   </div>
-                  <span class="text-slate-500 text-xs">▶</span>
                 </div>
               </div>
               
               <!-- Danh sách items trong nhóm -->
-              <ul class="divide-y divide-slate-700/30">
+              <ul v-show="expandedAssetGroups[group.category]" class="divide-y divide-slate-700/30">
                 <li v-for="asset in group.items" :key="asset.id" class="p-4 pl-12 hover:bg-slate-800/50 transition-colors flex justify-between items-center group/item">
                   <div>
                     <h4 class="text-slate-200 font-medium">{{ asset.name }}</h4>
@@ -203,21 +190,31 @@
           <div v-else class="divide-y divide-slate-700/50 overflow-y-auto custom-scrollbar flex-1" @scroll="handleLiabilityScroll">
             <!-- Group by Category -->
             <div v-for="group in groupedLiabilities" :key="group.category" class="group-container">
-              <div class="bg-slate-800/60 px-4 py-3 flex justify-between items-center sticky top-0 z-10 cursor-pointer hover:bg-slate-700/60 transition-colors" @click="openGroupDetail(group, 'liability')">
+              <div class="bg-slate-800/60 px-4 py-3 flex justify-between items-center sticky top-0 z-10 cursor-pointer hover:bg-slate-700/60 transition-colors" @click="toggleLiabilityGroup(group.category)">
                 <div class="flex items-center gap-3">
+                  <svg class="w-4 h-4 text-slate-500 transition-transform duration-200" :class="{ '-rotate-90': !expandedLiabilityGroups[group.category] }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                   <span class="text-xl">{{ getLiabilityIcon(group.category) }}</span>
                   <h3 class="text-white font-semibold">{{ group.categoryName }}</h3>
                 </div>
                 <div class="text-right flex items-center gap-3">
-                  <div>
-                    <p class="text-amber-500 font-bold">{{ formatCurrency(group.total_value) }}</p>
-                    <p class="text-xs text-slate-400">Chiếm {{ group.percentage }}%</p>
+                  <div class="text-right flex-1 sm:flex-none">
+                    <p class="text-amber-500 font-bold leading-tight">{{ formatCurrency(group.total_value) }}</p>
+                    <p class="text-[11px] text-slate-400">Chiếm {{ group.percentage }}%</p>
                   </div>
-                  <span class="text-slate-500 text-xs">▶</span>
+                  <div class="ml-2 pl-2 border-l border-slate-700 flex items-center justify-end gap-1 w-[40px]">
+                    <div class="relative group/tooltip">
+                      <button @click.stop="openGroupDetail(group, 'liability')" class="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-amber-500/10 rounded transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                      </button>
+                      <div class="absolute top-full right-0 mt-2 hidden group-hover/tooltip:block whitespace-nowrap bg-slate-900 text-xs text-slate-200 px-2.5 py-1.5 rounded-lg border border-slate-700 shadow-xl z-50">
+                        Xem chi tiết nhóm
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               
-              <ul class="divide-y divide-slate-700/30">
+              <ul v-show="expandedLiabilityGroups[group.category]" class="divide-y divide-slate-700/30">
                 <li v-for="liability in group.items" :key="liability.id" class="p-4 pl-12 hover:bg-slate-800/50 transition-colors flex justify-between items-center group/item">
                   <div>
                     <h4 class="text-slate-200 font-medium">{{ liability.name }}</h4>
@@ -303,15 +300,7 @@
         <form @submit.prevent="submitAssetForm" class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-slate-300 mb-1">Loại Tài Sản</label>
-            <select v-model="assetForm.category" required class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" :disabled="isEditingAsset">
-              <option value="cash">Tiền mặt</option>
-              <option value="deposit">Tiền gửi ngân hàng</option>
-              <option value="gold">Vàng</option>
-              <option value="stock">Cổ phiếu</option>
-              <option value="fund">Chứng chỉ quỹ</option>
-              <option value="crypto">Tiền điện tử (Crypto)</option>
-              <option value="real_estate">Bất động sản</option>
-            </select>
+            <CustomSelect v-model="assetForm.category" :options="categoryOptions" :disabled="isEditingAsset" />
           </div>
           
           <div v-if="showNameField">
@@ -322,43 +311,12 @@
           <div v-if="assetForm.category === 'deposit'" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block text-sm font-medium text-slate-300 mb-1">Ngân hàng</label>
-              <select v-model="depositBank" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
-                <option value="Vietcombank">Vietcombank</option>
-                <option value="BIDV">BIDV</option>
-                <option value="VietinBank">VietinBank</option>
-                <option value="Agribank">Agribank</option>
-                <option value="Techcombank">Techcombank</option>
-                <option value="MBBank">MBBank</option>
-                <option value="VPBank">VPBank</option>
-                <option value="ACB">ACB</option>
-                <option value="TPBank">TPBank</option>
-                <option value="Sacombank">Sacombank</option>
-                <option value="VIB">VIB</option>
-                <option value="HDBank">HDBank</option>
-                <option value="MSB">MSB</option>
-                <option value="SHB">SHB</option>
-                <option value="SeABank">SeABank</option>
-                <option value="OCB">OCB</option>
-                <option value="Eximbank">Eximbank</option>
-                <option value="LPBank">LPBank</option>
-                <option value="Nam A Bank">Nam A Bank</option>
-                <option value="Khác">Khác...</option>
-              </select>
+              <CustomSelect v-model="depositBank" :options="bankOptions" />
               <input v-if="depositBank === 'Khác'" type="text" v-model="customDepositBank" placeholder="Nhập tên NH..." class="mt-2 w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" />
             </div>
             <div>
               <label class="block text-sm font-medium text-slate-300 mb-1">Kỳ hạn</label>
-              <select v-model="depositTerm" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
-                <option value="Không kỳ hạn">Không kỳ hạn</option>
-                <option value="1 tháng">1 tháng</option>
-                <option value="3 tháng">3 tháng</option>
-                <option value="6 tháng">6 tháng</option>
-                <option value="12 tháng">12 tháng</option>
-                <option value="13 tháng">13 tháng</option>
-                <option value="18 tháng">18 tháng</option>
-                <option value="24 tháng">24 tháng</option>
-                <option value="Khác">Khác...</option>
-              </select>
+              <CustomSelect v-model="depositTerm" :options="termOptions" />
               <input v-if="depositTerm === 'Khác'" type="text" v-model="customDepositTerm" placeholder="Nhập kỳ hạn..." class="mt-2 w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" />
             </div>
             <div>
@@ -370,38 +328,15 @@
           <div v-if="assetForm.category === 'gold'" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block text-sm font-medium text-slate-300 mb-1">Loại vàng</label>
-              <select v-model="goldType" required class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
-                <option value="Vàng miếng">Vàng miếng</option>
-                <option value="Vàng nhẫn">Vàng nhẫn tròn trơn</option>
-                <option value="Vàng trang sức">Vàng trang sức</option>
-                <option value="Khác">Khác</option>
-              </select>
+              <CustomSelect v-model="goldType" :options="goldTypeOptions" />
             </div>
             <div>
               <label class="block text-sm font-medium text-slate-300 mb-1">Thương hiệu</label>
-              <select v-model="goldBrand" required class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
-                <option value="SJC">SJC</option>
-                <option value="DOJI">DOJI</option>
-                <option value="PNJ">PNJ</option>
-                <option value="Phú Quý">Phú Quý</option>
-                <option value="Mi Hồng">Mi Hồng</option>
-                <option value="Bảo Tín Minh Châu">Bảo Tín Minh Châu</option>
-                <option value="Bảo Tín Mạnh Hải">Bảo Tín Mạnh Hải</option>
-                <option value="Tư nhân">Tiệm vàng tư nhân</option>
-                <option value="Khác">Khác</option>
-              </select>
+              <CustomSelect v-model="goldBrand" :options="goldBrandOptions" />
             </div>
             <div>
               <label class="block text-sm font-medium text-slate-300 mb-1">Độ tinh khiết</label>
-              <select v-model="goldPurity" required class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
-                <option value="9999">9999 (24K)</option>
-                <option value="999">999</option>
-                <option value="99">99</option>
-                <option value="18K">18K</option>
-                <option value="14K">14K</option>
-                <option value="10K">10K</option>
-                <option value="Khác">Khác</option>
-              </select>
+              <CustomSelect v-model="goldPurity" :options="goldPurityOptions" />
               <input v-if="goldPurity === 'Khác'" type="text" v-model="customGoldPurity" placeholder="Nhập loại..." class="mt-2 w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" />
             </div>
           </div>
@@ -409,52 +344,32 @@
           <div v-if="assetForm.category === 'fund'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-slate-300 mb-1">Mã Quỹ (Ticker)</label>
-              <select v-model="fundCode" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
-                <option value="VESAF">VESAF - VinaCapital</option>
-                <option value="VEOF">VEOF - VinaCapital</option>
-                <option value="VIBF">VIBF - VinaCapital</option>
-                <option value="VLBF">VLBF - VinaCapital</option>
-                <option value="SSISCA">SSISCA - SSIAM</option>
-                <option value="VLGF">VLGF - SSIAM</option>
-                <option value="SSIPDF">SSIPDF - SSIAM</option>
-                <option value="VFMVF1">VFMVF1 - Dragon Capital</option>
-                <option value="VFMVF4">VFMVF4 - Dragon Capital</option>
-                <option value="VNDAF">VNDAF - VNDirect</option>
-                <option value="MAFEQI">MAFEQI - Manulife</option>
-                <option value="Khác">Khác...</option>
-              </select>
+              <CustomSelect v-model="fundCode" :options="fundCodeOptions" />
               <input v-if="fundCode === 'Khác'" type="text" v-model="customFundCode" placeholder="Nhập mã quỹ..." class="mt-2 w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 uppercase" />
             </div>
           </div>
 
-          <div v-if="isFluctuatingAsset(assetForm.category)" class="grid grid-cols-2 gap-4">
-            <div v-if="showTickerField">
+          <div v-if="isFluctuatingAsset(assetForm.category)" class="space-y-4">
+            <div v-if="showTickerField" class="flex flex-col justify-end">
               <label class="block text-sm font-medium text-slate-300 mb-1">Mã (Ticker)</label>
-              <input type="text" v-model="assetForm.ticker" :placeholder="tickerPlaceholder" required class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" />
+              <input type="text" v-model="assetForm.ticker" :placeholder="tickerPlaceholder" required class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 h-[42px] text-white focus:outline-none focus:border-indigo-500" />
             </div>
-            <div>
+            <div class="flex flex-col justify-end">
               <label class="block text-sm font-medium text-slate-300 mb-1">Số lượng <span v-if="assetForm.category === 'gold'" class="text-slate-500 text-xs font-normal">(Nhập số lượng theo Đơn vị tính)</span></label>
-              <div class="flex gap-2">
-                <CurrencyInput v-model="assetForm.quantity" @update:modelValue="calculateCurrentValue()" class="flex-1" />
-                <select v-if="assetForm.category === 'gold'" v-model="goldUnit" @change="calculateCurrentValue()" class="bg-slate-900/50 border border-slate-700 rounded-lg px-2 py-2 text-white text-sm focus:outline-none focus:border-indigo-500 shrink-0 w-[140px]">
-                  <option value="Loại 1 Lượng">Loại 1 Lượng</option>
-                  <option value="Loại 5 Chỉ">Loại 5 Chỉ</option>
-                  <option value="Loại 2 Chỉ">Loại 2 Chỉ</option>
-                  <option value="Loại 1 Chỉ">Loại 1 Chỉ</option>
-                  <option value="Loại 0.5 Chỉ">Loại 0.5 Chỉ</option>
-                  <option value="Lượng">Tùy chỉnh (Lượng)</option>
-                  <option value="Chỉ">Tùy chỉnh (Chỉ)</option>
-                  <option value="Phân">Tùy chỉnh (Phân)</option>
-                </select>
+              <div class="flex gap-2 items-center">
+                <CurrencyInput v-model="assetForm.quantity" @update:modelValue="calculateCurrentValue()" class="flex-1 min-w-0" />
+                <CustomSelect v-if="assetForm.category === 'gold'" v-model="goldUnit" :options="goldUnitOptions" @update:modelValue="calculateCurrentValue()" class="shrink-0 w-[140px]" />
               </div>
             </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Giá Vốn <span v-if="assetForm.category === 'gold'" class="text-slate-500 text-xs font-normal">(Nhập theo giá Lượng, tự quy đổi)</span><span v-else class="text-slate-500 text-xs font-normal">(Tùy chọn)</span></label>
-              <CurrencyInput v-model="assetForm.avg_price" placeholder="Bỏ qua" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Giá Hiện Tại <span v-if="assetForm.category === 'gold'" class="text-slate-500 text-xs font-normal">(Nhập theo giá Lượng, tự quy đổi)</span></label>
-              <CurrencyInput v-model="assetForm.current_price" @update:modelValue="calculateCurrentValue()" />
+            <div class="grid grid-cols-2 gap-4">
+              <div class="flex flex-col justify-end">
+                <label class="block text-sm font-medium text-slate-300 mb-1 flex-1">Giá Vốn <span v-if="assetForm.category === 'gold'" class="text-slate-500 text-xs font-normal">(Nhập theo giá Lượng, tự quy đổi)</span><span v-else class="text-slate-500 text-xs font-normal">(Tùy chọn)</span></label>
+                <CurrencyInput v-model="assetForm.avg_price" placeholder="Bỏ qua" />
+              </div>
+              <div class="flex flex-col justify-end">
+                <label class="block text-sm font-medium text-slate-300 mb-1 flex-1">Giá Hiện Tại <span v-if="assetForm.category === 'gold'" class="text-slate-500 text-xs font-normal">(Nhập theo giá Lượng, tự quy đổi)</span></label>
+                <CurrencyInput v-model="assetForm.current_price" @update:modelValue="calculateCurrentValue()" />
+              </div>
             </div>
           </div>
 
@@ -484,14 +399,7 @@
         <form @submit.prevent="submitLiabilityForm" class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-slate-300 mb-1">Loại Nợ</label>
-            <select v-model="liabilityForm.category" required class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" :disabled="isEditingLiability">
-              <option value="mortgage">Vay mua nhà</option>
-              <option value="auto_loan">Vay mua xe</option>
-              <option value="student_loan">Vay học tập</option>
-              <option value="credit_card">Thẻ tín dụng</option>
-              <option value="personal_loan">Vay tín chấp</option>
-              <option value="other">Khác</option>
-            </select>
+            <CustomSelect v-model="liabilityForm.category" :options="liabilityCategoryOptions" :disabled="isEditingLiability" />
           </div>
           
           <div>
@@ -572,6 +480,117 @@ import { getGoldMultiplier, extractGoldUnit } from '../utils/goldCalculations'
 import BulkUpdateGoldModal from '../components/BulkUpdateGoldModal.vue'
 import CurrencyInput from '../components/common/CurrencyInput.vue'
 import ConfirmModal from '../components/common/ConfirmModal.vue'
+import CustomSelect from '../components/common/CustomSelect.vue'
+
+const categoryOptions = [
+  { label: 'Tiền mặt', value: 'cash' },
+  { label: 'Tiền gửi ngân hàng', value: 'deposit' },
+  { label: 'Vàng', value: 'gold' },
+  { label: 'Cổ phiếu', value: 'stock' },
+  { label: 'Chứng chỉ quỹ', value: 'fund' },
+  { label: 'Tiền điện tử (Crypto)', value: 'crypto' },
+  { label: 'Bất động sản', value: 'real_estate' }
+]
+
+const bankOptions = [
+  'Vietcombank', 'BIDV', 'VietinBank', 'Agribank', 'Techcombank', 'MBBank', 'VPBank', 'ACB', 'TPBank', 'Sacombank', 'VIB', 'HDBank', 'MSB', 'SHB', 'SeABank', 'OCB', 'Eximbank', 'LPBank', 'Nam A Bank', 'Khác'
+].map(name => ({ label: name, value: name }))
+
+const termOptions = [
+  'Không kỳ hạn', '1 tháng', '3 tháng', '6 tháng', '12 tháng', '13 tháng', '18 tháng', '24 tháng', 'Khác'
+].map(t => ({ label: t, value: t }))
+
+const goldTypeOptions = [
+  { label: 'Vàng miếng', value: 'Vàng miếng' },
+  { label: 'Vàng nhẫn tròn trơn', value: 'Vàng nhẫn' },
+  { label: 'Vàng trang sức', value: 'Vàng trang sức' },
+  { label: 'Khác', value: 'Khác' }
+]
+
+const goldBrandOptions = [
+  'SJC', 'DOJI', 'PNJ', 'Phú Quý', 'Mi Hồng', 'Bảo Tín Minh Châu', 'Bảo Tín Mạnh Hải', 'Tiệm vàng tư nhân', 'Khác'
+].map(b => ({ label: b, value: b === 'Tiệm vàng tư nhân' ? 'Tư nhân' : b }))
+
+const goldPurityOptions = [
+  { label: '9999 (24K)', value: '9999' },
+  { label: '999', value: '999' },
+  { label: '99', value: '99' },
+  { label: '18K', value: '18K' },
+  { label: '14K', value: '14K' },
+  { label: '10K', value: '10K' },
+  { label: 'Khác', value: 'Khác' }
+]
+
+const fundCodeOptions = [
+  { label: 'VESAF - VinaCapital', value: 'VESAF' },
+  { label: 'VEOF - VinaCapital', value: 'VEOF' },
+  { label: 'VIBF - VinaCapital', value: 'VIBF' },
+  { label: 'VLBF - VinaCapital', value: 'VLBF' },
+  { label: 'SSISCA - SSIAM', value: 'SSISCA' },
+  { label: 'VLGF - SSIAM', value: 'VLGF' },
+  { label: 'SSIPDF - SSIAM', value: 'SSIPDF' },
+  { label: 'VFMVF1 - Dragon Capital', value: 'VFMVF1' },
+  { label: 'VFMVF4 - Dragon Capital', value: 'VFMVF4' },
+  { label: 'VNDAF - VNDirect', value: 'VNDAF' },
+  { label: 'MAFEQI - Manulife', value: 'MAFEQI' },
+  { label: 'Khác...', value: 'Khác' }
+]
+
+const goldUnitOptions = [
+  { label: 'Loại 1 Lượng', value: 'Loại 1 Lượng' },
+  { label: 'Loại 5 Chỉ', value: 'Loại 5 Chỉ' },
+  { label: 'Loại 2 Chỉ', value: 'Loại 2 Chỉ' },
+  { label: 'Loại 1 Chỉ', value: 'Loại 1 Chỉ' },
+  { label: 'Loại 0.5 Chỉ', value: 'Loại 0.5 Chỉ' },
+  { label: 'Tùy chỉnh (Lượng)', value: 'Lượng' },
+  { label: 'Tùy chỉnh (Chỉ)', value: 'Chỉ' },
+  { label: 'Tùy chỉnh (Phân)', value: 'Phân' }
+]
+
+const liabilityCategoryOptions = [
+  { label: 'Vay mua nhà', value: 'mortgage' },
+  { label: 'Vay mua xe', value: 'auto_loan' },
+  { label: 'Vay học tập', value: 'student_loan' },
+  { label: 'Thẻ tín dụng', value: 'credit_card' },
+  { label: 'Vay tín chấp', value: 'personal_loan' },
+  { label: 'Khác', value: 'other' }
+]
+
+const assetCategoryFilterOptions = [
+  { label: 'Tất cả các loại', value: '' },
+  { label: 'Tiền mặt', value: 'cash' },
+  { label: 'Tiền gửi ngân hàng', value: 'deposit' },
+  { label: 'Vàng', value: 'gold' },
+  { label: 'Cổ phiếu', value: 'stock' },
+  { label: 'Chứng chỉ quỹ', value: 'fund' },
+  { label: 'Tiền điện tử', value: 'crypto' },
+  { label: 'Bất động sản', value: 'real_estate' }
+]
+
+const assetSortOptions = [
+  { label: 'Giá trị giảm dần', value: 'value_desc' },
+  { label: 'Giá trị tăng dần', value: 'value_asc' },
+  { label: 'Tên (A-Z)', value: 'name_asc' },
+  { label: 'Tên (Z-A)', value: 'name_desc' }
+]
+
+const liabilityCategoryFilterOptions = [
+  { label: 'Tất cả các loại', value: '' },
+  { label: 'Vay mua nhà', value: 'mortgage' },
+  { label: 'Vay mua xe', value: 'auto_loan' },
+  { label: 'Vay học tập', value: 'student_loan' },
+  { label: 'Thẻ tín dụng', value: 'credit_card' },
+  { label: 'Vay tín chấp', value: 'personal_loan' },
+  { label: 'Khác', value: 'other' }
+]
+
+const liabilitySortOptions = [
+  { label: 'Dư nợ giảm dần', value: 'value_desc' },
+  { label: 'Dư nợ tăng dần', value: 'value_asc' },
+  { label: 'Tên (A-Z)', value: 'name_asc' },
+  { label: 'Tên (Z-A)', value: 'name_desc' }
+]
+
 
 const wealthStore = useWealthStore()
 
@@ -580,6 +599,16 @@ const showAddLiabilityModal = ref(false)
 const showGroupDetailModal = ref(false)
 const selectedGroup = ref(null)
 const selectedGroupType = ref('asset') // 'asset' or 'liability'
+
+const expandedAssetGroups = ref({})
+const toggleAssetGroup = (category) => {
+  expandedAssetGroups.value[category] = !expandedAssetGroups.value[category]
+}
+
+const expandedLiabilityGroups = ref({})
+const toggleLiabilityGroup = (category) => {
+  expandedLiabilityGroups.value[category] = !expandedLiabilityGroups.value[category]
+}
 
 const isEditingAsset = ref(false)
 const editingAssetId = ref(null)

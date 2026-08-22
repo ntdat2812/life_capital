@@ -5,7 +5,7 @@
     @input="handleInput"
     @blur="handleBlur"
     @focus="handleFocus"
-    class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500"
+    class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 h-[42px] text-white focus:outline-none focus:border-indigo-500"
   />
 </template>
 

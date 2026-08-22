@@ -102,7 +102,7 @@
           <!-- Progress Bar -->
           <div class="space-y-2">
             <div class="flex justify-between text-sm">
-              <span :class="goal.allocated > 0 ? 'text-indigo-400 font-bold' : 'text-slate-500'">
+              <span :class="goal.isFilled ? 'text-emerald-400 font-bold' : (goal.allocated > 0 ? 'text-indigo-400 font-bold' : 'text-slate-500')">
                 {{ formatCurrency(goal.allocated) }}
               </span>
               <span class="text-slate-400 font-medium">Mục tiêu: {{ formatCurrency(goal.target_amount) }}</span>
@@ -421,13 +421,20 @@ const processedGoals = computed(() => {
         waterfallAmount = unallocatedRemaining
         unallocatedRemaining = 0
       }
+    } else if (deficit < 0) {
+      // Overflow logic: If dedicated assets exceed the goal target,
+      // the excess amount overflows back into the general liquid pool 
+      // to fund subsequent goals!
+      unallocatedRemaining += Math.abs(deficit)
     }
     
-    const totalAllocated = dedicatedAmount + waterfallAmount
+    let effectiveDedicatedAmount = Math.min(dedicatedAmount, goal.target_amount)
+    
+    const totalAllocated = effectiveDedicatedAmount + waterfallAmount
     let percentage = (totalAllocated / goal.target_amount) * 100
     if (percentage > 100) percentage = 100
     
-    let dedicatedPercent = (dedicatedAmount / goal.target_amount) * 100
+    let dedicatedPercent = (effectiveDedicatedAmount / goal.target_amount) * 100
     if (dedicatedPercent > 100) dedicatedPercent = 100
     
     let waterfallPercent = (waterfallAmount / goal.target_amount) * 100
@@ -435,7 +442,8 @@ const processedGoals = computed(() => {
     
     return {
       ...goal,
-      dedicatedAmount,
+      dedicatedAmount, // Keep raw amount for linked assets summary
+      effectiveDedicatedAmount, // Amount actually consumed by this goal
       waterfallAmount,
       dedicatedPercent,
       waterfallPercent,
