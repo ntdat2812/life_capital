@@ -39,8 +39,7 @@
                 <div class="ml-2 relative group cursor-help">
                   <svg class="w-4 h-4 text-slate-400 hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                   <div class="absolute left-0 w-64 p-3 bg-slate-800 text-xs text-slate-300 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 top-full mt-2 border border-slate-700 pointer-events-none">
-                    <p class="mb-1">💡 <strong>Mẹo:</strong> Con số này mặc định được tính từ (Tổng Thu nhập - Tổng Chi phí) của bạn. Nhưng bạn có thể tùy chỉnh nó.</p>
-                    <p>Khuyến nghị hiện tại: <span class="text-emerald-400 font-medium">{{ formatCurrency(defaultMonthlySavings) }}</span></p>
+                    <p>💡 Con số này được gợi ý dựa trên dòng tiền của bạn (hoặc mặc định 10 triệu nếu chưa khai báo). Bạn có thể tùy chỉnh để xem các kịch bản khác nhau nhé!</p>
                   </div>
                 </div>
               </div>

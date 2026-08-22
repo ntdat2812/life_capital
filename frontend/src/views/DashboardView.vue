@@ -195,10 +195,12 @@ const fiProgressPercent = computed(() => {
 })
 
 const defaultMonthlySavings = computed(() => {
-  if (!profileStore.profile) return 0
+  const fallback = 10000000 // 10 Triệu VND
+  if (!profileStore.profile) return fallback
   const income = profileStore.totalIncome || 0
   const expense = (profileStore.essentialExpense || 0) + (profileStore.dependentsExpense || 0)
-  return Math.max(0, income - expense)
+  const savings = income - expense
+  return savings > 0 ? savings : fallback
 })
 
 // --- CHART LOGIC ---
