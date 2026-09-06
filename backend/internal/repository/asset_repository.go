@@ -16,6 +16,7 @@ type AssetRepository interface {
 	UpdateAsset(ctx context.Context, asset *model.Asset) error
 	DeleteAsset(ctx context.Context, id uuid.UUID, userID uuid.UUID) error
 	GetSyncableAssets(ctx context.Context, userID uuid.UUID) ([]model.Asset, error)
+	GetAllUsersSyncableAssets(ctx context.Context) ([]model.Asset, error)
 	BatchUpdatePrices(ctx context.Context, updates []model.PriceUpdate) error
 	BulkUpdateGoldPrice(ctx context.Context, userID uuid.UUID, assetIDs []uuid.UUID, newPrice float64) error
 }
@@ -184,6 +185,35 @@ func (r *assetRepository) GetSyncableAssets(ctx context.Context, userID uuid.UUI
 		  AND quantity IS NOT NULL AND quantity > 0
 	`
 	rows, err := r.db.Query(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var assets []model.Asset
+	for rows.Next() {
+		var a model.Asset
+		if err := rows.Scan(
+			&a.ID, &a.UserID, &a.Category, &a.Name, &a.Ticker, &a.Quantity,
+			&a.AvgPrice, &a.CurrentPrice, &a.CurrentValue, &a.CostBasis,
+			&a.Notes, &a.IsActive, &a.CreatedAt, &a.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		assets = append(assets, a)
+	}
+	return assets, nil
+}
+
+func (r *assetRepository) GetAllUsersSyncableAssets(ctx context.Context) ([]model.Asset, error) {
+	query := `
+		SELECT id, user_id, category, name, ticker, quantity, avg_price, current_price, current_value, cost_basis, notes, is_active, created_at, updated_at
+		FROM assets
+		WHERE is_active = true 
+		  AND ticker IS NOT NULL AND ticker != ''
+		  AND quantity IS NOT NULL AND quantity > 0
+	`
+	rows, err := r.db.Query(ctx, query)
 	if err != nil {
 		return nil, err
 	}

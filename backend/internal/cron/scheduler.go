@@ -37,24 +37,13 @@ func (s *Scheduler) Start() {
 		log.Println("[CRON] Starting daily Price Sync for all users...")
 		ctx := context.Background()
 		
-		// In a real system we would get all user IDs and sync them.
-		// For our multi-user setup, we need a repository method to get all users.
-		users, err := s.userRepo.GetAll(ctx)
+		report, err := s.priceSyncService.SyncAll(ctx)
 		if err != nil {
-			log.Printf("[CRON] Failed to get users for price sync: %v\n", err)
+			log.Printf("[CRON] Failed to sync prices: %v\n", err)
 			return
 		}
 
-		for _, user := range users {
-			report, err := s.priceSyncService.SyncByUser(ctx, user.ID)
-			if err != nil {
-				log.Printf("[CRON] Failed to sync prices for user %s: %v\n", user.ID, err)
-			} else {
-				log.Printf("[CRON] Price sync for user %s completed: %d updated, %d failed, %d skipped\n", user.ID, report.TotalUpdated, report.TotalFailed, report.TotalSkipped)
-			}
-		}
-		
-		log.Println("[CRON] Daily Price Sync completed.")
+		log.Printf("[CRON] Daily Price Sync completed: %d updated, %d failed, %d skipped\n", report.TotalUpdated, report.TotalFailed, report.TotalSkipped)
 	})
 
 	if err != nil {
