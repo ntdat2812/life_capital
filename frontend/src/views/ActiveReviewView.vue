@@ -7,7 +7,7 @@
       </router-link>
       <div>
         <h1 class="text-3xl font-bold text-white tracking-tight">Chốt Sổ Tháng {{ currentMonth }}</h1>
-        <p class="text-slate-400">Phân tích danh mục và đề xuất rải ngân bằng AI.</p>
+        <p class="text-slate-400">Phân tích danh mục và đề xuất giải ngân bằng AI.</p>
       </div>
     </div>
 
@@ -16,7 +16,7 @@
       <div class="w-20 h-20 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
         <span class="text-4xl">💰</span>
       </div>
-      <h2 class="text-2xl font-bold text-white mb-4">Vốn Rải Ngân Mới</h2>
+      <h2 class="text-2xl font-bold text-white mb-4">Vốn Giải Ngân Mới</h2>
       <p class="text-slate-400 mb-8 max-w-lg mx-auto">
         Nhập số tiền vốn mới mà bạn dự định tiết kiệm hoặc đầu tư trong tháng này. AI sẽ phân tích và đề xuất phân bổ tối ưu nhất cho bạn.
       </p>

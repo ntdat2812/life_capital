@@ -55,11 +55,48 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       
-      <!-- Cột Trái: Chart Phân Bổ (2/3) -->
+      <!-- Cột Trái: Chart Phân Bổ & Tăng Trưởng (2/3) -->
       <div class="lg:col-span-2 space-y-6">
-        <div class="premium-card rounded-2xl p-6 h-[400px] flex flex-col">
-          <h3 class="text-lg font-bold text-white mb-4">Cơ cấu Tài sản (Asset Allocation)</h3>
-          <div class="flex-1 w-full flex items-center justify-center relative">
+        <div class="premium-card rounded-2xl p-6 min-h-[440px] flex flex-col">
+          <!-- Segmented Tab Header -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800">
+            <div class="flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700/50">
+              <button 
+                type="button"
+                @click="activeChartTab = 'growth'"
+                :class="activeChartTab === 'growth' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-500/20' : 'text-slate-400 hover:text-white'"
+                class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                Tăng Trưởng Qua Các Tháng
+              </button>
+              <button 
+                type="button"
+                @click="activeChartTab = 'allocation'"
+                :class="activeChartTab === 'allocation' ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-500/20' : 'text-slate-400 hover:text-white'"
+                class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path></svg>
+                Cơ Cấu Tài Sản
+              </button>
+            </div>
+
+            <span class="text-xs text-slate-400 hidden sm:inline">
+              {{ activeChartTab === 'growth' ? 'Theo dõi xu hướng qua các kỳ chốt sổ' : 'Phân bổ thực tế vs Mục tiêu IPS' }}
+            </span>
+          </div>
+
+          <!-- Tab 1: Growth Chart -->
+          <div v-if="activeChartTab === 'growth'" class="flex-1 w-full flex flex-col">
+            <NetWorthGrowthChart 
+              :history="reviewStore.history"
+              :currentNetWorth="wealthStore.netWorthSummary?.net_worth || 0"
+              :loading="reviewStore.loading"
+            />
+          </div>
+
+          <!-- Tab 2: Allocation Doughnut Chart -->
+          <div v-else class="flex-1 w-full flex items-center justify-center relative">
             <template v-if="wealthStore.loading">
               <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
             </template>
@@ -140,22 +177,30 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useWealthStore } from '../stores/wealthStore'
 import { useProfileStore } from '../stores/profileStore'
 import { useIpsStore } from '../stores/ips'
+import { useReviewStore } from '../stores/reviewStore'
 import { Doughnut } from 'vue-chartjs'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import FISimulator from '../components/dashboard/FISimulator.vue'
+import NetWorthGrowthChart from '../components/dashboard/NetWorthGrowthChart.vue'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
 const wealthStore = useWealthStore()
 const profileStore = useProfileStore()
 const ipsStore = useIpsStore()
+const reviewStore = useReviewStore()
+
+const activeChartTab = ref('growth') // 'growth' | 'allocation'
 
 onMounted(async () => {
-  await wealthStore.fetchAllForDashboard()
+  await Promise.all([
+    wealthStore.fetchAllForDashboard(),
+    reviewStore.fetchHistory()
+  ])
   if (!profileStore.profile) {
     await profileStore.fetchProfile()
   }

@@ -61,7 +61,7 @@
         
         <div class="space-y-3 mb-6">
           <div class="flex justify-between items-center text-sm border-b border-slate-700/50 pb-2">
-            <span class="text-slate-400">Vốn rải ngân:</span>
+            <span class="text-slate-400">Vốn giải ngân:</span>
             <span class="font-bold text-white">{{ formatCurrency(review.new_investment_amount) }}</span>
           </div>
           <div class="flex justify-between items-center text-sm">

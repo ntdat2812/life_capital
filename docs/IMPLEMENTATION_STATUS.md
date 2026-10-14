@@ -23,7 +23,7 @@ Tài liệu này theo dõi tiến độ thực tế (Source Code) so với đặ
 - 🟢 **Tổng quan tài sản (Net Worth Card)**: Đã hiển thị số thực tế từ DB.
 - 🟢 **Biểu đồ phân bổ tài sản (Pie Chart)**: Đã hoàn thành (Sử dụng Chart.js).
 - 🟢 **Tiến trình FI**: Đã hiển thị thanh tiến trình dựa trên mục tiêu hiện tại.
-- 🔴 **Biểu đồ tăng trưởng (Line Chart)**: Đang chờ tính năng "Chốt sổ tháng" (Monthly Review) để có dữ liệu lịch sử vẽ biểu đồ đường.
+- 🟢 **Biểu đồ tăng trưởng (Line Chart)**: Đã hoàn thành component `NetWorthGrowthChart.vue` tích hợp tab chuyển đổi hài hòa trên Dashboard, vẽ biểu đồ đường tăng trưởng MoM/YoY từ lịch sử chốt sổ.
 - 🟢 **Cảnh báo chiến lược**: Đã có logic check cảnh báo (Lệch phân bổ tỷ lệ Nợ, tỷ trọng Tiền mặt).
 
 ### Module 2 — Assets & Liabilities Management
@@ -43,7 +43,7 @@ Tài liệu này theo dõi tiến độ thực tế (Source Code) so với đặ
 
 ### Module 5 -> 8 (Thesis, Decision Journal, Monthly Review)
 - 🟢 **Investment Thesis**: Đã hoàn thành API lưu trữ, giao diện dạng lưới Grid và tính năng nhờ AI sinh Thesis tự động.
-- 🟢 **Monthly Review**: Đã hoàn thành tính năng nhập vốn rải ngân, AI tổng hợp toàn bộ danh mục, IPS, nợ và gợi ý hành động.
+- 🟢 **Monthly Review**: Đã hoàn thành tính năng nhập vốn giải ngân, AI tổng hợp toàn bộ danh mục, IPS, nợ và gợi ý hành động.
 - 🔴 **Decision Journal**: Chưa code.
 
 ### Module 9 — Authentication & Authorization
