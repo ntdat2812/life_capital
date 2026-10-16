@@ -55,34 +55,52 @@
           </div>
         </div>
 
-        <div class="mt-8 p-4 bg-gradient-to-br from-indigo-900/30 to-violet-900/30 border border-indigo-500/30 rounded-xl">
-          <p class="text-sm text-slate-300 mb-1">Dự kiến đạt Tự do tài chính sau:</p>
-          <div v-if="yearsToFI > 0 && yearsToFI <= 40" class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-400">
-            {{ yearsToFI }} năm
-            <span class="text-base font-normal text-slate-400">({{ new Date().getFullYear() + yearsToFI }})</span>
-          </div>
-          <div v-else-if="yearsToFI === 0" class="text-2xl font-bold text-emerald-400">
-            Đã đạt mục tiêu! 🎉
-          </div>
-          <div v-else class="text-lg font-bold text-red-400">
-            Cần tăng vốn hoặc lợi nhuận
+        <!-- Card 1: Cột mốc Tự do tài chính (Hero Card riêng biệt) -->
+        <div class="mt-6 p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-indigo-950/40 border border-emerald-500/30 relative overflow-hidden shadow-lg shadow-emerald-500/5">
+          <!-- Subtle decorative background icon -->
+          <div class="absolute -right-2 -bottom-2 opacity-10 pointer-events-none">
+            <svg class="w-20 h-20 text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
           </div>
 
-          <div class="mt-4 pt-4 border-t border-indigo-500/20">
-            <div class="flex justify-between items-end mb-2">
-              <label class="text-sm font-medium text-slate-300">Tài sản sau</label>
-              <span class="text-base font-bold text-emerald-400">{{ targetYears }} năm</span>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-base">🎯</span>
+            <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Cột mốc Tự do tài chính (FI)</span>
+          </div>
+
+          <div v-if="yearsToFI > 0 && yearsToFI <= 40">
+            <div class="flex items-baseline gap-2">
+              <span class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200 font-outfit">
+                {{ yearsToFI }} năm nữa
+              </span>
             </div>
-            <input 
-              type="range" 
-              v-model.number="targetYears" 
-              min="1" max="30" step="1"
-              class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-            />
-            <div class="mt-3 flex justify-between items-center">
-              <span class="text-sm text-slate-400">Dự kiến đạt:</span>
-              <span class="text-xl font-bold text-white">{{ formatCurrency(projectedAmountAtTargetYear) }}</span>
+            <div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 text-xs border border-emerald-500/20">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              Dự kiến cán đích vào năm <strong class="font-bold text-white ml-0.5">{{ new Date().getFullYear() + yearsToFI }}</strong>
             </div>
+          </div>
+          <div v-else-if="yearsToFI === 0" class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+            <span>🎉</span> Đã đạt mục tiêu FI!
+          </div>
+          <div v-else class="text-sm font-medium text-amber-400 bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/20 mt-1">
+            ⚠️ Cần tăng thêm vốn tích lũy tháng hoặc kỳ vọng lợi nhuận để đạt mục tiêu.
+          </div>
+        </div>
+
+        <!-- Card 2: Mô phỏng tài sản theo thanh kéo -->
+        <div class="mt-4 p-4 bg-slate-800/40 border border-slate-700/50 rounded-xl">
+          <div class="flex justify-between items-end mb-2">
+            <label class="text-xs font-medium text-slate-400">Ước tính tài sản sau:</label>
+            <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">{{ targetYears }} năm</span>
+          </div>
+          <input 
+            type="range" 
+            v-model.number="targetYears" 
+            min="1" max="30" step="1"
+            class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+          />
+          <div class="mt-3 flex justify-between items-center pt-2.5 border-t border-slate-700/40">
+            <span class="text-xs text-slate-400">Tài sản dự kiến:</span>
+            <span class="text-base font-bold text-white font-outfit">{{ formatCurrency(projectedAmountAtTargetYear) }}</span>
           </div>
         </div>
       </div>

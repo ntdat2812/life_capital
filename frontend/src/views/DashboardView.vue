@@ -68,7 +68,7 @@
                 class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5"
               >
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                Tăng Trưởng Qua Các Tháng
+                Tăng Trưởng Tài Sản
               </button>
               <button 
                 type="button"
@@ -82,7 +82,7 @@
             </div>
 
             <span class="text-xs text-slate-400 hidden sm:inline">
-              {{ activeChartTab === 'growth' ? 'Theo dõi xu hướng qua các kỳ chốt sổ' : 'Phân bổ thực tế vs Mục tiêu IPS' }}
+              {{ activeChartTab === 'growth' ? 'Theo dõi xu hướng qua từng tháng và cả năm' : 'Phân bổ thực tế vs Mục tiêu IPS' }}
             </span>
           </div>
 
