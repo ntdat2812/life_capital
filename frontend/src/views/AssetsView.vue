@@ -141,16 +141,21 @@
               <ul v-show="expandedAssetGroups[group.category]" class="divide-y divide-slate-700/30">
                 <li v-for="asset in group.items" :key="asset.id" class="p-4 pl-12 hover:bg-slate-800/50 transition-colors flex justify-between items-center group/item">
                   <div>
-                    <div class="flex items-center gap-2">
-                      <span v-if="group.category === 'gold'" class="text-[10px] font-bold px-1.5 py-0.5 rounded border" :class="getBrandBadgeClass(getGoldBrand(asset))">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <h4 class="text-slate-200 font-medium">{{ asset.name }}</h4>
+                      <span v-if="group.category === 'gold'" class="text-[10px] font-bold px-1.5 py-0.5 rounded border leading-none" :class="getBrandBadgeClass(getGoldBrand(asset))">
                         {{ getGoldBrand(asset) }}
                       </span>
-                      <h4 class="text-slate-200 font-medium">{{ asset.name }}</h4>
                     </div>
                     <p class="text-xs text-slate-400 mt-1">
-                      <span v-if="asset.ticker" class="font-mono text-slate-500">{{ asset.ticker }}</span>
-                      <span v-if="asset.ticker && asset.quantity"> • </span>
-                      <span v-if="asset.quantity">SL: {{ formatInputNumber(asset.quantity) }}</span>
+                      <template v-if="group.category === 'gold'">
+                        <span v-if="asset.quantity">SL: {{ formatInputNumber(asset.quantity) }}</span>
+                      </template>
+                      <template v-else>
+                        <span v-if="asset.ticker" class="font-mono text-slate-500">{{ asset.ticker }}</span>
+                        <span v-if="asset.ticker && asset.quantity"> • </span>
+                        <span v-if="asset.quantity">SL: {{ formatInputNumber(asset.quantity) }}</span>
+                      </template>
                     </p>
                   </div>
                   <div class="text-right">

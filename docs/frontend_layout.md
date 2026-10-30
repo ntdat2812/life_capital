@@ -112,6 +112,7 @@ Tất cả các thẻ hiển thị (cards), sidebar và modal đều kế thừa
     - Tiêu đề "Các khoản nợ" + Nút `[+ Thêm Khoản Nợ]`.
     - Danh sách khoản nợ tương tự cột trái (Gom nhóm, có thể click xem chi tiết).
   - Từng Item trong danh sách có nút `Sửa` và `Xóa` xuất hiện khi hover.
+  - Với nhóm Vàng: Hiển thị tên sản phẩm kèm Badge thương hiệu màu vàng ánh kim nhỏ ngay sau tên, ẩn mã ticker kỹ thuật cho gọn gàng.
 - **Modal Thêm Mới / Cập Nhật (Edit)**: 
   - Form nổi (Overlay) mờ ảo dùng chung cho cả tính năng Thêm và Sửa.
   - Dropdown chọn Category (Khóa không cho sửa khi đang ở chế độ Edit).
@@ -133,6 +134,7 @@ Tất cả các thẻ hiển thị (cards), sidebar và modal đều kế thừa
     - **Phân nhóm thông minh theo thương hiệu Vàng (Gold Brand Sub-groups)**:
       - Đối với nhóm Vàng, bảng tự động phân nhóm theo thương hiệu (DOJI, Bảo Tín Minh Châu, Bảo Tín Mạnh Hải, SJC, PNJ, Phú Quý...).
       - Mỗi thương hiệu có một Sub-header riêng kèm Badge thương hiệu đồng bộ tông màu vàng ánh kim (`amber`), tổng số sản phẩm, tổng khối lượng (Lượng/Chỉ/Phân) và tổng giá trị nội bộ hãng.
+      - **Thu gọn / Mở rộng (Expand/Collapse)**: Hỗ trợ click vào từng dòng thương hiệu để đóng/mở danh sách sản phẩm của hãng đó (có icon chevron xoay mượt mà), kèm nút `[Thu gọn tất cả / Mở rộng tất cả]` ở header nhóm Vàng.
       - Tên tiếng Việt của vàng hiển thị to, rõ ràng (`font-bold`), mã kỹ thuật (`GOLD_...`) được đưa xuống hàng dưới dạng chữ nhỏ (`font-mono text-slate-400`).
     - Cột Hành động: `[Xem Thesis]`, `[Cài đặt cảnh báo / Mục tiêu]`.
 - **Chế độ Watchlist**:

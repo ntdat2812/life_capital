@@ -75,12 +75,21 @@
           <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
             <span class="text-indigo-400">{{ getCategoryIcon(cat) }}</span> Nhóm {{ getCategoryName(cat) }}
           </h2>
-          <span class="text-sm font-medium text-slate-400">
-            <span v-if="cat === 'gold'" class="mr-4 border-r border-slate-700 pr-4">
+          <div class="flex items-center gap-3 text-sm font-medium text-slate-400">
+            <template v-if="cat === 'gold' && group.brandGroups?.length > 1">
+              <button 
+                type="button" 
+                @click="toggleAllGoldBrands(group.brandGroups)"
+                class="text-xs text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>{{ areAllGoldBrandsExpanded(group.brandGroups) ? 'Thu gọn tất cả' : 'Mở rộng tất cả' }}</span>
+              </button>
+            </template>
+            <span v-if="cat === 'gold'" class="mr-2 pr-3 border-r border-slate-700">
               Khối lượng: <span class="text-amber-400 font-bold">{{ formatGoldVolume(group.totalGoldVolume) }}</span>
             </span>
-            Tổng: <span class="text-white">{{ formatCurrency(group.totalValue) }}</span>
-          </span>
+            <span>Tổng: <span class="text-white">{{ formatCurrency(group.totalValue) }}</span></span>
+          </div>
         </div>
         
         <div class="overflow-x-auto">
@@ -112,11 +121,20 @@
               <!-- NHÓM VÀNG: Phân nhóm con theo từng thương hiệu (DOJI, Bảo Tín Minh Châu, Bảo Tín Mạnh Hải, SJC...) -->
               <template v-if="cat === 'gold'">
                 <template v-for="bg in group.brandGroups" :key="'brand-' + bg.brand">
-                  <!-- Brand Sub-header Row -->
-                  <tr class="bg-slate-900/90 border-y border-amber-500/20 font-medium">
+                  <!-- Brand Sub-header Row (Clickable to Expand/Collapse) -->
+                  <tr 
+                    class="bg-slate-900/90 border-y border-amber-500/20 font-medium cursor-pointer select-none hover:bg-amber-500/15 transition-colors group/brand"
+                    @click="toggleGoldBrand(bg.brand)"
+                    :title="isGoldBrandExpanded(bg.brand) ? 'Bấm để thu gọn nhóm ' + bg.brand : 'Bấm để mở rộng nhóm ' + bg.brand"
+                  >
                     <td colspan="7" class="py-2.5 px-4 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent">
                       <div class="flex items-center justify-between flex-wrap gap-2">
-                        <div class="flex items-center gap-2.5">
+                        <div class="flex items-center gap-2">
+                          <span class="text-amber-400/80 group-hover/brand:text-amber-300 transition-transform duration-200" :class="{ '-rotate-90': !isGoldBrandExpanded(bg.brand) }">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </span>
                           <span class="w-2 h-2 rounded-full bg-amber-400"></span>
                           <span class="text-xs font-bold px-2 py-0.5 rounded border" :class="getBrandBadgeClass(bg.brand)">
                             {{ bg.brand }}
@@ -142,53 +160,55 @@
                     </td>
                   </tr>
 
-                  <!-- Các sản phẩm vàng của thương hiệu này -->
-                  <tr v-for="asset in bg.items" :key="asset.id" class="bg-slate-900/20 hover:bg-slate-800/40 transition-colors">
-                    <td class="p-4 pl-6">
-                      <div class="flex flex-col">
-                        <!-- Tên vàng hiển thị TO, rõ nét -->
-                        <span class="font-bold text-slate-100 text-sm leading-snug">{{ asset.name }}</span>
-                        <!-- Ticker kỹ thuật hiển thị NHỎ bên dưới -->
-                        <div class="flex items-center gap-1.5 mt-0.5">
-                          <span v-if="asset.ticker" class="text-xs font-mono text-slate-400">{{ asset.ticker }}</span>
+                  <!-- Các sản phẩm vàng của thương hiệu này (Expandable) -->
+                  <template v-if="isGoldBrandExpanded(bg.brand)">
+                    <tr v-for="asset in bg.items" :key="asset.id" class="bg-slate-900/20 hover:bg-slate-800/40 transition-colors">
+                      <td class="p-4 pl-6">
+                        <div class="flex flex-col">
+                          <!-- Tên vàng hiển thị TO, rõ nét -->
+                          <span class="font-bold text-slate-100 text-sm leading-snug">{{ asset.name }}</span>
+                          <!-- Ticker kỹ thuật hiển thị NHỎ bên dưới -->
+                          <div class="flex items-center gap-1.5 mt-0.5">
+                            <span v-if="asset.ticker" class="text-xs font-mono text-slate-400">{{ asset.ticker }}</span>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td class="p-4 text-right text-slate-300 font-medium">{{ formatNumber(asset.quantity) }}</td>
-                    <td class="p-4 text-right text-slate-300">{{ formatCurrency(asset.avg_price) }}</td>
-                    <td class="p-4 text-right">
-                      <div class="flex flex-col items-end">
-                        <span :class="getPriceClass(asset.current_price, asset.avg_price)">
-                          {{ formatCurrency(asset.current_price) }}
-                        </span>
-                        <span v-if="asset.avg_price > 0 && asset.current_price > 0" class="text-[11px] font-medium mt-0.5" :class="getPriceClass(asset.current_price, asset.avg_price)">
-                          {{ asset.current_price >= asset.avg_price ? '+' : '' }}{{ (((asset.current_price - asset.avg_price) / asset.avg_price) * 100).toFixed(2) }}%
-                        </span>
-                      </div>
-                    </td>
-                    <td class="p-4 text-right font-bold text-white">{{ formatCurrency(asset.current_value) }}</td>
-                    <td class="p-4 text-right">
-                      <div class="flex flex-col items-end">
-                        <span class="font-bold text-emerald-400">
-                          {{ group.totalValue > 0 ? ((asset.current_value / group.totalValue) * 100).toFixed(1) : '0.0' }}% <span class="text-xs text-slate-500 font-normal ml-0.5">nhóm</span>
-                        </span>
-                        <span class="text-xs text-slate-400 mt-0.5">
-                          {{ totalInvestableValue > 0 ? ((asset.current_value / totalInvestableValue) * 100).toFixed(1) : '0.0' }}% <span class="text-slate-500">tổng</span>
-                        </span>
-                      </div>
-                    </td>
-                    <td class="p-4 text-center">
-                      <div class="flex items-center justify-center gap-2">
-                        <button v-if="asset.ticker || asset.category !== 'cash'" @click="openAlertModal(asset)" class="inline-flex items-center justify-center p-1.5 bg-slate-800 hover:bg-amber-500/20 text-slate-400 hover:text-amber-400 rounded-lg transition-colors group" title="Cài đặt cảnh báo / Mục tiêu">
-                          <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                        </button>
-                        <router-link v-if="asset.ticker || asset.category !== 'cash'" :to="`/thesis/${asset.ticker || encodeURIComponent(asset.name)}`" class="inline-flex items-center justify-center p-1.5 bg-slate-800 hover:bg-indigo-600/20 text-slate-400 hover:text-indigo-400 rounded-lg transition-colors group" title="Xem Luận điểm đầu tư">
-                          <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        </router-link>
-                        <span v-else class="text-slate-600">-</span>
-                      </div>
-                    </td>
-                  </tr>
+                      </td>
+                      <td class="p-4 text-right text-slate-300 font-medium">{{ formatNumber(asset.quantity) }}</td>
+                      <td class="p-4 text-right text-slate-300">{{ formatCurrency(asset.avg_price) }}</td>
+                      <td class="p-4 text-right">
+                        <div class="flex flex-col items-end">
+                          <span :class="getPriceClass(asset.current_price, asset.avg_price)">
+                            {{ formatCurrency(asset.current_price) }}
+                          </span>
+                          <span v-if="asset.avg_price > 0 && asset.current_price > 0" class="text-[11px] font-medium mt-0.5" :class="getPriceClass(asset.current_price, asset.avg_price)">
+                            {{ asset.current_price >= asset.avg_price ? '+' : '' }}{{ (((asset.current_price - asset.avg_price) / asset.avg_price) * 100).toFixed(2) }}%
+                          </span>
+                        </div>
+                      </td>
+                      <td class="p-4 text-right font-bold text-white">{{ formatCurrency(asset.current_value) }}</td>
+                      <td class="p-4 text-right">
+                        <div class="flex flex-col items-end">
+                          <span class="font-bold text-emerald-400">
+                            {{ group.totalValue > 0 ? ((asset.current_value / group.totalValue) * 100).toFixed(1) : '0.0' }}% <span class="text-xs text-slate-500 font-normal ml-0.5">nhóm</span>
+                          </span>
+                          <span class="text-xs text-slate-400 mt-0.5">
+                            {{ totalInvestableValue > 0 ? ((asset.current_value / totalInvestableValue) * 100).toFixed(1) : '0.0' }}% <span class="text-slate-500">tổng</span>
+                          </span>
+                        </div>
+                      </td>
+                      <td class="p-4 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                          <button v-if="asset.ticker || asset.category !== 'cash'" @click="openAlertModal(asset)" class="inline-flex items-center justify-center p-1.5 bg-slate-800 hover:bg-amber-500/20 text-slate-400 hover:text-amber-400 rounded-lg transition-colors group" title="Cài đặt cảnh báo / Mục tiêu">
+                            <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                          </button>
+                          <router-link v-if="asset.ticker || asset.category !== 'cash'" :to="`/thesis/${asset.ticker || encodeURIComponent(asset.name)}`" class="inline-flex items-center justify-center p-1.5 bg-slate-800 hover:bg-indigo-600/20 text-slate-400 hover:text-indigo-400 rounded-lg transition-colors group" title="Xem Luận điểm đầu tư">
+                            <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                          </router-link>
+                          <span v-else class="text-slate-600">-</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </template>
                 </template>
               </template>
 
@@ -429,6 +449,30 @@ const tabs = computed(() => [
   { id: 'holdings', name: 'Danh mục thực tế', count: portfolioStore.holdings.length },
   { id: 'watchlist', name: 'Danh sách theo dõi', count: portfolioStore.watchlist.length }
 ])
+
+// Expand / Collapse state for gold brand groups
+const expandedGoldBrands = ref({})
+
+const isGoldBrandExpanded = (brand) => {
+  return expandedGoldBrands.value[brand] !== false // Default true (expanded)
+}
+
+const toggleGoldBrand = (brand) => {
+  expandedGoldBrands.value[brand] = !isGoldBrandExpanded(brand)
+}
+
+const areAllGoldBrandsExpanded = (brandGroups) => {
+  if (!brandGroups || brandGroups.length === 0) return true
+  return brandGroups.every(bg => isGoldBrandExpanded(bg.brand))
+}
+
+const toggleAllGoldBrands = (brandGroups) => {
+  if (!brandGroups) return
+  const allExpanded = areAllGoldBrandsExpanded(brandGroups)
+  brandGroups.forEach(bg => {
+    expandedGoldBrands.value[bg.brand] = !allExpanded
+  })
+}
 
 onMounted(async () => {
   await Promise.all([
