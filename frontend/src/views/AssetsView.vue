@@ -141,9 +141,14 @@
               <ul v-show="expandedAssetGroups[group.category]" class="divide-y divide-slate-700/30">
                 <li v-for="asset in group.items" :key="asset.id" class="p-4 pl-12 hover:bg-slate-800/50 transition-colors flex justify-between items-center group/item">
                   <div>
-                    <h4 class="text-slate-200 font-medium">{{ asset.name }}</h4>
+                    <div class="flex items-center gap-2">
+                      <span v-if="group.category === 'gold'" class="text-[10px] font-bold px-1.5 py-0.5 rounded border" :class="getBrandBadgeClass(getGoldBrand(asset))">
+                        {{ getGoldBrand(asset) }}
+                      </span>
+                      <h4 class="text-slate-200 font-medium">{{ asset.name }}</h4>
+                    </div>
                     <p class="text-xs text-slate-400 mt-1">
-                      <span v-if="asset.ticker">{{ asset.ticker }}</span>
+                      <span v-if="asset.ticker" class="font-mono text-slate-500">{{ asset.ticker }}</span>
                       <span v-if="asset.ticker && asset.quantity"> • </span>
                       <span v-if="asset.quantity">SL: {{ formatInputNumber(asset.quantity) }}</span>
                     </p>
@@ -474,7 +479,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { getCategoryName, getCategoryIcon, getLiabilityName, getLiabilityIcon } from '../utils/assetUtils'
+import { getCategoryName, getCategoryIcon, getLiabilityName, getLiabilityIcon, getGoldBrand, getBrandBadgeClass } from '../utils/assetUtils'
 import { useWealthStore } from '../stores/wealthStore'
 import { getGoldMultiplier, extractGoldUnit } from '../utils/goldCalculations'
 import BulkUpdateGoldModal from '../components/BulkUpdateGoldModal.vue'
@@ -760,6 +765,14 @@ const groupedAssets = computed(() => {
   
   sortedGroups.forEach(g => {
     g.percentage = ((g.total_value / total) * 100).toFixed(1)
+    if (g.category === 'gold') {
+      g.items.sort((a, b) => {
+        const brandA = getGoldBrand(a)
+        const brandB = getGoldBrand(b)
+        if (brandA !== brandB) return brandA.localeCompare(brandB)
+        return (b.current_value || 0) - (a.current_value || 0)
+      })
+    }
     g.items.forEach(i => {
       i.percentage = ((i.current_value / total) * 100).toFixed(1)
     })

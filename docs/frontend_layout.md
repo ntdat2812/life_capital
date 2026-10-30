@@ -129,7 +129,12 @@ Tất cả các thẻ hiển thị (cards), sidebar và modal đều kế thừa
     - Tổng giá trị đầu tư, Lãi/Lỗ (P/L) tổng hợp, và một biểu đồ Doughnut nhỏ hiển thị Tỷ trọng danh mục.
   - **Bảng Holding (Data Table)**:
     - Bảng hiển thị: Tên tài sản (Mã), Giá vốn (Avg Price), Giá hiện tại, Khối lượng, Tổng giá trị, Tỷ trọng (%), Lãi/Lỗ.
-    - Cột Hành động: `[Xem Thesis]`, `[Chỉnh sửa]`.
+    - **Thứ tự hiển thị các nhóm tài sản**: Cổ phiếu -> Chứng chỉ quỹ (ngay dưới Cổ phiếu) -> Crypto / BĐS / Tiền mặt -> Vàng (nằm ở dưới cùng).
+    - **Phân nhóm thông minh theo thương hiệu Vàng (Gold Brand Sub-groups)**:
+      - Đối với nhóm Vàng, bảng tự động phân nhóm theo thương hiệu (DOJI, Bảo Tín Minh Châu, Bảo Tín Mạnh Hải, SJC, PNJ, Phú Quý...).
+      - Mỗi thương hiệu có một Sub-header riêng kèm Badge thương hiệu đồng bộ tông màu vàng ánh kim (`amber`), tổng số sản phẩm, tổng khối lượng (Lượng/Chỉ/Phân) và tổng giá trị nội bộ hãng.
+      - Tên tiếng Việt của vàng hiển thị to, rõ ràng (`font-bold`), mã kỹ thuật (`GOLD_...`) được đưa xuống hàng dưới dạng chữ nhỏ (`font-mono text-slate-400`).
+    - Cột Hành động: `[Xem Thesis]`, `[Cài đặt cảnh báo / Mục tiêu]`.
 - **Chế độ Watchlist**:
   - **Bảng Theo dõi**:
     - Hiển thị các tài sản đang đưa vào tầm ngắm nhưng chưa mua.
